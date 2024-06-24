@@ -1,0 +1,160 @@
+'''
+
+#!/usr/bin/env python3
+
+import os
+import json
+import argparse
+from collections import Counter
+
+class DirectoryAnalyzer:
+    """
+    Класс для анализа структуры директории и создания JSON-представления.
+    """
+
+    def __init__(self, source_dir, include_extensions=None):
+        """
+        Инициализация анализатора директорий.
+
+        :param source_dir: Путь к исходной директории для анализа.
+        :param include_extensions: Список расширений файлов для включения в анализ.
+        """
+        self.source_dir = os.path.abspath(source_dir)
+        self.ignore_dirs = ['.git'] 
+        self.include_extensions = [ext.lower() for ext in (include_extensions or [])]
+        self.structure = {"files": {}, "directories": {}}
+        self.stats = Counter()
+
+    def analyze(self):
+        """
+        Запуск анализа директории.
+        """
+        print("Analyzing directory: {}".format(self.source_dir))
+        print("Including extensions: {}".format(self.include_extensions or 'all'))
+        self._analyze_directory(self.source_dir, self.structure)
+
+    def _analyze_directory(self, directory, current_structure):
+        """
+        Рекурсивный анализ директории и её поддиректорий.
+
+        :param directory: Путь к текущей анализируемой директории.
+        :param current_structure: Текущая структура для заполнения результатами анализа.
+        """
+        self.stats['directories'] += 1
+
+        try:
+            print("Entering directory: {}".format(directory))
+            entries = list(os.scandir(directory))
+            print("Found {} entries in {}".format(len(entries), directory))
+            
+            # Обход всех элементов в директории
+            for entry in entries:
+                if entry.is_dir():
+                    # Обработка поддиректорий
+                    if entry.name in self.ignore_dirs:
+                        print(f"Ignoring directory: {entry.path}")
+                        continue
+                    print("Found subdirectory: {}".format(entry.path))
+                    current_structure["directories"][entry.name] = {"files": {}, "directories": {}}
+                    self._analyze_directory(entry.path, current_structure["directories"][entry.name])
+                else:
+                    # Обработка файлов
+                    print("Found file: {}".format(entry.path))
+                    file_info = self._analyze_file(entry)
+                    if file_info['include']:
+                        current_structure["files"][entry.name] = file_info
+                        self.stats['files'] += 1
+                        self.stats['files_{}'.format(file_info["extension"])] += 1
+            
+            print("Processed: {}".format(directory))
+        except PermissionError:
+            print("Permission denied: {}".format(directory))
+        except Exception as e:
+            print("Error processing {}: {}".format(directory, str(e)))
+
+    def _analyze_file(self, file_entry):
+        """
+        Анализ отдельного файла.
+
+        :param file_entry: Объект файла для анализа.
+        :return: Словарь с информацией о файле.
+        """
+        try:
+            name, ext = os.path.splitext(file_entry.name)
+            extension = ext[1:].lower()
+            return {
+                "name": name,
+                "extension": extension,
+                "include": self._should_include(extension),
+                "size": file_entry.stat().st_size
+            }
+        except Exception as e:
+            print(f"Error analyzing file {file_entry.path}: {str(e)}")
+            return {
+                "name": file_entry.name,
+                "extension": "",
+                "include": False,
+                "size": 0
+            }
+
+    def _should_include(self, extension):
+        """
+        Проверка, должен ли файл с данным расширением быть включен в анализ.
+
+        :param extension: Расширение файла.
+        :return: True, если файл должен быть включен, иначе False.
+        """
+        if not self.include_extensions:
+            return True
+        return extension in self.include_extensions
+
+    def save_json(self):
+        """
+        Сохранение результатов анализа в JSON-файл.
+        """
+        # Определение пути для сохранения JSON-файла
+        parent_dir = os.path.dirname(self.source_dir)
+        base_name = os.path.basename(self.source_dir)
+        json_filename = "{}_analysis.json".format(base_name)
+        json_path = os.path.join(parent_dir, json_filename)
+
+        # Подготовка результатов для сохранения
+        result = {
+            "structure": self.structure,
+            "stats": self.stats
+        }
+
+        # Запись результатов в файл
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(result, f, ensure_ascii=False, indent=4)
+
+        # Вывод статистики
+        print("\nAnalysis complete:")
+        print("JSON structure saved to {}".format(json_path))
+        print("Total directories: {}".format(self.stats['directories']))
+        print("Total files (matching specified extensions): {}".format(self.stats['files']))
+        for ext in self.include_extensions:
+            print("Files with .{} extension: {}".format(ext, self.stats['files_{}'.format(ext)]))
+
+def main():
+    """
+    Основная функция для запуска анализа директории из командной строки.
+    """
+    # Настройка парсера аргументов командной строки
+    parser = argparse.ArgumentParser(description="Analyze directory structure and create JSON representation.")
+    parser.add_argument("source_dir", help="Path to the source directory")
+    parser.add_argument("--include", nargs="*", help="List of file extensions to include (if not specified, all files are included)")
+    parser.add_argument("--ignore-dirs", nargs="*", default=['.git'], help="List of directories to ignore")
+    
+    args = parser.parse_args()
+
+    # Создание и запуск анализатора
+    analyzer = DirectoryAnalyzer(args.source_dir, args.include)
+    analyzer.ignore_dirs = args.ignore_dirs
+    analyzer.analyze()
+    analyzer.save_json()
+    
+if __name__ == "__main__":
+    main()
+
+'''    

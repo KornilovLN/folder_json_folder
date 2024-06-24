@@ -1,0 +1,1176 @@
+{
+    "structure": {
+        "files": {
+            "site.yaml": {
+                "name": "site",
+                "extension": "yaml",
+                "include": true,
+                "size": 1102
+            }
+        },
+        "directories": {
+            "opt": {
+                "files": {},
+                "directories": {
+                    "etc": {
+                        "files": {
+                            "st2_keys_defaults.json": {
+                                "name": "st2_keys_defaults",
+                                "extension": "json",
+                                "include": true,
+                                "size": 319
+                            },
+                            "rtdb_hub_conf.yaml": {
+                                "name": "rtdb_hub_conf",
+                                "extension": "yaml",
+                                "include": true,
+                                "size": 902
+                            }
+                        },
+                        "directories": {
+                            "meta": {
+                                "files": {
+                                    "sqlfunctions7.py": {
+                                        "name": "sqlfunctions7",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 11621
+                                    },
+                                    "mu.yaml": {
+                                        "name": "mu",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 165
+                                    },
+                                    "sqlfunctions5.py": {
+                                        "name": "sqlfunctions5",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 6963
+                                    },
+                                    "sqlfunctions3.py": {
+                                        "name": "sqlfunctions3",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 9955
+                                    },
+                                    "gdb2rdf.ttl": {
+                                        "name": "gdb2rdf",
+                                        "extension": "ttl",
+                                        "include": true,
+                                        "size": 14316
+                                    },
+                                    "gdb2rdf7.ttl": {
+                                        "name": "gdb2rdf7",
+                                        "extension": "ttl",
+                                        "include": true,
+                                        "size": 15625
+                                    },
+                                    "hika5.yaml": {
+                                        "name": "hika5",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 533
+                                    },
+                                    "sqlfunctions.py": {
+                                        "name": "sqlfunctions",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 5073
+                                    },
+                                    "hika7.yaml": {
+                                        "name": "hika7",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 568
+                                    },
+                                    "dbf2rdf.ttl": {
+                                        "name": "dbf2rdf",
+                                        "extension": "ttl",
+                                        "include": true,
+                                        "size": 15396
+                                    },
+                                    "hika3.yaml": {
+                                        "name": "hika3",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 298
+                                    }
+                                },
+                                "directories": {
+                                    "cim": {
+                                        "files": {},
+                                        "directories": {
+                                            "sunpp_hika": {
+                                                "files": {
+                                                    "types.yaml": {
+                                                        "name": "types",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1602
+                                                    },
+                                                    "dtypes.yaml": {
+                                                        "name": "dtypes",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 3004
+                                                    },
+                                                    "meta.ttl": {
+                                                        "name": "meta",
+                                                        "extension": "ttl",
+                                                        "include": true,
+                                                        "size": 116
+                                                    },
+                                                    "atypes.yaml": {
+                                                        "name": "atypes",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 2238
+                                                    }
+                                                },
+                                                "directories": {}
+                                            },
+                                            "hika": {
+                                                "files": {
+                                                    "hika.ttl": {
+                                                        "name": "hika",
+                                                        "extension": "ttl",
+                                                        "include": true,
+                                                        "size": 7260
+                                                    },
+                                                    "dtypes.yaml": {
+                                                        "name": "dtypes",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 2685
+                                                    },
+                                                    "meta.ttl": {
+                                                        "name": "meta",
+                                                        "extension": "ttl",
+                                                        "include": true,
+                                                        "size": 112
+                                                    },
+                                                    "classes.ttl": {
+                                                        "name": "classes",
+                                                        "extension": "ttl",
+                                                        "include": true,
+                                                        "size": 2720
+                                                    },
+                                                    "atypes.yaml": {
+                                                        "name": "atypes",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 2069
+                                                    }
+                                                },
+                                                "directories": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "mnemo": {
+                                "files": {
+                                    "block2type.yaml": {
+                                        "name": "block2type",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 1109
+                                    },
+                                    "testmnemolib.py": {
+                                        "name": "testmnemolib",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 7453
+                                    },
+                                    "pallete_hika.yaml": {
+                                        "name": "pallete_hika",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 5039
+                                    },
+                                    "color2alpha.py": {
+                                        "name": "color2alpha",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 1335
+                                    },
+                                    "hikapakextract.py": {
+                                        "name": "hikapakextract",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 5035
+                                    },
+                                    "colorhika.py": {
+                                        "name": "colorhika",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 8302
+                                    }
+                                },
+                                "directories": {
+                                    "lib": {
+                                        "files": {
+                                            "hikabinder7.py": {
+                                                "name": "hikabinder7",
+                                                "extension": "py",
+                                                "include": true,
+                                                "size": 18201
+                                            }
+                                        },
+                                        "directories": {}
+                                    }
+                                }
+                            },
+                            "vars": {
+                                "files": {
+                                    "vars.yaml": {
+                                        "name": "vars",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 834
+                                    },
+                                    "frontend.yaml": {
+                                        "name": "frontend",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 441
+                                    },
+                                    "docker.yaml": {
+                                        "name": "docker",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 532
+                                    }
+                                },
+                                "directories": {}
+                            }
+                        }
+                    },
+                    "brama": {
+                        "files": {
+                            "db_append.py": {
+                                "name": "db_append",
+                                "extension": "py",
+                                "include": true,
+                                "size": 1342
+                            },
+                            "db_dump.py": {
+                                "name": "db_dump",
+                                "extension": "py",
+                                "include": true,
+                                "size": 1373
+                            },
+                            "brama.yaml": {
+                                "name": "brama",
+                                "extension": "yaml",
+                                "include": true,
+                                "size": 235
+                            }
+                        },
+                        "directories": {
+                            "projects": {
+                                "files": {
+                                    "__projects.yaml": {
+                                        "name": "__projects",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 1406
+                                    },
+                                    "__init__.py": {
+                                        "name": "__init__",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 0
+                                    }
+                                },
+                                "directories": {
+                                    "pams": {
+                                        "files": {
+                                            "__prj.yaml": {
+                                                "name": "__prj",
+                                                "extension": "yaml",
+                                                "include": true,
+                                                "size": 1840
+                                            }
+                                        },
+                                        "directories": {
+                                            "etc": {
+                                                "files": {
+                                                    "config.yaml": {
+                                                        "name": "config",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1890
+                                                    },
+                                                    "schema.ttl": {
+                                                        "name": "schema",
+                                                        "extension": "ttl",
+                                                        "include": true,
+                                                        "size": 6017
+                                                    }
+                                                },
+                                                "directories": {}
+                                            },
+                                            "rtdb": {
+                                                "files": {
+                                                    "info.yaml": {
+                                                        "name": "info",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 10
+                                                    }
+                                                },
+                                                "directories": {}
+                                            }
+                                        }
+                                    },
+                                    "modules": {
+                                        "files": {
+                                            "mainview.py": {
+                                                "name": "mainview",
+                                                "extension": "py",
+                                                "include": true,
+                                                "size": 2375
+                                            },
+                                            "__init__.py": {
+                                                "name": "__init__",
+                                                "extension": "py",
+                                                "include": true,
+                                                "size": 0
+                                            }
+                                        },
+                                        "directories": {
+                                            "templates": {
+                                                "files": {
+                                                    "welcome.html": {
+                                                        "name": "welcome",
+                                                        "extension": "html",
+                                                        "include": true,
+                                                        "size": 5570
+                                                    }
+                                                },
+                                                "directories": {}
+                                            }
+                                        }
+                                    },
+                                    "reglament": {
+                                        "files": {
+                                            "__prj.yaml": {
+                                                "name": "__prj",
+                                                "extension": "yaml",
+                                                "include": true,
+                                                "size": 1855
+                                            }
+                                        },
+                                        "directories": {
+                                            "mnemos": {
+                                                "files": {
+                                                    "fYAPPY3.yaml": {
+                                                        "name": "fYAPPY3",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 2596
+                                                    },
+                                                    "fVSYAU2_T3.yaml": {
+                                                        "name": "fVSYAU2_T3",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1158
+                                                    },
+                                                    "fVSYAU_T3.yaml": {
+                                                        "name": "fVSYAU_T3",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1424
+                                                    },
+                                                    "fParBGSVX_3.yaml": {
+                                                        "name": "fParBGSVX_3",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1123
+                                                    }
+                                                },
+                                                "directories": {}
+                                            },
+                                            "etc": {
+                                                "files": {
+                                                    "config.yaml": {
+                                                        "name": "config",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1391
+                                                    },
+                                                    "nav.yaml": {
+                                                        "name": "nav",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 559
+                                                    },
+                                                    "__init__.py": {
+                                                        "name": "__init__",
+                                                        "extension": "py",
+                                                        "include": true,
+                                                        "size": 6285
+                                                    }
+                                                },
+                                                "directories": {}
+                                            }
+                                        }
+                                    },
+                                    "u3": {
+                                        "files": {
+                                            "__prj.yaml": {
+                                                "name": "__prj",
+                                                "extension": "yaml",
+                                                "include": true,
+                                                "size": 85
+                                            }
+                                        },
+                                        "directories": {
+                                            "etc": {
+                                                "files": {
+                                                    "config.yaml": {
+                                                        "name": "config",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 14561
+                                                    },
+                                                    "nav.yaml": {
+                                                        "name": "nav",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 57
+                                                    }
+                                                },
+                                                "directories": {}
+                                            }
+                                        }
+                                    },
+                                    "ekatra": {
+                                        "files": {
+                                            "__prj.yaml": {
+                                                "name": "__prj",
+                                                "extension": "yaml",
+                                                "include": true,
+                                                "size": 3591
+                                            }
+                                        },
+                                        "directories": {
+                                            "etc": {
+                                                "files": {
+                                                    "nav_mnemos.yaml": {
+                                                        "name": "nav_mnemos",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 206
+                                                    },
+                                                    "semantic.yaml": {
+                                                        "name": "semantic",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 499
+                                                    },
+                                                    "nav.yaml": {
+                                                        "name": "nav",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 106
+                                                    },
+                                                    "nav_groups.yaml": {
+                                                        "name": "nav_groups",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 153
+                                                    },
+                                                    "clean.yaml": {
+                                                        "name": "clean",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 221
+                                                    },
+                                                    "nav_arrays.yaml": {
+                                                        "name": "nav_arrays",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 262
+                                                    }
+                                                },
+                                                "directories": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "workflow": {
+                        "files": {
+                            "ivs_call.py": {
+                                "name": "ivs_call",
+                                "extension": "py",
+                                "include": true,
+                                "size": 1843
+                            },
+                            "test.py": {
+                                "name": "test",
+                                "extension": "py",
+                                "include": true,
+                                "size": 314
+                            },
+                            "__init__.py": {
+                                "name": "__init__",
+                                "extension": "py",
+                                "include": true,
+                                "size": 0
+                            }
+                        },
+                        "directories": {
+                            "packs": {
+                                "files": {},
+                                "directories": {
+                                    "default": {
+                                        "files": {
+                                            "pack.yaml": {
+                                                "name": "pack",
+                                                "extension": "yaml",
+                                                "include": true,
+                                                "size": 195
+                                            }
+                                        },
+                                        "directories": {
+                                            "actions": {
+                                                "files": {},
+                                                "directories": {
+                                                    "workflows": {
+                                                        "files": {},
+                                                        "directories": {}
+                                                    }
+                                                }
+                                            },
+                                            "rules": {
+                                                "files": {},
+                                                "directories": {}
+                                            },
+                                            "sensors": {
+                                                "files": {},
+                                                "directories": {}
+                                            }
+                                        }
+                                    },
+                                    "sunpp": {
+                                        "files": {
+                                            "pack.yaml": {
+                                                "name": "pack",
+                                                "extension": "yaml",
+                                                "include": true,
+                                                "size": 106
+                                            }
+                                        },
+                                        "directories": {
+                                            "policies": {
+                                                "files": {
+                                                    "compile_ekatra_project.yaml": {
+                                                        "name": "compile_ekatra_project",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 284
+                                                    },
+                                                    "deploy2production.yaml": {
+                                                        "name": "deploy2production",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 266
+                                                    },
+                                                    "process_iso.yaml": {
+                                                        "name": "process_iso",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 252
+                                                    },
+                                                    "process_io.yaml": {
+                                                        "name": "process_io",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 249
+                                                    },
+                                                    "up_common_metadata.yaml": {
+                                                        "name": "up_common_metadata",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 287
+                                                    }
+                                                },
+                                                "directories": {}
+                                            },
+                                            "actions": {
+                                                "files": {
+                                                    "compile_app.yaml": {
+                                                        "name": "compile_app",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1380
+                                                    },
+                                                    "prometheus_alarm.yaml": {
+                                                        "name": "prometheus_alarm",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 188
+                                                    },
+                                                    "prepare_extract_io.yaml": {
+                                                        "name": "prepare_extract_io",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 259
+                                                    },
+                                                    "prepare_extract_iso.yaml": {
+                                                        "name": "prepare_extract_iso",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 265
+                                                    },
+                                                    "compile_ivs_silent.yaml": {
+                                                        "name": "compile_ivs_silent",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1633
+                                                    },
+                                                    "stop_production.yaml": {
+                                                        "name": "stop_production",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1754
+                                                    },
+                                                    "getconfig.yaml": {
+                                                        "name": "getconfig",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 159
+                                                    },
+                                                    "compile_app_silent.yaml": {
+                                                        "name": "compile_app_silent",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1418
+                                                    },
+                                                    "deploy2production.yaml": {
+                                                        "name": "deploy2production",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1837
+                                                    },
+                                                    "mnemoc.yaml": {
+                                                        "name": "mnemoc",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 750
+                                                    },
+                                                    "process_iso.yaml": {
+                                                        "name": "process_iso",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 385
+                                                    },
+                                                    "compile_ivs.yaml": {
+                                                        "name": "compile_ivs",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 1605
+                                                    },
+                                                    "process_io.yaml": {
+                                                        "name": "process_io",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 382
+                                                    },
+                                                    "clean_app.yaml": {
+                                                        "name": "clean_app",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 995
+                                                    }
+                                                },
+                                                "directories": {
+                                                    "scripts": {
+                                                        "files": {
+                                                            "getconfig.py": {
+                                                                "name": "getconfig",
+                                                                "extension": "py",
+                                                                "include": true,
+                                                                "size": 185
+                                                            },
+                                                            "prepare_extract_io.py": {
+                                                                "name": "prepare_extract_io",
+                                                                "extension": "py",
+                                                                "include": true,
+                                                                "size": 2680
+                                                            },
+                                                            "prepare_extract_iso.py": {
+                                                                "name": "prepare_extract_iso",
+                                                                "extension": "py",
+                                                                "include": true,
+                                                                "size": 2668
+                                                            },
+                                                            "prometheus_alarm.py": {
+                                                                "name": "prometheus_alarm",
+                                                                "extension": "py",
+                                                                "include": true,
+                                                                "size": 1904
+                                                            }
+                                                        },
+                                                        "directories": {}
+                                                    },
+                                                    "chains": {
+                                                        "files": {
+                                                            "mnemoc.yaml": {
+                                                                "name": "mnemoc",
+                                                                "extension": "yaml",
+                                                                "include": true,
+                                                                "size": 451
+                                                            },
+                                                            "process_iso.yaml": {
+                                                                "name": "process_iso",
+                                                                "extension": "yaml",
+                                                                "include": true,
+                                                                "size": 543
+                                                            },
+                                                            "compile_ivs.yaml": {
+                                                                "name": "compile_ivs",
+                                                                "extension": "yaml",
+                                                                "include": true,
+                                                                "size": 881
+                                                            },
+                                                            "process_io.yaml": {
+                                                                "name": "process_io",
+                                                                "extension": "yaml",
+                                                                "include": true,
+                                                                "size": 537
+                                                            }
+                                                        },
+                                                        "directories": {}
+                                                    }
+                                                }
+                                            },
+                                            "rules": {
+                                                "files": {
+                                                    "collect_rtdb2tsdb.yaml": {
+                                                        "name": "collect_rtdb2tsdb",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 644
+                                                    },
+                                                    "meta_up.yaml": {
+                                                        "name": "meta_up",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 477
+                                                    },
+                                                    "process_io_on_upload.yaml": {
+                                                        "name": "process_io_on_upload",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 483
+                                                    },
+                                                    "collect_rtdb2oldrtdb.yaml": {
+                                                        "name": "collect_rtdb2oldrtdb",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 653
+                                                    },
+                                                    "dropcaches_backend.yaml": {
+                                                        "name": "dropcaches_backend",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 290
+                                                    },
+                                                    "sample.yaml": {
+                                                        "name": "sample",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 347
+                                                    },
+                                                    "process_iso_on_upload.yaml": {
+                                                        "name": "process_iso_on_upload",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 471
+                                                    },
+                                                    "bridge_hika2rtdb.yaml": {
+                                                        "name": "bridge_hika2rtdb",
+                                                        "extension": "yaml",
+                                                        "include": true,
+                                                        "size": 714
+                                                    }
+                                                },
+                                                "directories": {}
+                                            },
+                                            "sensors": {
+                                                "files": {},
+                                                "directories": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "scripts": {
+                                "files": {
+                                    "block2type.py": {
+                                        "name": "block2type",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 1248
+                                    },
+                                    "showon.py": {
+                                        "name": "showon",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 637
+                                    },
+                                    "collect_algor_img3.py": {
+                                        "name": "collect_algor_img3",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 1476
+                                    },
+                                    "showon3.py": {
+                                        "name": "showon3",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 655
+                                    },
+                                    "collect_algor_img.py": {
+                                        "name": "collect_algor_img",
+                                        "extension": "py",
+                                        "include": true,
+                                        "size": 1259
+                                    }
+                                },
+                                "directories": {}
+                            },
+                            "ansible": {
+                                "files": {
+                                    "collect_rtdb2tsdb.yaml": {
+                                        "name": "collect_rtdb2tsdb",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 2038
+                                    },
+                                    "bridge_simulator.yaml": {
+                                        "name": "bridge_simulator",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 832
+                                    },
+                                    "stop_production.yaml": {
+                                        "name": "stop_production",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 1699
+                                    },
+                                    "collect_rtdb2oldrtdb.yaml": {
+                                        "name": "collect_rtdb2oldrtdb",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 1920
+                                    },
+                                    "deploy2production.yaml": {
+                                        "name": "deploy2production",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 4994
+                                    },
+                                    "bridge_hika2rtdb_from_service_confs.yaml": {
+                                        "name": "bridge_hika2rtdb_from_service_confs",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 464
+                                    },
+                                    "stage.yaml": {
+                                        "name": "stage",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 412
+                                    },
+                                    "bridge_hika2rtdb.yaml": {
+                                        "name": "bridge_hika2rtdb",
+                                        "extension": "yaml",
+                                        "include": true,
+                                        "size": 2234
+                                    }
+                                },
+                                "directories": {
+                                    "templates": {
+                                        "files": {},
+                                        "directories": {}
+                                    },
+                                    "roles": {
+                                        "files": {},
+                                        "directories": {
+                                            "bootstrap": {
+                                                "files": {},
+                                                "directories": {
+                                                    "meta": {
+                                                        "files": {
+                                                            "main.yaml": {
+                                                                "name": "main",
+                                                                "extension": "yaml",
+                                                                "include": true,
+                                                                "size": 108
+                                                            }
+                                                        },
+                                                        "directories": {}
+                                                    }
+                                                }
+                                            },
+                                            "production": {
+                                                "files": {},
+                                                "directories": {
+                                                    "backup": {
+                                                        "files": {},
+                                                        "directories": {
+                                                            "tasks": {
+                                                                "files": {
+                                                                    "backup_images.yaml": {
+                                                                        "name": "backup_images",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 458
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            }
+                                                        }
+                                                    },
+                                                    "meta": {
+                                                        "files": {},
+                                                        "directories": {
+                                                            "templates": {
+                                                                "files": {},
+                                                                "directories": {}
+                                                            },
+                                                            "meta": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 29
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            },
+                                                            "tasks": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 1483
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            }
+                                                        }
+                                                    },
+                                                    "farm": {
+                                                        "files": {},
+                                                        "directories": {
+                                                            "templates": {
+                                                                "files": {
+                                                                    "prod-compose.yaml": {
+                                                                        "name": "prod-compose",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 6419
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            },
+                                                            "meta": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 101
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            },
+                                                            "tasks": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 539
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            }
+                                                        }
+                                                    },
+                                                    "rtdb": {
+                                                        "files": {},
+                                                        "directories": {
+                                                            "templates": {
+                                                                "files": {},
+                                                                "directories": {}
+                                                            },
+                                                            "meta": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 29
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            },
+                                                            "tasks": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 1314
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            }
+                                                        }
+                                                    },
+                                                    "frontend": {
+                                                        "files": {},
+                                                        "directories": {
+                                                            "templates": {
+                                                                "files": {},
+                                                                "directories": {}
+                                                            },
+                                                            "meta": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 29
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            },
+                                                            "defaults": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 103
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            },
+                                                            "tasks": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 2073
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            }
+                                                        }
+                                                    },
+                                                    "backend": {
+                                                        "files": {},
+                                                        "directories": {
+                                                            "templates": {
+                                                                "files": {},
+                                                                "directories": {}
+                                                            },
+                                                            "meta": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 29
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            },
+                                                            "tasks": {
+                                                                "files": {
+                                                                    "main.yaml": {
+                                                                        "name": "main",
+                                                                        "extension": "yaml",
+                                                                        "include": true,
+                                                                        "size": 1423
+                                                                    }
+                                                                },
+                                                                "directories": {}
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "install": {
+                "files": {},
+                "directories": {}
+            },
+            "inputs": {
+                "files": {
+                    "hika7.yaml": {
+                        "name": "hika7",
+                        "extension": "yaml",
+                        "include": true,
+                        "size": 523
+                    }
+                },
+                "directories": {
+                    "fix": {
+                        "files": {
+                            "gdb2txt_cli.py": {
+                                "name": "gdb2txt_cli",
+                                "extension": "py",
+                                "include": true,
+                                "size": 3509
+                            }
+                        },
+                        "directories": {}
+                    }
+                }
+            },
+            "test_extract": {
+                "files": {
+                    "hika7.yaml": {
+                        "name": "hika7",
+                        "extension": "yaml",
+                        "include": true,
+                        "size": 553
+                    }
+                },
+                "directories": {}
+            }
+        }
+    },
+    "stats": {
+        "directories": 72,
+        "files": 133,
+        "files_py": 28,
+        "files_yaml": 95,
+        "files_ttl": 8,
+        "files_json": 1,
+        "files_html": 1
+    }
+}
