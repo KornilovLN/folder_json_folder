@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>main.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>main.yaml</h1>
+    <pre>- set_fact:
+    work_dir: &quot;/var/ekatra/tmp/prod/rtdb/&quot;
+    src_dir: &quot;/var/ekatra/&quot;
+    dest_dir: &quot;/var/ekatra/&quot;
+
+- name: Ensure tmp dirs
+  file: path={{ work_dir }}/coolie state=directory mode=0755
+
+######################################################
+
+- set_fact:
+    old_check_sum: &quot;&quot;
+    checksum_file: &quot;{{ work_dir }}/.checksum.txt&quot;
+
+- stat:
+    path: &quot;{{ checksum_file }}&quot;
+  register: cs
+
+- set_fact:
+    old_check_sum: &quot;{{ lookup(&#x27;file&#x27;, checksum_file) }}&quot;
+  when: cs.stat.exists
+
+- name: check changes for *.json and *.pg
+  shell: &#x27;find -name &quot;*.json&quot; -o -name &quot;*.pg&quot; -o -name &quot;*.conf&quot; -exec cat {} + | cksum | tee {{ checksum_file }}&#x27;
+  args:
+    chdir: &#x27;{{ src_dir }}/hub&#x27;
+  register: check_sum
+
+- name: Inspect image
+  docker_image_facts:
+    name: &#x27;{{ images_domain }}/{{ ekatra_domain }}/rtdb:latest&#x27;
+  register: image_state
+
+######################################################
+
+- block:
+  - name: make coolie/make.yaml
+    template:
+      src: make.yaml.j2
+      dest: &quot;{{ work_dir }}/coolie/make.yaml&quot;
+  
+  - name: Build image {{ images_domain }}/{{ ekatra_domain }}/rtdb
+    shell: &quot;coolie -l --batch build&quot;
+    args:
+      chdir: &#x27;{{ work_dir }}&#x27;
+
+  when: image_state.images|default([])|length == 0 or old_check_sum|default(1) != check_sum.stdout|default(2) or build_force|default(false)|bool
+</pre>
+</body>
+</html>

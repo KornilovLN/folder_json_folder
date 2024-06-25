@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>test.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>test.py</h1>
+    <pre>from flask import current_app, request
+from flask_login import current_user
+from brama import noty
+
+
+def notify(msg=None):
+    if msg:
+        msg[&#x27;userid&#x27;] = current_user.id if current_user.is_authenticated else None
+        current_app.logger.info(&quot;noty: {}&quot;.format(msg))
+        noty.flash(current_app.io, msg)
+</pre>
+</body>
+</html>

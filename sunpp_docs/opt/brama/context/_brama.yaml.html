@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_brama.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_brama.yaml</h1>
+    <pre># процесс, использующий этот файл конфигурации,
+# будет пропускать выполнение тестов или измерение задержек (latency).
+BRAMA_SKIP_PARTS:
+  - tests
+  - latency
+
+# сервисы не будут запускаться или использоваться в работе системы
+BRAMA_SKIP_SERVICES:
+  - pki
+  - prometheus
+  - weave
+
+# определены MIME-типы для различных файлов по их расширениям.
+# Например, файлы с .000 будут интерпретироваться как text/plain.
+MIMES:
+  &#x27;.000&#x27;: &#x27;text/plain&#x27;
+
+
+# используется виджет типа iframe, который загружает содержимое
+# с указанного источника ekatra/mnemo#/u/fArrays.json.
+BRAMA_WELCOME_PAGE_WIDGETS:
+    - type: iframe
+      src: &#x27;ekatra/mnemo#/u/fArrays.json&#x27;
+
+# использование Bootstrap для стилизации интерфейса.
+GUI_THEME: bootstrap
+</pre>
+</body>
+</html>

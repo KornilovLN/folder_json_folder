@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>fVSYAU_T3.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>fVSYAU_T3.mnemo</h1>
+    <pre>import ekatra.semantic.mnemobinder as m;
+//from lib.spir import *;
+from lib.panel import panel2;
+from lib.naec import *;
+
+debug ?= True;
+mnemo_marging ?= 20;
+//mnemo_width ?= 850; //1020
+//mnemo_height ?= 430; //440
+
+
+
+pg := m.Binder(&#x27;fVSYAU_T3.yaml&#x27;);
+
+
+Mnemo(title=&#x27;Вспомогательные системы и системы безопастосни РУ (параметры группы Т)&#x27;, class=&quot;mnemo&quot;,
+      stylesheets = &#x27;../dark.css&#x27;, marging = mnemo_marging, font_size=&#x27;24px&#x27;)
+
+{
+
+    labels_size := 10;
+    panel_width := 400;
+    panel_margins := (10, 10, 20, 10);
+    element_height := 50;
+    txt_cls := &#x27;f22&#x27;;
+// Panel 1
+    panel2(Origin, margins=panel_margins){
+        in_block(Origin, panel_width, 60, &quot;Насос аварийного впрыска бора&quot;, lclass=txt_cls){
+           b_line_pump(Origin, panel_width, pg.N_av_bor);
+        }
+        in_block(Point(0, 80), panel_width, 60, &quot;Насос САОЗ &quot;, lclass=txt_cls){
+            b_line_pump(Origin, panel_width, pg.N_SAOS_VD);
+        }
+        in_block(Point(0, 160), panel_width, 60, &quot;Спринклерный насос&quot;, lclass=txt_cls){
+           b_line_pump(Origin, panel_width, pg.N_SPLNK);
+        }
+    }
+// Panel 2
+    panel2(Point(0, 270), margins=panel_margins){
+        block_step := 140;
+        in_block(Point(0, 0), panel_width, 120, &quot;Расход на напоре насоса аварийного впрыска бора&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.F_NAPOR);
+        }
+        in_block(Point(0, block_step), panel_width, 120, &quot;F на напоре САОЗ НД&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.F_NAPOR_ND);
+        }
+        in_block(Point(0, block_step*2), panel_width, 120, &quot;F на напоре САОЗ ВД&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.F_NAPOR_VD);
+        }
+
+
+    }
+// Panel 3
+    panel2(Point(panel_width*1.1, 0), margins=panel_margins){
+        block_step := 120;
+
+        in_block(Point(0, 0), panel_width, 100, &quot;Расход раствора бора на напоре спринклерного насоса&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.F_NAPOR_2);
+        }
+        in_block(Point(0, block_step), panel_width, 100, &quot;C бора в баке&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.C_BORA);
+        }
+        in_block(Point(0, block_step*2), panel_width, block_step, &quot;Концентрация бора в баке САОЗ НД&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.C_BORA_ND);
+        }
+        in_block(Point(0, block_step*3), panel_width, block_step, &quot;Концентрация бора в баке САОЗ ВД&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.C_BORA_VD);
+        }
+        in_block(Point(0, block_step*4), panel_width, block_step, &quot;Уровень в спринклерном баке&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.L_BAK_SPR);
+        }
+        in_block(Point(0, block_step*5), panel_width, block_step, &quot;Уровень в баке&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.L_1);
+        }
+    }
+
+// Panel 4
+    panel2(Point(panel_width*2.2, 0), margins=panel_margins){
+        block_step := 150;
+        in_block(Point(0, 0), panel_width, block_step, &quot;Уровень в баке системы аварийного охлаждения&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.L_2);
+        }
+        in_block(Point(0, block_step), panel_width, block_step, &quot;Уровень в спринклерном баке&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.L_3);
+        }
+        in_block(Point(0, block_step*2), panel_width, element_height, &quot;Л в баке САОЗ ВД&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.L_SAOZ_VD);
+        }
+        in_block(Point(0, block_step*3), panel_width, element_height, &quot;Давление в ГО широкий диапазон&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.P_GO);
+        }
+        in_block(Point(0, block_step*3.5), panel_width, element_height, &quot;Т в помещении&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.T);
+        }
+        in_block(Point(0, block_step*4), panel_width, element_height, &quot;С водорода в ГО&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.C_GO);
+        }
+    }
+}</pre>
+</body>
+</html>

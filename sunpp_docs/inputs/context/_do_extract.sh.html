@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_do_extract.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_do_extract.sh</h1>
+    <pre>#!/bin/bash  # Указывает, что скрипт должен быть интерпретирован Bash
+
+# Переходим в временную директорию /tmp
+cd /tmp
+
+# Распаковываем IO-7.3-76.tar.gz из директории /build в текущую  /tmp
+# Опции xzf означают: x — извлечение, 
+#                     z — использ. gzip для распаковки,
+#                     f — указание файла.
+
+tar xzf /build/IO-7.3-76.tar.gz
+
+# Исп. утилиту deepextract для извл. данных из распакованного архива
+# -c /build/hika7.yaml:   указывает файл конфигурации hika7.yaml
+# -u:                     означает &#x27;unpack&#x27; (распаковка)
+# -o /build/.inputs:      указ. выходную дир. для извлеченных данных
+# /tmp/IO-7.3-76/:        директория, из которой извлекаются данные
+deepextract -c /build/hika7.yaml -u -o /build/.inputs /tmp/IO-7.3-76/
+
+# Переходим в директорию, где находятся базы данных
+cd /build/.inputs/db
+
+# Восстанавливаем базы данных из резервных копий с помощью утилиты gbak
+# -REP: заменяет существующую базу данных (если она есть)
+# Формат команды: gbak -REP &lt;input_file.gbk&gt; &lt;output_file.gdb&gt;
+gbak -REP algor_blk.gbk algor_blk.gdb
+gbak -REP algor_kzb.gbk algor_kzb.gdb
+gbak -REP algor_rnp.gbk algor_rnp.gdb
+gbak -REP algor_vpb.gbk algor_vpb.gdb
+gbak -REP isc4.gbk      isc4.gdb
+gbak -REP skv_tep.gbk   skv_tep.gdb
+gbak -REP uso.gbk       uso.gdb
+
+# Преобр. базу данных uso.gdb в текст. формат с помощью утилиты gdb2txt
+# --output /build/.uso:       указ. вых. директорию для текст. вывода
+# -e koi8-r:                  кодировка для преобразования (koi8-r)
+# /build/.inputs/db/uso.gdb:  входной файл базы данных
+gdb2txt --output /build/.uso -e koi8-r /build/.inputs/db/uso.gdb
+
+
+
+# Исходный текст скрипта без комментариев
+# cd /tmp
+# tar xzf /build/IO-7.3-76.tar.gz
+# 
+# deepextract -c /build/hika7.yaml -u -o /build/.inputs /tmp/IO-7.3-76/
+# 
+# cd /build/.inputs/db
+# gbak -REP algor_blk.gbk algor_blk.gdb
+# gbak -REP algor_kzb.gbk algor_kzb.gdb
+# gbak -REP algor_rnp.gbk algor_rnp.gdb
+# gbak -REP algor_vpb.gbk algor_vpb.gdb
+# gbak -REP isc4.gbk      isc4.gdb
+# gbak -REP skv_tep.gbk   skv_tep.gdb
+# gbak -REP uso.gbk       uso.gdb
+# 
+# gdb2txt --output /build/.uso -e koi8-r /build/.inputs/db/uso.gdb
+</pre>
+</body>
+</html>

@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>adigital.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>adigital.mnemo</h1>
+    <pre>def _wide(oldsize, newsize)
+{
+  if(oldsize != newsize){
+    scale(@, newsize/oldsize);
+  }else{
+    @;
+  }
+}
+
+def _digital_3060(){
+    linearGradient(y1=1){
+        .stop(0%, &#x27;#f9f9f9&#x27;, opacity=0.1);
+        .stop(100%, &#x27;#f9f9f9&#x27;, opacity=0.3);
+    }
+}
+
+def _digital_3073(){
+    linearGradient(y1=1){
+        .stop(0%, &#x27;#333&#x27;, opacity=0);
+        .stop(15%, &#x27;#333&#x27;, opacity=0.15);
+        .stop(38%, &#x27;#282828&#x27;, opacity=0.38);
+        .stop(100%, &#x27;#0&#x27;, opacity=1);
+    }
+}
+
+def _digital_3077(){
+    linearGradient(){
+        .stop(0%, &#x27;#1a1a1a&#x27;);
+        .stop(100%, &#x27;#4c4c4c&#x27;);
+    }
+}
+
+def _digital_border1(){
+    linearGradient(x1=0.5, x2=0.5, y1=0, y2=1){
+        .stop(0%, &#x27;#1a1a1a&#x27;);
+        .stop(100%, &#x27;#4c4c4c&#x27;);
+    }
+}
+
+def _digital_border2(){
+    linearGradient(x1=1, x2=0.5, y1=1, y2=0.4){
+        .stop(0%, &#x27;#000&#x27;);
+        .stop(100%, &#x27;#1c1c1c&#x27;);
+    }
+}
+def _digital_window(w, h){
+    c:=curve(points=(Point(0.02*w, 0.34*h), Point(0.08*w, 0.5*h), Point(0.33*w, 0.34*h),
+                     Point(0.8*w, 0.3*h), Point(w, 0.17*h)));
+    combinePath(style=(fill=#_digital_3060(), stroke=&#x27;none&#x27;)){
+        rect(0.02*w, 0.06*h, 0.96*w, 0.88*h, r=0.09*h);
+        -path(){
+            .M(0.02*w, 0.34*h);
+            .l(0, 0, c);
+            .v(h);
+            .h(-w);
+            .z();
+        }
+    }
+}
+def _digital_back(w, h){
+    rect(Origin, w, h, ry=0.09*h, class=&#x27;mnemo_panel&#x27;, style=(stroke=&#x27;none&#x27;));
+    group(class=&#x27;mnemo-meter-bg&#x27;){
+        rect(height=h, width=w, ry=0.11*h, style=(fill=#_digital_border1(), stroke=&#x27;none&#x27;));
+        rect(0.01*w, 0.03*h, 0.98*w, 0.94*h, ry=0.1*h, style=(fill=#_digital_border2(), stroke=&#x27;none&#x27;));
+        rect(0.02*w, 0.06*h, 0.96*w, 0.88*h, ry=0.09*h, style=(fill=&#x27;#333&#x27;, stroke=&#x27;none&#x27;));
+    }
+}
+
+def digital9(p, w, bind){
+    h := w*0.27;
+    font_size := w*0.08;
+
+    mu := bind.defined(&#x27;mu&#x27;, &#x27;MU&#x27;);
+    lir := bind.defined(&#x27;LIR&#x27;, 0);
+    hir := bind.defined(&#x27;HIR&#x27;, 32.6);
+    barline_width := w*0.03;
+    rect(p, w, h, class=&#x27;_SKIP&#x27;);
+    group(p, class=&#x27;ppt&#x27;, bind=bind.bind_idx){
+        //use(Origin, href=#_digital_back(w, h));
+        _digital_back(w, h);
+        text(Point(w*0.81, h*0.83), mu, class=&#x27;label&#x27;, bind_content=&#x27;mu&#x27;, style=&#x27;font-size:{}px;&#x27;.format(font_size));
+        line(Point(0.075*w, 0.24*h), ((0.72+0.075)*w, 0.24*h), style=&#x27;stroke-width:{}&#x27;.format(barline_width*1.2));
+        group(bindtype=&#x27;hist&#x27;, bind=bind.bind_idx, class=&#x27;atag&#x27;, range=(lir,&#x27;;&#x27;,hir), transform=(Translate(Point(0.075*w, 0.24*h))*Rotate(90))){
+            line(Origin, (0, -0.72*w), style=&#x27;stroke-width:{}&#x27;.format(barline_width));
+            circle(0*h, 0.02*w, 0.01*w, class=&#x27;bulbover&#x27;);
+            circle(0*h, -0.75*w, 0.01*w, class=&#x27;bulbunder&#x27;);
+        }
+        group(bindtype=&#x27;dtext&#x27;, bind=bind.bind_idx, class=&#x27;atag&#x27;){
+            text(Point(0.8*w, 0.87*h), &#x27;X.XX&#x27;, class=&#x27;apptxt alignR&#x27;, style=&#x27;font-size:{}px;&#x27;.format(font_size*2));
+            rect(0.86*w, 0.16*h, 0.09*w, 0.09*w, rx=2, class=&#x27;astatus Solid&#x27;);
+            rect(0.015*w, 0.015*w, 0.97*w, 0.88*h, rx=0.03*w, class=&#x27;astatus Contour&#x27;);
+        }
+        //text(Point(0.91*w, 0.44*h), &#x27;5&#x27;, class=&#x27;statussymbol alignC&#x27;, style=&#x27;font-size:{}px;&#x27;.format(font_size));
+
+        use(Origin, href=#_digital_window(w, h));
+    }
+}
+
+def digital5(p, w, bind, format=False, height=None){
+    h := height ? height : w * 0.34;
+        font_size := h;
+    if (format) {
+        bt:=&#x27;fdtext&#x27;;
+    }else{
+        bt:=&#x27;dtext&#x27;;
+    }
+    rect(p, w, h, class=&#x27;_SKIP&#x27;);
+    group(p, bindtype=bt, class=&#x27;ppt atag&#x27;, bind=bind.bind_idx){
+        //use(Origin, href=#_digital_back(w, h));
+        _digital_back(w, h);
+        text(Point(0.96*w, 0.85*h), class=&#x27;alignR apptxt&#x27;, style=&#x27;font-size:{}px&#x27;.format(font_size));
+        //text(Point(0.95*w, 0.85*h), &#x27;XXX&#x27;, class=&#x27;alignR apptxt&#x27;, style=&#x27;font-size:{}px&#x27;.format(font_size));
+        use(Origin, href=#_digital_window(w, h));
+    }
+}
+
+def digital_meter(p, w, bind){
+    mu := bind.defined(&#x27;mu&#x27;, &#x27;MU&#x27;);
+    label := bind.defined(&#x27;label&#x27;, &#x27;label&#x27;);
+    lir := bind.defined(&#x27;LIR&#x27;, 0);
+    hir := bind.defined (&#x27;HIR&#x27;, 1000);
+    h := 0.265*w;
+    ruler_start := 0.08*w;
+    ruler_end := 0.75*w;
+    ruler_h1 := 0.47*h;
+    ruler_h2 := 0.65*h;
+    font_size := 0.06*w;
+    font_size_ruler := 0.04*w;
+    barline_width := w*0.02;
+
+    rect(p, w, h, class=&#x27;_SKIP&#x27;);
+    group(p, class=&#x27;ppt&#x27;, bind=bind.bind_idx){
+        //use(Origin, href=#_digital_back(w, h));
+        _digital_back(w, h);
+        text(Point(0.86*w, 0.62*h), mu, class=&#x27;label alignC&#x27;, bind_content=&#x27;mu&#x27;, style=&#x27;font-size:{}px&#x27;.format(font_size));
+        text(Point(0.86*w, 0.85*h), &#x27;*100&#x27;, class=&#x27;label alignC&#x27;, bind_content=&#x27;*{rulescale}&#x27;, style=&#x27;font-size:{}px&#x27;.format(font_size));
+        text(Point(0.08*w, 0.25*h), label, class=&#x27;label&#x27;, style=&#x27;font-size:{}px&#x27;.format(font_size));
+
+        group(bindtype=&#x27;dtext&#x27;, bind=bind.bind_idx, class=&#x27;atag&#x27;){
+            text(Point(0.96*w, 0.36*h), &#x27;XXX&#x27;, class=&#x27;alignR apptxt&#x27;, style=&#x27;font-size:{}px&#x27;.format(font_size*2));
+        }
+
+        range_ := (lir, hir/100.);
+        b_step := range_[1] == 10 ? 2 : 20;
+        m_step := b_step / 2.;
+
+        group(class=&#x27;hruler&#x27;){
+            ruler(range=range_){
+                rule = line(Point(ruler_start, ruler_h1), Point(ruler_end, ruler_h1));
+                line(Point(0,0), Point(0, -6), _rulestep=b_step);
+                line(Point(0,0), Point(0, -3), _rulestep=m_step);
+            }
+        }
+        group(class=&#x27;hruler&#x27;){
+            ruler(range=range_){
+                rule = line((ruler_start, ruler_h2), (ruler_end, ruler_h2));
+                line(Origin, Point(0, 6), _rulestep=b_step);
+                line(Origin, Point(0, 3), _rulestep=m_step);
+                text(0, 10, &#x27;%d&#x27;, _rulestep=b_step, style=&#x27;font-size:{}px&#x27;.format(font_size_ruler));
+            }
+        }
+        group(bindtype=&#x27;hist&#x27;, class=&#x27;atag&#x27;, bind=bind.bind_idx, range=(lir, &#x27;;&#x27;, hir), transform=(Translate(0.083*w, 0.562*h)*Rotate(90))){
+            line(Origin, Point(0, -w*0.66), style=&#x27;stroke-width:{}&#x27;.format(barline_width));
+            circle(0, -0.69*w, w*0.015, class=&#x27;bulbover&#x27;);
+            circle(0, 0.035*w, w*0.015, class=&#x27;bulbunder&#x27;);
+        }
+        use(Origin, href=#_digital_window(w, h));
+    }
+}</pre>
+</body>
+</html>

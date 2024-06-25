@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Makefile</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>Makefile</h1>
+    <pre>.PHONY: all
+
+print-%: ; @echo $*=$($*)
+
+default: all
+
+#all: push-images ## publish images and build installation iso
+
+pull: .pull.txt ## pull project images
+begin: .begin.txt ## bootstrap and start
+bootstrap: .bootstrap.txt ## bootstrap
+start: .start.txt ## start
+clean: .clean.txt ## remove all containers
+iso: install.iso ## make iso image
+test_vm: .test.txt ## test iso by vargrant VM
+del_vm: .del.txt ## destroy test VM
+
+.pull.txt:
+	coolie script start-dev pull
+
+.begin.txt:
+	coolie script start-dev --clean --bootstrap --localhost start
+
+.bootstrap.txt:
+	coolie script start-dev --bootstrap
+
+.start.txt:
+	coolie script start-dev start
+
+.clean.txt:
+	coolie script start-dev --clean forget
+
+install.iso:
+	coolie script make_project_iso.py
+
+
+.test.txt: install.iso
+	coolie script run_vagrant.sh ./test 172.16.0.8
+
+.del.txt:
+	coolie script remove-vagrant.sh ./test
+
+help: ## this help
+	@awk &#x27;BEGIN {FS = &quot;:.*?## &quot;} /^[a-zA-Z_-]+:.*?## / {sub(&quot;\\\\n&quot;,sprintf(&quot;\n%22c&quot;,&quot; &quot;), $$2);printf &quot;\033[36m%-20s\033[0m %s\n&quot;, $$1, $$2}&#x27; $(MAKEFILE_LIST)
+</pre>
+</body>
+</html>

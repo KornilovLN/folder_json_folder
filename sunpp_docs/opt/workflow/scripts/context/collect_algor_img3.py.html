@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>collect_algor_img3.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>collect_algor_img3.py</h1>
+    <pre>#! /usr/bin/env python
+import sys
+import json
+
+
+def commit(massive, idx, set1, set2):
+    if massive and idx:
+        d = dict(SHIFR=u&#x27;{}{:03d}&#x27;.format(massive, idx))
+        if set1:
+            d[&#x27;ALGOR&#x27;] = &#x27;,&#x27;.join(set1)
+        if set2:
+            d[&#x27;IMG&#x27;] = &#x27;,&#x27;.join(set2)
+        print(json.dumps(d, ensure_ascii=False))
+
+
+def main():
+    massive, idx = None, None
+    set1 = set()
+    set2 = set()
+    for line in sys.stdin:
+        try:
+            line = line[:-1].split(&#x27;;&#x27;)
+            if len(line) == 5:
+                m = line[0]
+                i = int(line[1])
+                s1, s2, format = line[2], line[3], line[4]
+                if m != massive or i != idx:
+                    if massive is not None:
+                        commit(massive, idx, set1, set2)
+                        set1 = set()
+                        set2 = set()
+                    massive = m
+                    idx = i
+                    if s1:
+                        set1.add(s1)
+                    if s2:
+                        if format:
+                            set2.add(&#x27;{}.{}&#x27;.format(s2, format))
+                        else:
+                            set2.add(s2)
+                else:
+                    if s1:
+                        set1.add(s1)
+                    if s2:
+                        set2.add(s2)
+        except:
+            continue
+
+    if massive is not None:
+        commit(massive, idx, set1, set2)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</pre>
+</body>
+</html>

@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>fYAPPY.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>fYAPPY.mnemo</h1>
+    <pre>import ekatra.semantic.mnemobinder as m;
+//from lib.spir import *;
+from lib.panel import panel2;
+from lib.naec import *;
+
+debug ?= True;
+mnemo_marging ?= 20;
+//mnemo_width ?= 850; //1020
+//mnemo_height ?= 430; //440
+
+
+
+pg := m.MultiBinder(
+                    fYAPPY3=&#x27;fYAPPY3.yaml&#x27;
+                    );
+
+Mnemo(title=&#x27;Ядерная паропроизводящая установка&#x27;, class=&quot;mnemo&quot;,
+      stylesheets=&#x27;../dark.css&#x27;, marging=mnemo_marging, font_size=&#x27;24px&#x27;)
+{
+
+    labels_size := 10;
+    panel_width := 400;
+    panel_margins := (0, 10, 15, 10);
+    element_height := 30;
+
+    // YA panel
+    block_step := element_height*5;
+    txt_cls := &#x27;f22&#x27;;
+    panel2(Origin, title=(&#x27;YA первый контур&#x27;, None), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step, &quot;Перепад давления на ГЦН&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YA_PK.DP);
+        }
+        in_block(Point(0, block_step*1), panel_width, block_step, &quot;Температура холодной нитки&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YA_PK.T_HOL);
+        }
+        in_block(Point(0, 2*block_step), panel_width, block_step, &quot;Температура горячей нитки&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YA_PK.T_GOR);
+        }
+    }
+
+    //YZ panel
+    block_step:= element_height;
+    panel2(Point(0, 515), title=(&#x27;YZ - Защита реактора&#x27;, None), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step, &quot;Ступен. пуск ступ.1&quot;, lclass=txt_cls){
+            in_block(Origin, panel_width*0.5, block_step, &quot;Срабатывание АЗ&quot;, lclass=txt_cls){
+                b_line_lamp(Origin, panel_width*0.5, pg.YZ.SRAB_AZ);
+            }
+            in_block(Point(panel_width*0.5, 0), panel_width*0.5, block_step, &quot;Срабатывание ПЗ&quot;, lclass=txt_cls){
+                b_line_lamp(Origin, panel_width*0.5, pg.YZ.SRAB_PZ);
+            }
+            in_block(Point(0, 2.5*block_step), panel_width*0.3, block_step, &quot;Ступ. пуск 1 КБ&quot;, lclass=txt_cls){
+                b_line_lamp(Origin, panel_width*0.3, pg.YZ.SB1, notext=True);
+            }
+            in_block(Point(panel_width*0.33, 2.5*block_step), panel_width*0.3, block_step, &quot;Ступ. пуск 2 КБ&quot;, lclass=txt_cls){
+                b_line_lamp(Origin, panel_width*0.3, pg.YZ.SB2, notext=True);
+            }
+            in_block(Point(panel_width*0.66, 2.5*block_step), panel_width*0.3, block_step, &quot;Ступ. пуск 3 КБ&quot;, lclass=txt_cls){
+                b_line_lamp(Origin, panel_width*0.3, pg.YZ.SB3, notext=True);
+            }
+            in_block(Point(0, 5*block_step), panel_width, block_step*len(pg.YZ.NCP), &quot;Положение группы ОР СУЗ&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YZ.NCP);
+            }
+        }
+    }
+
+
+    //YB panel
+    block_step := element_height*5;
+    panel2(Point(panel_width*1.1, 0), title=(&#x27;YB парогенератор&#x27;, None), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step, &quot;Давление свежего пара в ПГ&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YB.P_PARA);
+        }
+        in_block(Point(0, block_step), panel_width, block_step, &quot;Уровень котловой воды в ПГ&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YB.L_KORR);
+        }
+    }
+    //YD panel
+    block_step := element_height*2.5;
+    panel2(Point(panel_width*1.1, 360), title=(&#x27;YD Главные циркуляционные насосы&#x27;, None), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step, &quot;ГЦН&quot;, lclass=txt_cls){
+               b_line_shutter(Point(0, 10), panel_width, pg.YD.GCN);
+        }
+    }
+
+    //YT panel
+    block_step := element_height*5;
+    panel2(Point(panel_width*1.1, 500), title=(&#x27;YT Система аварийного расхолаживания РУ&#x27;, (&#x27;пассивная часть&#x27;)), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step, &quot;Уровень раствора бора в ГЕ САОЗ&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YT.L_GE);
+        }
+        in_block(Point(0, block_step), panel_width, block_step, &quot;Концентрация бора в гидроемкости САОЗ&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YT.C_BORA);
+        }
+        in_block(Point(0, block_step*2), panel_width, block_step, &quot;Давление в гидроемкости САОЗ&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YT.P_GE);
+        }
+    }
+
+    // YC panel
+    block_step := element_height*1.5;
+    panel2(Point(panel_width*2.2, 0), title=(&#x27;YC Корпус реактора&#x27;, None), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step, &quot;Давление над активной зоной&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YC.P);
+        }
+        in_block(Point(0, block_step+20), panel_width, block_step, &quot;Перепад давления на реакторе&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YC.DP, rule_step=1);
+        }
+        in_block(Point(0, 2*(block_step+20)), panel_width, block_step, &quot;Температура корпуса реактора&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YC.T);
+        }
+        in_block(Point(0, 3*(block_step+20)), panel_width, block_step, &quot;Уровень воды в реакторе&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YC.L);
+        }
+        in_block(Point(0, 4*(block_step+20)), panel_width, block_step, &quot;Достоверная средневзешенная мощность&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YC.NAKZ);
+        }
+        in_block(Point(0, 5*(block_step+20)), panel_width, block_step, &quot;Мощность активная генератора&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YC.Na);
+        }
+        in_block(Point(0, 6*(block_step+20)), panel_width, block_step, &quot;Средняя температура на выходе кассет&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YC.SR);
+        }
+        in_block(Point(0, 7*(block_step+20)), panel_width, block_step*1.5, &quot;Максимальная температура на выходе кассет&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.YC.MAX);
+        }
+        if (pg.YC.get(&#x27;MIN&#x27;)){
+            in_block(Point(0, 8*(block_step+20)), panel_width, block_step*1.5, &quot;Минимальная температура на выходе кассет&quot;, lclass=txt_cls){
+                   hist_group(Origin, panel_width, pg.YC.MIN);
+            }
+        }
+    }
+
+    // YP panel
+    block_step := element_height*2;
+    pheight := pg.YC.get(&#x27;MIN&#x27;) ? 650 : 590;
+    panel2(Point(panel_width*2.2, pheight), title=(&#x27;YP Компенсатор давления и барботер&#x27;, None), label_class=txt_cls, margins=panel_margins){
+
+        in_block(Origin, panel_width, block_step, &quot;ИПК КД&quot;, lclass=txt_cls){
+               b_line_shutter(Point(0, 10), panel_width, pg.YA_KDB.RAB_IPK_KD);
+        }
+        in_block(Point(0, 1.4*block_step), panel_width, block_step, &quot;Уровень теплоносителя в КД (13м)&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YA_KDB.L_KD1);
+        }
+        in_block(Point(0, 2.6*block_step), panel_width, block_step, &quot;Уровень теплоносителя в КД (10м)&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.YA_KDB.L_KD2);
+        }
+
+        in_block(Point(0, 3.8*block_step), panel_width, block_step, &quot;Электронагреватель КД&quot;, lclass=txt_cls){
+            b_line_toggle(Origin, panel_width, pg.YA_KDB.TEN_KD);
+        }
+    }
+//
+//    //YD panel
+//    panel2(Point(panel_width*2.4, 760), title=(&#x27;YD -Главные циркуляционные насосы&#x27;, None), label_class=txt_cls, margins=panel_margins){
+//        in_block(Origin, panel_width, 70, &quot;ГЦН&quot;, lclass=txt_cls){
+//            b_line_pump(Origin, panel_width, pg.YD.GCN, h_version=pg.hika_version);
+//        }
+//    }
+}</pre>
+</body>
+</html>

@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>nginx-spd.j2</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>nginx-spd.j2</h1>
+    <pre>server {
+    listen 80;
+    index index.html index.htm;
+
+    location /install {
+        root /var/ekatra;
+        client_body_temp_path /tmp;
+        client_body_buffer_size    128K;
+        client_max_body_size       10000M;
+
+        dav_methods PUT DELETE MKCOL COPY MOVE;
+
+        create_full_put_path  on;
+        dav_access            all:rw;
+
+        limit_except GET {
+            allow all;
+
+        }
+
+{% if nginx.statsd_server is defined %}
+    # --- nginx-statsd ---
+    statsd_count &quot;http.requests.nginx.{{ vhost_name }}.install&quot; 1;
+    statsd_count &quot;http.responses.nginx.{{ vhost_name }}.install.$status&quot; 1 &quot;$status&quot;;
+    statsd_count &quot;http.request_receive.nginx.{{ vhost_name }}.install&quot; &quot;$request_length&quot;;
+    statsd_count &quot;http.bytes_sent.nginx.{{ vhost_name }}.install&quot; &quot;$bytes_sent&quot;;
+    statsd_timing &quot;http.request_time.nginx.{{ vhost_name }}.install&quot; &quot;$request_time&quot;;
+    # --------------------
+{% endif %}
+
+    }
+
+    location /spd {
+        root /var/ekatra;
+        expires -1;
+        add_header Pragma public;
+        add_header Cache-Control &quot;public, must-revalidate, proxy-revalidate&quot;;
+
+{% if nginx.statsd_server is defined %}
+    # --- nginx-statsd ---
+    statsd_count &quot;http.requests.nginx.{{ vhost_name }}.spd&quot; 1;
+    statsd_count &quot;http.responses.nginx.{{ vhost_name }}.spd.$status&quot; 1 &quot;$status&quot;;
+    statsd_count &quot;http.request_receive.nginx.{{ vhost_name }}.spd&quot; &quot;$request_length&quot;;
+    statsd_count &quot;http.bytes_sent.nginx.{{ vhost_name }}.spd&quot; &quot;$bytes_sent&quot;;
+    statsd_timing &quot;http.request_time.nginx.{{ vhost_name }}.spd&quot; &quot;$request_time&quot;;
+    # --------------------
+{% endif %}
+
+    }
+
+    location / {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        root /var/www;
+        try_files $uri $uri/ =404;
+
+{% if nginx.statsd_server is defined %}
+    # --- nginx-statsd ---
+    statsd_count &quot;http.requests.nginx.{{ vhost_name }}.static&quot; 1;
+    statsd_count &quot;http.responses.nginx.{{ vhost_name }}.static.$status&quot; 1 &quot;$status&quot;;
+    statsd_count &quot;http.request_receive.nginx.{{ vhost_name }}.static&quot; &quot;$request_length&quot;;
+    statsd_count &quot;http.bytes_sent.nginx.{{ vhost_name }}.static&quot; &quot;$bytes_sent&quot;;
+    statsd_timing &quot;http.request_time.nginx.{{ vhost_name }}.static&quot; &quot;$request_time&quot;;
+    # --------------------
+{% endif %}
+
+    }
+
+    error_page 404 /404.html;
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
+</pre>
+</body>
+</html>

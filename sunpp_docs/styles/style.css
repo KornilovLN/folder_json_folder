@@ -1,0 +1,248 @@
+:root {
+    --max-width: 1700px; /* Устанавливает максимальную ширину контейнеров */
+}
+
+/* Импортируем шрифт из внешнего источника (например, Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+
+html, body {
+    height: 100%;
+    margin: 10;
+    background-color: #c5be7f; /* Цвет фона для всего окна */
+    font-family: 'Roboto', sans-serif;
+}
+
+header {
+    background: #b4d6e5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0; /* Добавляем небольшой отступ сверху и снизу */
+    border: 2px solid #9bbdd3; /* Добавляем бордер */
+
+}
+
+sidebar {
+    height: 300px;
+    border: 2px solid #7c7c55; /* Добавляем бордер */
+}
+
+.main {
+    background: #dbda74;
+    height: 300px;
+    border: 2px solid #7c7c55; /* Добавляем бордер */
+}
+
+
+
+
+
+.main-content-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex-grow: 1;
+}
+
+#content-frame {
+    border: none;
+    width: 100%;
+    height: 100%;
+}
+
+
+
+
+.main-content p i {
+    font-size: 0.9em;
+}
+
+footer {
+    background: #c4d3b6;
+    display: flex;
+    align-items: left;
+    justify-content: space-between;
+    padding: 10px 0; /* Добавляем небольшой отступ сверху и снизу */
+    border: 2px solid #a4a396;  /* Добавляем бордер */
+}
+
+
+header .container,
+footer .container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin: 0 auto; /* Выравнивает контейнеры по центру */
+    max-width: var(--max-width); /* Устанавливает максимальную ширину контейнеров */
+    justify-content: space-between; /* Распределяет элементы по краям контейнера */
+}
+
+.h2 {
+    text-align: center;
+}
+
+.main-content h2 {
+    text-align: center;
+}
+
+
+header, footer {
+    display: flex;
+    align-items: center;
+    /*width: 100%;*/
+}
+
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    max-width: var(--max-width); /* Устанавливает максимальную ширину контейнеров 1600 пикселей */
+    padding: 0 15px;
+    margin: 10px auto;   
+}
+
+.container:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+
+
+.logo {
+    /* Эти стили применяются к div-контейнеру */
+    margin-right: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 120px;
+    height: 120px;
+}
+
+.logo img {
+    /* Эти стили применяются к изображению внутри .logo */
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+nav {
+    display: flex;      /* Используем flexbox для навигации */
+}
+
+nav ul {
+    display: flex;      /* Размещаем элементы списка в строку */
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+nav li {
+    margin-left: 40px;  /* Отступ между элементами списка */
+}
+
+nav a {
+    text-decoration: none;
+    line-height: 1;     /* Сбрасываем line-height для ссылок */
+    padding: 10px;      /* Добавляем отступы для ссылок */
+}
+
+.sidebar-container {
+    width: 25%;
+    height: 100%;
+    float: left;
+    background-color: #cfd3b7; /* Цвет фона для контейнера сайдбара */
+    overflow: auto; /* для полос прокрутки */
+    padding: 20px; /* Отступ для контейнера сайдбара */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Тень */
+    
+    border: 2px solid #aaaa7d; /* Добавляем бордер */
+}
+
+.main-content-container {
+    width: 75%;
+    height: 100%;
+    float: right;    
+    background-color: #dee7ce; /* Цвет фона для контейнера основного содержимого */
+    overflow: auto; /* для полос прокрутки */
+    padding: 20px; /* Отступ для контейнера основного содержимого */
+
+    border: 2px solid #aaaa7d; /* Добавляем бордер */
+}
+
+.sidebar-container, .main-content-container {
+    box-sizing: border-box;
+}
+
+.sidebar {
+    width: 100%;
+    padding: 20px;
+    background-color: #cfd3b7;   
+}
+
+.sidebar h2 {
+    text-align: left;
+}
+
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+
+    text-align: left; /* Прижимаем текст к левому краю */
+  }
+  
+  .sidebar-menu > li {
+    margin-bottom: 10px;
+  }
+  
+  .sidebar-menu a {
+    display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .sidebar-menu a:hover {
+    background-color: #ddd;
+  }
+  
+  .submenu {
+    list-style-type: none;
+    padding-left: 20px;
+    margin: 5px 0;
+    display: none;
+  }
+  
+  .submenu.open {
+    display: block;
+  }
+
+
+
+.container div {    
+    float: left;
+    margin-bottom: 15px;
+}
+
+.col-1-2 {
+    width: 50%;  
+}
+
+.col-1-3 {
+    width: 33.3333333333%;
+}
+
+.col-1-4 {
+    width: 25%;
+}
+
+.col-2-3 {
+    width: 66.6666666667%;
+}   

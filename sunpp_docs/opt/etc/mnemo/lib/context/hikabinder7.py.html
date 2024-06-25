@@ -1,0 +1,514 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>hikabinder7.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>hikabinder7.py</h1>
+    <pre># -*- coding: utf-8 -*-
+from __future__ import print_function
+
+import re
+import rdflib
+from string import Template
+from ekatra.semantic import sparql_tools
+from collections import defaultdict
+from path import Path
+from mnemo.tree.node import root_context
+import mnemo.runtime as runtime
+
+# sparql_tools.init_sparql(os.environ.get(&#x27;SPARQL_ENDPOINT&#x27;, &#x27;DSN=semantic;host=meta&#x27;))
+
+MOF = rdflib.Namespace(&#x27;http://spd.ivl.cns/cim/rtdbmof#&#x27;)
+HIKA = rdflib.Namespace(&#x27;http://spd.ivl.cns/cim/hika#&#x27;)
+
+
+RECORD_EXTENTS = {
+    &#x27;A&#x27;: 2,
+    &#x27;B&#x27;: 1,
+    &#x27;D&#x27;: 1,
+    &#x27;B2&#x27;: 1,  # BipedDiscrete
+    &#x27;AS&#x27;: 1,  # AnalogState
+    &#x27;AD&#x27;: 1
+}
+
+_algoformats = {  # DTEXT_ANALOG
+            # TABLO_ANALOG
+            # T
+            # DT
+            # ZONT
+            # DTEXT_TABLO
+    &#x27;DTEXT_TIMER_AHK&#x27;: &#x27;{:%d.%m.%Y %H:%M}&#x27;,
+    &#x27;DTEXT_TIMETEP_R&#x27;: &#x27;{:%H:%M:%S}&#x27;,
+    &#x27;DTEXT_TIMETEP&#x27;: &#x27;{:%H:%M:%S}&#x27;,
+    &#x27;DTEXT_TEPND_R&#x27;: &#x27;{:%H:%M:%S}&#x27;,
+    &#x27;DTEXT_TIMER&#x27;: &#x27;{:%H:%M:%S}&#x27;,
+    &#x27;KNOP_SIGN&#x27;: &#x27;{:.0f}&#x27;,
+           }
+
+_spec_formats = {
+    u&#x27;5E&#x27;: &#x27;{:.5G}&#x27;,
+}
+
+_frmrex = re.compile(r&quot;\d+\.\d+&quot;)
+
+_img_formats = {
+    &#x27;ANAL8.7&#x27;:  &#x27;{:7.2f}&#x27;,
+    &#x27;ANAL8F.7&#x27;: &#x27;{:7.2f}&#x27;,
+    &#x27;ANAL.7&#x27;:   &#x27;{:7.2f}&#x27;,
+    &#x27;ANAL8K.5&#x27;: &#x27;{:5.1f}&#x27;,
+    &#x27;AKRBK.&#x27;:   &#x27;{:.1f}&#x27;,
+    &#x27;AKRBTP.&#x27;:  &#x27;{:.1f}&#x27;,
+    &#x27;AKRBTL.&#x27;:  &#x27;{:.1f}&#x27;,
+}
+
+
+def shifr(arg):
+    if arg[0].split(&#x27;:&#x27;)[1] and arg[1] != &#x27;0&#x27;:
+        return u&#x27;{}/{}&#x27;.format(arg[0], arg[1])
+    else:
+        return arg[2]
+
+q_tag_query = Template(u&quot;&quot;&quot;
+prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+prefix mof: &lt;http://spd.ivl.cns/cim/rtdbmof#&gt;
+select ?uid ?mofid ?arrindex ?arrurl ?type ?label ?title (GROUP_CONCAT(?ClassOf; separator=&#x27; &#x27;) as ?ClassOf)
+where {
+  ?uid mof:plaincode &quot;$ivsplaincode&quot;;
+       mof:array ?arrurl ;
+       mof:arr_index ?arrindex ;
+       a ?type ;
+       rdfs:label ?label.
+  optional { ?uid mof:id ?mofid . }
+  optional { ?uid mof:title ?title . }
+  ?type rdfs:subClassOf+ ?ClassOf.
+}
+&quot;&quot;&quot;)
+
+def get_tagdata(arrlabel, idx, debug=False):
+    sparql = sparql_tools.sparql
+    ivsplaincode = &quot;{}:{}&quot;.format(repr(arrlabel)[1:-1], idx)
+    q = q_tag_query.substitute(ivsplaincode=ivsplaincode)
+    r = sparql.query(q)
+    if len(r) == 1:
+        r = sparql_tools.objectview(r[0]._asdict())
+        class_of = r.__dict__.pop(&#x27;ClassOf&#x27;,&#x27;&#x27;).split()
+        if r.type == sparql_tools.mofAnalog or str(sparql_tools.mofAnalog) in class_of:
+            q = sparql_tools.q_analog_query.substitute(pp=r.uid)
+            ar = sparql.query(q)
+            if ar:
+                r.__dict__.update(ar[0]._asdict())
+        return r
+
+
+
+class HikaBinder(object):
+    _mnemos = {}
+
+    def __init__(self, namespace, mnemoid, pgsource):
+        self.tagarray = None
+        self.namespace = namespace
+        self.id = mnemoid = mnemoid
+        self.prefix, self.name = mnemoid.split(&#x27;.&#x27;, 1)
+        self.topic = &#x27;ekatra.flow.%s.pg.%s&#x27; % (self.prefix, self.name)
+        root_context()._binder = self
+        self.mnemos = self.mnemo_dict(self.namespace)
+        self.tags = {}
+        runtime.console.send(&#x27;pgsource&#x27;, pgsource)
+
+    @classmethod
+    def mnemo_dict(cls, ns):
+        r = cls._mnemos.get(ns)
+        if r is None:
+            r = {}
+            for m in sparql_tools.get_mnemos(ns):
+                r[str(m.label)] = m
+                r[str(m.id)] = m
+            cls._mnemos[ns] = r
+        return r
+
+    def get_tagdata(self, arrlabel, index, debug=False):
+        return get_tagdata(arrlabel, int(index), debug=debug)
+
+    def title(self):
+        r = self.mnemos.get(self.id)
+        return self.id if r is None else u&#x27;{}: {}&#x27;.format(self.prefix, str(r.title))
+
+    def mnemoref(self, label):
+        f = self.mnemos.get(label)
+        if f is not None:
+            return MnemoRef(f)
+
+    def tag(self, *args):
+        return TagGroup(*[self._tag(x) for x in args])
+
+    def _tag(self, arg):
+        &quot;&quot;&quot;Return existing Tag or create new Tag
+        &quot;&quot;&quot;
+        id_ = shifr(arg)
+        tag = self.tags.get(id_)
+        if tag is None:
+            if self.tagarray is not None:
+                raise Exception(&#x27;New tag after tag indexing&#x27;)
+            tag = self.tags[id_] = Tag(self, arg)
+        return tag
+
+    def get_index(self, tag):
+        if self.tagarray is None:
+            self.tag_indexing()
+        try:
+            if tag.kind == &#x27;?&#x27;:
+                return &#x27;?&#x27;
+            return tag.index_in_topic
+        except:
+            print(&quot;get_index:&quot;, tag.kind)
+            raise
+
+    def tag_indexing(self):
+        d = defaultdict(list)
+        for tag in self.tags.values():
+            if tag.data is None:
+                # runtime.console.warning(u&quot;Unknown process point: %s[%s]/%s&quot;, *tag.arg)
+                continue
+            if tag.kind in (None, &#x27;-&#x27;):
+                runtime.console.warning(u&quot;Unknown kind for &lt;%s&gt;. Ignored&quot;, tag.data.uid)
+                continue
+            d[tag.data.arrurl].append(tag)
+        arr = []
+        for l in d.values():
+            arr.extend(sorted(l, key=lambda x: x.arrindex))
+        c = 0
+        topic = self.topic
+        for i, tag in enumerate(arr):
+            tag.index_in_pg = c
+            tag.index_in_topic = i
+            tag.topic = topic
+            c += RECORD_EXTENTS.get(tag.kind, 1)
+        self.tagarray = arr
+
+    def generations(self, src, outpath, pg_outpath):
+        src = Path(src)
+        # runtime.console.send(&#x27;mnemosource&#x27;, src)
+        name = src.stem
+#         semantic.collect(self.tagarray, name)
+        if outpath is None:
+            target = src.with_suffix(&#x27;.json&#x27;)
+        else:
+            target = Path(outpath).makedirs_p() / (name + &#x27;.json&#x27;)
+
+        if pg_outpath is None:
+            pg_target = src.with_suffix(&#x27;.pg&#x27;)
+        else:
+            pg_target = Path(pg_outpath).makedirs_p() / (name + &#x27;.pg&#x27;)
+
+        self._target = target
+        self._pg_target = pg_target
+        return [self._generate]
+
+    def _generate(self, context, mod):
+        xml = context.svg()
+        tags = self.tagarray
+        if tags:
+            with self._pg_target.open(&#x27;w&#x27;) as f:
+                for tag in tags:
+                    f.write(u&#x27;- !pp{} # {}\n&#x27;.format(tag.kind.lower(), tag.index_in_pg))
+                    if tag.kind == &#x27;A&#x27;:
+                        f.write(u&#x27;  format: &quot;{}&quot;\n&#x27;.format(tag.analog_format))
+                    if tag.data.mofid:
+                        f.write(u&#x27;  id: &quot;{}&quot;\n&#x27;.format(tag.data.mofid))
+                    f.write(u&#x27;  addr: [&quot;{}&quot;, {}]\n\n&#x27;.format(tag.data.arrurl.rsplit(&#x27;/&#x27;)[-1], tag.arrindex))
+        return self._target, [self.topic], tags, xml
+
+
+class MnemoRef(object):
+
+    def __init__(self, data):
+        self.data = data
+
+    @property
+    def url(self):
+        href = &#x27;#/&#x27; + self.data.id.replace(&#x27;.&#x27;, &#x27;/&#x27;)
+        return href
+
+    @property
+    def title(self):
+        return self.data.title
+
+
+class Tag(object):
+    log = runtime.console
+
+    def __init__(self, owner, arg=None):
+        self.owner = owner
+        self.kind = None
+        self.arg = arg
+        self.data = None
+        self.prepare_data()
+
+    def prepare_data(self):
+        arg = self.arg
+        if arg:
+            self.data = self.owner.get_tagdata(arg[0], arg[1])
+            if self.data is None:
+                self.log.warning(u&quot;Unknown process point: %s[%s]/%s&quot;, *arg)
+
+    def defined(self, attr, default=False):
+        try:
+            return getattr(self.data, attr)
+        except:
+            return default
+
+    def __getattr__(self, name):
+        try:
+            return getattr(self.data, name)
+        except:
+            pass
+
+    @property
+    def analog_format(self):
+        if &#x27;_analog_format&#x27; not in self.__dict__:
+            self.calc_format()
+        return self._analog_format
+
+    @property
+    def arrindex(self):
+        return int(self.data.arrindex)
+
+    @property
+    def href(self):
+        try:
+            return &#x27;#&#x27; + self.data.mofid
+        except:
+            if isinstance(self.arg, (list, tuple)):
+                return &#x27;?unknown={}&#x27;.format(&quot;:&quot;.join(self.arg))
+            return &#x27;?&#x27;
+
+    @property
+    def hint(self):
+        try:
+            d = self.data
+            r = u&#x27;{}\n{}&#x27;.format(d.label, d.title)
+            if hasattr(d, &#x27;mu&#x27;):
+                r += u&#x27;\n{}&#x27;.format(d.mu)
+            return r
+        except:
+            return &#x27;?&#x27;
+
+    @property
+    def bind_idx(self):
+        return BindIndex(self) if self.data else -1
+
+    def __call__(self, datakind):
+        datakind = datakind.upper()
+        if self.kind is not None and self.kind != datakind:
+
+#             if self.kind in (&#x27;B2&#x27;, &#x27;B&#x27;) and datakind in (&#x27;B2&#x27;, &#x27;B&#x27;):
+#                 r = Tag(self.owner, self.arg)(datakind)
+#                 self.owner.tags[shifr(self.arg) + datakind] = r
+#                 # print (&quot;check me:&quot;, repr(self.arg))
+#                 return r
+#             if self.kind in (&#x27;A&#x27;, &#x27;AS&#x27;) and datakind in (&#x27;A&#x27;, &#x27;AS&#x27;):
+#                 self.kind = &#x27;A&#x27;
+#                 return self
+            if self.kind == &#x27;-&#x27;:
+                self.kind = datakind
+                return self
+            elif datakind == &#x27;-&#x27;:
+                return self
+            else:
+                raise Exception(&#x27;{}: tag with different kinds {} and {}&#x27;.format(self.uid, self.kind, datakind))
+        self.kind = datakind
+        return self
+
+    def calc_format(self, algor=None, format=None, format_obj=None, imgname=None):
+        &quot;&quot;&quot; TODO: reimplementation
+        &quot;&quot;&quot;
+
+        try:
+            f = _algoformats.get(algor) if algor is not None else None
+
+            if f is None and format is not None and format_obj is not None:
+                type = format_obj.get(&#x27;type&#x27;)
+                exponent = int(format_obj.get(&#x27;exponent&#x27;, 0))
+                precision = int(format_obj.get(&#x27;precision&#x27;, 0))
+                if type == u&#x27;s&#x27;:
+                    f = &#x27;{:%s.%sE}&#x27; % (format + exponent, precision)
+                elif type == u&#x27;f&#x27;:
+                    f = &#x27;{:%s.%sF}&#x27; % (format + exponent, precision)
+
+            if f is None:
+                rdfformat = getattr(self.data, &#x27;format&#x27;, None)
+                f = _spec_formats.get(str(rdfformat))
+
+            if f is None:
+                if rdfformat is not None and _frmrex.match(str(rdfformat)):
+                    f = &#x27;{:%sf}&#x27; % rdfformat
+
+            if f is None:
+                f = _img_formats.get(&quot;%s.%s&quot; % (imgname, format))
+                if f is None:
+                    f = &#x27;{:.1f}&#x27;
+            self._analog_format = str(f)
+        except:
+            self._analog_format = &#x27;?&#x27;
+        return self
+
+    def iter_props(self):
+        for k, v in self.data.__dict__.items():
+            yield k, v
+
+
+class TagGroup(object):
+
+    def __init__(self, *tags):
+        self.tags = tags
+
+    def __getitem__(self, item):
+        try:
+            return self.tags[item]
+        except:
+            pass
+
+    def __len__(self):
+        return len(self.tags)
+
+
+    def datakind_by_algor(self, algor):
+        &quot;&quot;&quot;
+         &quot;C&quot; name_category=&quot;Дискретный одиночный&quot;     name_alg=&quot;Состояние диагностики&quot;                                                    num_category=&quot;1&quot; kolsost=&quot;4&quot;  vid=&quot;K&quot;
+         &quot;F&quot; name_category=&quot;Дискретный одиночный&quot;     name_alg=&quot;Формируемый дискретный&quot;                                                   num_category=&quot;1&quot; kolsost=&quot;5&quot;  vid=&quot;K&quot;
+         &quot;D&quot; name_category=&quot;Дискретный одиночный&quot;     name_alg=&quot;Одиночный дискретный&quot;                                                     num_category=&quot;1&quot; kolsost=&quot;7&quot;  vid=&quot;K&quot;
+         &quot;G&quot; name_category=&quot;Дискретный одиночный&quot;     name_alg=&quot;Групповой формируемый&quot;                                                    num_category=&quot;1&quot; kolsost=&quot;9&quot;  vid=&quot;K&quot;
+         &quot;k&quot; name_category=&quot;Дискретный одиночный&quot;     name_alg=&quot;Воздействие блокировки&quot;                                                   num_category=&quot;1&quot; kolsost=&quot;8&quot;  vid=&quot;K&quot;
+         &quot;X&quot; name_category=&quot;Дискретный одиночный&quot;     name_alg=&quot;Контроль выполнения команд защиты/блокировки&quot;                             num_category=&quot;1&quot; kolsost=&quot;7&quot;  vid=&quot;K&quot;&gt;
+         &quot;Y&quot; name_category=&quot;Дискретный одиночный&quot;     name_alg=&quot;Контроль условий срабатывания защит/блокировок&quot;                           num_category=&quot;1&quot; kolsost=&quot;10&quot; vid=&quot;K&quot;
+
+         &quot;M&quot; name_category=&quot;Дискретные по параметрам&quot; name_alg=&quot;Механизм&quot;                                                                 num_category=&quot;2&quot; kolsost=&quot;11&quot; vid=&quot;П&quot;
+         &quot;S&quot; name_category=&quot;Дискретные по параметрам&quot; name_alg=&quot;Задвижка&quot;                                                                 num_category=&quot;2&quot; kolsost=&quot;15&quot; vid=&quot;П&quot;
+
+         &quot;H&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Система контроля водорода&quot;                                                num_category=&quot;3&quot; kolsost=&quot;10&quot; vid=&quot;K&quot;
+         &quot;L&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Переключатель блокировки&quot;                                                 num_category=&quot;3&quot; kolsost=&quot;14&quot; vid=&quot;K&quot;
+         &quot;o&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Сигнал о состоянии невычисляемой блокировки&quot;                              num_category=&quot;3&quot; kolsost=&quot;18&quot; vid=&quot;K&quot;
+         &quot;x&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Сигнал о состоянии защиты(блокировки)&quot;                                    num_category=&quot;3&quot; kolsost=&quot;31&quot; vid=&quot;K&quot;
+         &quot;r&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Регулятор без стерегущего режима&quot;                                         num_category=&quot;3&quot; kolsost=&quot;4&quot;  vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+         &quot;R&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Регулятор со стерегущим режимом&quot;                                          num_category=&quot;3&quot; kolsost=&quot;5&quot;  vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+         &quot;z&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Сигнализатор неисправности задвижек&quot;                                      num_category=&quot;3&quot; kolsost=&quot;6&quot;  vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+         &quot;I&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Табло &#x27;Неисправность измерения&#x27;&quot;                                          num_category=&quot;3&quot; kolsost=&quot;6&quot;  vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+         &quot;v&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Табло режима&quot;                                                             num_category=&quot;3&quot; kolsost=&quot;10&quot; vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+         &quot;V&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Табло &#x27;Включенного режима&#x27;&quot;                                               num_category=&quot;3&quot; kolsost=&quot;18&quot; vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+         &quot;t&quot; name_category=&quot;Дискретный агрегатный&quot;    name_alg=&quot;Аналоговый параметр структуры - РВ&quot;                                       num_category=&quot;3&quot; kolsost=&quot;13&quot; vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+
+         &quot;a&quot; name_category=&quot;Аналоговый&quot;               name_alg=&quot;Аналоговый параметр структуры - АМ&quot;                                       num_category=&quot;5&quot; kolsost=&quot;13&quot; vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+         &quot;d&quot; name_category=&quot;Аналоговый&quot;               name_alg=&quot;Технологическая сигнализация по РВ параметру в виде дискретных состояний&quot; num_category=&quot;5&quot; kolsost=&quot;10&quot; vid=&quot;K&quot; kvit=&quot;0&quot; upr=&quot;&quot;
+
+
+
+        &quot;&quot;&quot;
+        MAP_ALGOR_TO_KIND = {
+
+            &#x27;C&#x27;: (&#x27;B&#x27;,),
+            &#x27;F&#x27;: (&#x27;B&#x27;,),
+            &#x27;D&#x27;: (&#x27;B&#x27;,),
+            &#x27;G&#x27;: (&#x27;B&#x27;,),
+            &#x27;k&#x27;: (&#x27;B&#x27;,),
+            &#x27;X&#x27;: (&#x27;B&#x27;,),
+            &#x27;Y&#x27;: (&#x27;B&#x27;,),
+
+            &#x27;M&#x27;: (&#x27;B2&#x27;,),  # XXX: already combined
+            &#x27;S&#x27;: (&#x27;B2&#x27;,),  # XXX: already combined
+
+            &#x27;H&#x27;: (&#x27;A&#x27;, &#x27;A&#x27;),
+            &#x27;L&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;, &#x27;B&#x27;),
+            &#x27;o&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;),
+            &#x27;x&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;),
+            &#x27;r&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;), # XXX: don&#x27;t merge to B2
+            &#x27;R&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;, &#x27;B&#x27;),
+            &#x27;z&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;, &#x27;B&#x27;),
+            &#x27;I&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;),
+            &#x27;v&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;, &#x27;B&#x27;),
+            &#x27;V&#x27;: (&#x27;B&#x27;, &#x27;B&#x27;, &#x27;B&#x27;, &#x27;B&#x27;),
+            &#x27;t&#x27;: (&#x27;A&#x27;,),  ### FIXME  maybe kind AD
+
+            &#x27;a&#x27;: (&#x27;A&#x27;,),
+            &#x27;d&#x27;: (&#x27;A&#x27;,),
+
+        }
+        kind = MAP_ALGOR_TO_KIND.get(algor, &#x27;-&#x27;)
+        if kind == &#x27;-&#x27;:
+            raise Exception(&quot;Unknown algor %s&quot;, algor)
+
+        return self.__call__(kind)
+
+    def __call__(self, datakind):
+        if not isinstance(datakind, (list, tuple)):
+            datakind = [datakind]
+        datakind = [x.upper() for x in datakind]
+        _res = [x(datakind[idx]) for idx, x in enumerate(self.tags)]
+        return self
+
+    def defined(self, attr, default=False):
+        if len(self.tags) == 1:
+            return self.tags[0].defined(attr, default)
+        else:
+            raise Exception(&quot;Can&#x27;t defined by many tags&quot;)
+
+    def calc_format(self, algor=None, format=None, format_obj=None, imgname=None):
+        if len(self.tags) == 1:
+            self.tags[0].calc_format(algor=None, format=None, format_obj=None, imgname=None)
+            return self
+        else:
+            raise Exception(&quot;Can&#x27;t calc_format by many tags&quot;)
+
+    @property
+    def href(self):
+        return &#x27;;&#x27;.join([x.href for x in self.tags])
+
+    @property
+    def hint(self):
+        return &#x27;\n&#x27;.join([x.hint for x in self.tags])
+
+    @property
+    def bind_idx(self):
+        return BindIndexGroup(self.tags)
+
+
+class BindIndex(object):
+
+    def __init__(self, tag):
+        self.tag = tag
+
+    def __call__(self):
+        return str(self.tag.owner.get_index(self.tag))
+
+
+class BindIndexGroup(object):
+
+    def __init__(self, tags):
+        self.tags = [BindIndex(x) for x in tags]
+
+    def __call__(self):
+        return &#x27;;&#x27;.join([x() for x in self.tags])
+</pre>
+</body>
+</html>

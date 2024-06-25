@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>main.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>main.yaml</h1>
+    <pre>- set_fact:
+    work_dir: &quot;/var/ekatra/tmp/prod/backend/&quot;
+    src_dir: &quot;/var/ekatra/&quot;
+    dest_dir: &quot;/var/ekatra/&quot;
+
+- name: Ensure tmp dirs
+  file: path=&#x27;{{ work_dir }}/coolie&#x27; state=directory mode=0755
+
+##################################################
+
+- set_fact:
+    config_file: &quot;{{ work_dir }}/ekatra-{{ ekatra_mode }}.yaml&quot;
+
+- name: Inspect image
+  docker_image_facts:
+    name: &#x27;{{ images_domain }}/{{ ekatra_domain }}/backend:latest&#x27;
+  register: image_state
+
+- stat: path=&#x27;{{ config_file }}&#x27; get_md5=yes
+  register: before
+
+- name: copy backend config
+  copy:
+     src: /var/ekatra/ekatra.yaml
+     dest: &#x27;{{ config_file }}&#x27;
+
+- name: change SPARQL_ENDPOINT in backend config
+  lineinfile:
+    path: &#x27;{{ config_file }}&#x27;
+    regexp: &#x27;^SPARQL_ENDPOINT(.*);host={{ meta_service }};(.*)$&#x27;
+    line: &#x27;SPARQL_ENDPOINT\1;host={{ meta_service }}-{{ ekatra_mode }};\2&#x27;
+    backrefs: yes
+
+- stat: path=&#x27;{{ config_file }}&#x27; get_md5=yes
+  register: after
+
+##################################################
+
+- block:
+  - name: make coolie/make.yaml
+    template:
+      src: make.yaml.j2
+      dest: &quot;{{ work_dir }}/coolie/make.yaml&quot;
+
+  - name: Build image {{ images_domain }}/{{ ekatra_domain }}/backend
+    shell: &quot;coolie -l --batch build&quot;
+    args:
+      chdir: &#x27;{{ work_dir }}&#x27;
+
+  when: image_state.images|default([])|length == 0 or before.stat.md5|default(1) != after.stat.md5|default(2) or build_force|default(false)|bool
+</pre>
+</body>
+</html>

@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_hika7.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_hika7.yaml</h1>
+    <pre>encoding: &quot;koi8-r&quot;  # Указание кодировки файла
+
+targets:
+  &quot;(.+/)?listinfo.cks&quot;: &quot;&quot;  # Пустая цель для файлов, соответствующих шаблону &quot;listinfo.cks&quot;
+  &quot;(.+/)?info.ver&quot;: &quot;&quot;  # Пустая цель для файлов, соответствующих шаблону &quot;info.ver&quot;
+
+  ## database
+  &#x27;(.+/)?RPMS/info_database.+\.rpm&#x27;:
+    &#x27;.+\.gbk&#x27;: &quot;db&quot;  # Файлы с расширением .gbk из RPM-пакетов info_database направляются в папку &quot;db&quot;
+
+  ## exchange lists
+  &#x27;(.+/)?RPMS/info_rex_spd.+\.i386.rpm&#x27;:
+    &#x27;.+/GKT/[^/]+\.000&#x27;: &quot;db/ex&quot;  # Файлы с расширением .000 из папки GKT направляются в папку &quot;db/ex&quot;
+    &quot;.+/GKT/[^/]+&quot;: &quot;db/ex&quot;  # Все файлы из папки GKT направляются в папку &quot;db/ex&quot;
+
+  ## mnemos
+  &#x27;(.+/)?RPMS/info_ris-.+\.i386.rpm&#x27;:
+    &#x27;.+/ris/[^/]+\.xml&#x27;: &quot;ris&quot;  # XML-файлы из папки ris направляются в папку &quot;ris&quot;
+    &#x27;.+/ris/[^/]+\.(bmp|png)&#x27;: &quot;ris&quot;  # BMP и PNG файлы из папки ris направляются в папку &quot;ris&quot;
+    &#x27;.+/ris/kfb/[^/]+\.xml&#x27;: &quot;ris/kfb&quot;  # XML-файлы из папки ris/kfb направляются в папку &quot;ris/kfb&quot;
+    &#x27;.+/ris/kfb/[^/]+\.(bmp|png)&#x27;: &quot;ris/kfb&quot;  # BMP и PNG файлы из папки ris/kfb направляются в папку &quot;ris/kfb&quot;
+    &quot;.+/ris/LDG$|.+/ris/LDS$|.+/ris/LSG$|.+/ris/ALGOR$&quot;: &quot;ris&quot;  # Файлы с именами LDG, LDS, LSG и ALGOR из папки ris направляются в папку &quot;ris&quot;
+    &quot;.+/ris/grset&quot;: &quot;ris/etc&quot;  # Файлы из папки ris/grset направляются в папку &quot;ris/etc&quot;</pre>
+</body>
+</html>

@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_schema.ttl</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_schema.ttl</h1>
+    <pre># Этот файл определяет правила преобразования данных из различных источников (CSV, XLSX) в RDF-триплеты
+# с использованием спецификации R2RML (RDB to RDF Mapping Language).
+
+# * Раздел &lt;arrays&gt; определяет правила преобразования для массивов.
+#   Он включает SQL-запрос для выборки данных, определение субъекта (URI) для каждой строки данных
+#   и преобразование различных столбцов в предикаты и объекты, таких как exchangeList, tick, title,
+#   MASID, rdfs:label и mof:Array.
+
+# * Раздел &lt;reglament_analog&gt; определяет правила преобразования для аналоговых сигналов. 
+#   Он включает SQL-запрос для выборки данных, определение субъекта (URI) для каждой строки данных
+#   и преобразование различных столбцов в предикаты и объекты, таких как PlainID, DocNum, title,
+#   array, arr_index, id, WRONG_SCALE, mu, LLL, LL, HL, HHL, LIR, HIR и FORMAT.
+
+# * Раздел &lt;reglament_digit&gt; определяет правила преобразования для дискретных сигналов.
+#   Он включает SQL-запрос для выборки данных, определение субъекта (URI) для каждой строки данных
+#   и преобразование столбцов в предикаты и объекты, таких как rdf:type, PlainID, DocNum, label,
+#   title, array, arr_index и id.
+
+# * Раздел &lt;triggers&gt; определяет дополнительные правила обработки, такие как предварительная обработка
+#   (init_idset) и постобработка (test_uniq).
+
+# Этот файл используется для преобразования данных из различных источников в RDF-триплеты,
+# которые могут быть использованы для построения семантической модели данных
+# и выполнения запросов на основе этой модели.
+
+@prefix rr: &lt;http://www.w3.org/ns/r2rml#&gt; .
+@prefix rr2: &lt;http://spd.ivl.cns/ns/r2rmp-ext#&gt; .
+
+@prefix rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .
+@prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
+
+@prefix mof: &lt;http://spd.ivl.cns/cim/rtdbmof#&gt; .
+@prefix m: &lt;http://spd.ivl.cns/cim/mmi#&gt; .
+@prefix sh: &lt;http://sunpp.cns.atom/cim/hika#&gt; .
+
+&lt;arrays&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+          m._1 as EXCHANGE_LIST,
+          cast(m._2 as integer) as TICK,
+          m._3 as TITLE,
+          m._4 as MASID
+          from csv.arrays.csv as m
+       &quot;&quot;&quot;
+    ];
+    rr:subjectMap [
+      a rr:TermMap;
+      rr:template &quot;arr{MASID}&quot;;
+      rr:class mof:Array
+    ];
+    rr:predicateObjectMap
+      # Преобразование столбца EXCHANGE_LIST
+      [   rr:predicate mof:exchangeList ;
+          rr:objectMap [ rr:column &quot;EXCHANGE_LIST&quot; ]
+      ],
+      # Преобразование столбца TICK
+      [   rr:predicate mof:tick ;
+          rr:objectMap [ rr:column &quot;TICK&quot; ]
+      ],
+      # Преобразование столбца TITLE
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;TITLE&quot;;  rr:language &quot;ru&quot; ]
+      ],
+      # Преобразование метки (label)
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{MASID}&quot;; rr:termType rr:Literal ]
+      ]
+.
+
+&lt;reglament_analog&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;
+          ... # SQL-запрос для выборки данных
+       &quot;&quot;&quot;
+    ];
+    rr:subjectMap [
+      a rr:TermMap;
+      rr:template &quot;{MASTERID}&quot;;
+      rr:class sh:Analog
+    ];
+    rr:predicateObjectMap
+      # Преобразование столбца PlainID
+      [   rr:predicate mof:PlainID;
+          rr:objectMap [ rr:template &quot;{CIPHER}:{PLAINID}&quot;; rr:termType rr:Literal ]
+      ],
+      # Преобразование столбца DocNum
+      [   rr:predicate mof:DocNum;
+          rr:objectMap [ rr:column &quot;DOCNUM&quot; ]
+      ],
+      # Преобразование метки (label)
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{prefix}}:{PLAINID}&quot;; rr:language &quot;ru&quot; ]
+      ],
+      # Преобразование столбца title
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;TITLE&quot;;  rr:language &quot;ru&quot; ]
+      ],
+      # Преобразование столбца array
+      [   rr:predicate mof:array ;
+          rr:objectMap [ rr:template &quot;arr{worksheet}&quot;; rr:termType rr:IRI ]
+      ],
+      # Преобразование столбца arr_index
+      [   rr:predicate mof:arr_index ;
+          rr:objectMap [ rr:column &quot;INDEX&quot; ]
+      ],
+      # Преобразование идентификатора (id)
+      [   rr:predicate mof:id  ;
+          rr:objectMap  [ rr:template &quot;{{ prefix }}.{MASTERID}&quot;; rr:termType rr:Literal ]
+      ],
+      # Преобразование столбца WRONG_SCALE
+      [ rr:predicate mof:WRONG_SCALE ; rr:objectMap [ rr:column &quot;WRONG_SCALE&quot; ]],
+      # Преобразование столбца mu
+      [ rr:predicate mof:mu ;  rr:objectMap  [ rr:column &quot;MU&quot;   ]],
+      # Преобразование столбца LLL
+      [ rr:predicate mof:LLL ; rr:objectMap  [ rr:column &quot;LLL&quot;  ]],
+      # Преобразование столбца LL
+      [ rr:predicate mof:LL  ; rr:objectMap  [ rr:column &quot;LL&quot;   ]],
+      # Преобразование столбца HL
+      [ rr:predicate mof:HL  ; rr:objectMap  [ rr:column &quot;HL&quot;   ]],
+      # Преобразование столбца HHL
+      [ rr:predicate mof:HHL ; rr:objectMap  [ rr:column &quot;HHL&quot;  ]],
+      # Преобразование столбца LIR
+      [ rr:predicate mof:LIR ; rr:objectMap  [ rr:column &quot;LIR&quot;  ]],
+      # Преобразование столбца HIR
+      [ rr:predicate mof:HIR ; rr:objectMap  [ rr:column &quot;HIR&quot;  ]],
+      # Преобразование столбца FORMAT
+      [ rr:predicate mof:format; rr:objectMap [ rr:column &quot;FORMAT&quot;]]
+.
+
+&lt;reglament_digit&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;
+          ... # SQL-запрос для выборки данных
+       &quot;&quot;&quot;
+    ];
+    rr:subjectMap [
+      a rr:TermMap;
+      rr:template &quot;{MASTERID}&quot;
+    ];
+    rr:predicateObjectMap
+      # Преобразование типа (rdf:type)
+      [   rr:predicate rdf:type;
+          rr:objectMap [ rr:template &quot;{TYPE}&quot;; rr:termType rr:class ]
+      ],
+      # Преобразование столбца PlainID
+      [   rr:predicate mof:PlainID;
+          rr:objectMap [ rr:template &quot;{CIPHER}:{PLAINID}&quot;; rr:termType rr:Literal ]
+      ],
+      # Преобразование столбца DocNum
+      [   rr:predicate mof:DocNum;
+          rr:objectMap [ rr:column &quot;DOCNUM&quot; ]
+      ],
+      # Преобразование метки (label)
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{prefix}}:{PLAINID}&quot;; rr:language &quot;ru&quot; ]
+      ],
+      # Преобразование столбца title
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;TITLE&quot;;  rr:language &quot;ru&quot; ]
+      ],
+      # Преобразование столбца array
+      [   rr:predicate mof:array ;
+          rr:objectMap [ rr:template &quot;arr{worksheet}&quot;; rr:termType rr:IRI ]
+      ],
+      # Преобразование столбца arr_index
+      [   rr:predicate mof:arr_index ;
+          rr:objectMap [ rr:column &quot;INDEX&quot; ]
+      ],
+      # Преобразование идентификатора (id)
+      [   rr:predicate mof:id  ;
+          rr:objectMap  [ rr:template &quot;{{ prefix }}.{MASTERID}&quot;; rr:termType rr:Literal ]
+      ]
+.
+
+&lt;triggers&gt;
+  rr2:preProcess &quot;init_idset&quot;; # Предварительная обработка
+  rr2:postProcess &quot;test_uniq&quot;. # Постобработка
+</pre>
+</body>
+</html>

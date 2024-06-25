@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>grset_data.xsl</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>grset_data.xsl</h1>
+    <pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;xsl:stylesheet version=&quot;1.0&quot; xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot;&gt;
+  &lt;xsl:output method=&quot;text&quot; omit-xml-declaration=&quot;yes&quot; indent=&quot;no&quot; encoding=&quot;UTF-8&quot;/&gt;
+
+  &lt;xsl:template match=&quot;/&quot;&gt;
+    &lt;xsl:text&gt;# -*- coding: utf-8 -*-&lt;/xsl:text&gt;
+    &lt;xsl:apply-templates select=&quot;/graphicalset&quot;/&gt;
+  &lt;/xsl:template&gt;
+
+  &lt;xsl:template match=&quot;graphicalset&quot;&gt;
+    &lt;xsl:text&gt;
+id_to_colors = {
+    &lt;/xsl:text&gt;
+&lt;xsl:for-each select=&quot;colors/color&quot;&gt;
+&lt;xsl:text&gt;  &lt;/xsl:text&gt;&lt;xsl:value-of select=&quot;@id&quot;/&gt;: &lt;xsl:text&gt;&quot;&lt;/xsl:text&gt;&lt;xsl:value-of select=&quot;@cod&quot;/&gt;&lt;xsl:text&gt;&quot;&lt;/xsl:text&gt;&lt;xsl:text&gt;,&amp;#xa;&lt;/xsl:text&gt;
+&lt;/xsl:for-each&gt;
+    &lt;xsl:text&gt;
+    }
+name_to_id = {
+    &lt;/xsl:text&gt;
+&lt;xsl:for-each select=&quot;colors/color&quot;&gt;
+&lt;xsl:if test=&quot;@mname != &#x27;&#x27;&quot;&gt;
+&lt;xsl:text&gt;  &lt;/xsl:text&gt;&lt;xsl:text&gt;u&quot;&lt;/xsl:text&gt;&lt;xsl:value-of select=&quot;@mname&quot;/&gt;&lt;xsl:text&gt;&quot;&lt;/xsl:text&gt;: &lt;xsl:value-of select=&quot;@id&quot;/&gt;&lt;xsl:text&gt;,&amp;#xa;&lt;/xsl:text&gt;
+&lt;/xsl:if&gt;
+&lt;/xsl:for-each&gt;
+    &lt;xsl:text&gt;
+    }
+    &lt;/xsl:text&gt;
+&lt;xsl:text&gt;
+id_to_fid = {
+&lt;/xsl:text&gt;
+&lt;xsl:for-each select=&quot;tech/forfonts/system&quot;&gt;
+    &lt;xsl:text&gt;  &quot;&lt;/xsl:text&gt;&lt;xsl:value-of select=&quot;@id&quot;/&gt;&lt;xsl:text&gt;&quot;: &lt;/xsl:text&gt;&lt;xsl:text&gt;&quot;&lt;/xsl:text&gt;&lt;xsl:value-of select=&quot;@fontid&quot;/&gt;&lt;xsl:text&gt;&quot;&lt;/xsl:text&gt;&lt;xsl:text&gt;,&amp;#xa;&lt;/xsl:text&gt;
+&lt;/xsl:for-each&gt;
+&lt;xsl:text&gt;
+    }
+fid_to_data = {
+&lt;/xsl:text&gt;
+&lt;xsl:for-each select=&quot;fonts/font&quot;&gt;
+    &lt;xsl:text&gt;  &quot;&lt;/xsl:text&gt;&lt;xsl:value-of select=&quot;@id&quot;/&gt;&lt;xsl:text&gt;&quot;:{&amp;#xa;&lt;/xsl:text&gt;
+    &lt;xsl:text&gt;    &quot;fs&quot;:&quot;&lt;/xsl:text&gt;&lt;xsl:value-of select=&quot;@size&quot;/&gt;&lt;xsl:text&gt;&quot;,&amp;#xa;&lt;/xsl:text&gt;
+    &lt;xsl:if test=&quot;@bold != 0&quot;&gt;
+             &lt;xsl:text&gt;    &quot;fb&quot;:True,&amp;#xa;&lt;/xsl:text&gt;
+    &lt;/xsl:if&gt;
+    &lt;xsl:if test=&quot;@italic != 0&quot;&gt;
+            &lt;xsl:text&gt;    &quot;fi&quot;:True,&amp;#xa;&lt;/xsl:text&gt;
+    &lt;/xsl:if&gt;
+    &lt;xsl:text&gt;    &quot;ff&quot;:&lt;/xsl:text&gt;&lt;xsl:text&gt;&quot;&lt;/xsl:text&gt;&lt;xsl:value-of select=&quot;@family&quot;/&gt;&lt;xsl:text&gt;&quot;},&amp;#xa;&lt;/xsl:text&gt;
+
+&lt;/xsl:for-each&gt;
+&lt;xsl:text&gt;
+}
+&lt;/xsl:text&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;
+</pre>
+</body>
+</html>

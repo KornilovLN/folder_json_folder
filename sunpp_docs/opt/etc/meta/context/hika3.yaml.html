@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>hika3.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>hika3.yaml</h1>
+    <pre>encoding: &#x27;koi8-r&#x27;
+targets:
+  &#x27;listinfo.cks&#x27;: &#x27;&#x27;
+  &#x27;info.ver&#x27;: &#x27;&#x27;
+  &#x27;RPMS/info_uso-.+\.tar\.gz&#x27;:
+      &#x27;.+\.dbf&#x27;: &#x27;db&#x27;
+  &#x27;RPMS/info_video-.+\.tar\.gz&#x27;:
+      &#x27;.+\.dbf&#x27;: &#x27;db&#x27;
+  &#x27;RPMS/info_ris-.+\.tar\.gz&#x27;:
+      &#x27;.+/ris/.+\.xml&#x27;: &#x27;ris&#x27;
+      &#x27;.+/ris/.+\.bmp&#x27;: &#x27;ris&#x27;
+      &#x27;.+/ris/grset&#x27;: &#x27;ris/etc&#x27;
+
+</pre>
+</body>
+</html>

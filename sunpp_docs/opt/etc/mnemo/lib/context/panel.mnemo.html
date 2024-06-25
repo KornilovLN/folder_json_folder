@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>panel.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>panel.mnemo</h1>
+    <pre>def halo()
+{
+  filter()
+  {
+    fl = .flood(&#x27;black&#x27;, 0.9);
+    c1 = .composite(&#x27;in&#x27;, fl, &#x27;SourceGraphic&#x27;);
+    .blur(c1, 5);
+    ofs = .offset(Point(0,0));
+    .composite(&quot;over&quot;, &quot;SourceGraphic&quot;, ofs);
+  }
+}
+
+def panel(p, title=&#x27;&#x27;, notch=(50, 10), margins=(30, 20, 20, 20), label_class=&#x27;label&#x27;, label_up=5)
+{
+  b := bounds(@) + margins;
+  group(p){
+        if(title)
+        {
+            f := b.topleft;
+            combinePath(smooth=15, filter=#halo(), class=&#x27;mnemo_panel&#x27;){
+              rect(b);
+              - polygon(points=(f, f+(notch[0]+notch[1]/2, 0), f + (notch[0], notch[1]), f+(0, notch[1])));
+            }
+            text(Point(b.x+margins[3]/2., b.y+notch[1]-label_up), title, class=label_class);
+        }
+        else{
+          rect(b, r=15, filter=#halo(), class=&#x27;mnemo_panel&#x27;);
+        }
+        @;
+  }
+}
+
+def panel2(p, title=(&#x27;&#x27;), margins=(10, 10, 10, 10), label_class=&#x27;&#x27;){
+    b := bounds(@) + margins;
+    header_line ?= 20;
+    inner_margs ?= 5;
+    group(p){
+        if (title){
+            if (all(title) == True){
+                title := list(title);
+            }else{
+                title := title[0:1]; // making list of 1 element
+            }
+            line_y := header_line*(len(title));
+            rect(b+(0, 0, line_y+inner_margs*2, 0), filter=#halo(), r=10, class=&#x27;mnemo_panel&#x27;);
+            text_x := b.x+b.width/2.;
+            text(Point(text_x, b.y+inner_margs), class=(label_class, &#x27;label&#x27;, &#x27;alignC&#x27;, &#x27;alignT&#x27;)){
+                iter i (title_line=title){
+                    tspan(Point(text_x, i*header_line), title_line);
+                }
+            }
+//            iter i (title_line=title){
+//                if(title_line){
+//                    text(Point(b.x+b.width/2., b.y+inner_margs+i*header_line), title_line, class=(label_class, &#x27;label&#x27;, &#x27;alignC&#x27;, &#x27;alignT&#x27;));
+//                }
+//            }
+            line(Point(b.x, b.y+line_y+inner_margs), Point(b.width+b.x, b.y+line_y+inner_margs), class=&#x27;mnemo_panel&#x27;);
+            content_point := Point(0, line_y+inner_margs+5);
+        }
+        else{
+            rect(b, r=15, filter=#halo(), class=&#x27;mnemo_panel&#x27;);
+            content_point := Origin;
+        }
+        group(content_point){
+          @;
+        }
+    }
+}</pre>
+</body>
+</html>

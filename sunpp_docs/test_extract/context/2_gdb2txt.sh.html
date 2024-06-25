@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>2_gdb2txt.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>2_gdb2txt.sh</h1>
+    <pre>
+#rm -r -f ./inputs
+#rm -r -f ./tmp
+#mkdir -p ./tmp
+#tar -v -xzf IO-7.3-70.tar.gz -C ./tmp/ --strip-components=1
+#    -u 1000:1000 \
+
+docker run \
+    -e LANG=C.UTF8 -it --rm \
+    -v &quot;$(pwd):/build&quot; \
+    -w /build/inputs/db/ \
+    registry.master.cns/lmzmq/compiler:latest \
+    gdb2txt -v -t csv --encoding koi8_r uso.gdb -o uso
+
+
+
+
+
+</pre>
+</body>
+</html>

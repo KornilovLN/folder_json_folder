@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>db_dump.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>db_dump.py</h1>
+    <pre>#!/usr/bin/env python
+from __future__ import print_function
+import sys
+import yaml
+from ekatra.brama import db
+from ekatra.brama.auth.models import User, Role
+
+from gevent import monkey
+monkey.patch_all()
+
+
+def row2dict(row):
+    d = {}
+    for column in row.__table__.columns:
+        v = getattr(row, column.name)
+        if v is not None:
+            d[column.name] = v
+
+    if row.__table__.name == &#x27;user&#x27;:
+        for c in row.__mapper__.relationships:
+            v = None
+            if c.key == &#x27;roles&#x27;:
+                v = [i.name for i in row.__getattribute__(c.key)]
+            if v is not None:
+                d[c.key] = v
+
+    return d
+
+
+def dump_db(db):
+    users = []
+    for u in db.session.query(User).all():
+        users.append(row2dict(u))
+
+    roles = []
+    for r in db.session.query(Role).all():
+        roles.append(row2dict(r))
+
+    return {&#x27;users&#x27;: users,
+#             &#x27;roles&#x27;: roles
+            }
+
+
+def main(fn):
+    dump = dump_db(db)
+    if fn == &#x27;-&#x27;:
+        f = sys.stdout
+    else:
+        f = open(fn, &#x27;w&#x27;)
+
+    f.write(yaml.safe_dump(dump, default_flow_style=False))
+    f.close()
+
+
+if __name__ == &#x27;__main__&#x27;:
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument(&#x27;--output&#x27;, &#x27;-o&#x27;, default=&#x27;-&#x27;, type=str, help=&quot;file name for the dump output&quot;)
+
+    args = parser.parse_args()
+    sys.exit(main(args.output))
+</pre>
+</body>
+</html>

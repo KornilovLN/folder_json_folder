@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_site.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_site.yaml</h1>
+    <pre># Скрипт для инструмента автоматизации развертывания
+ 
+# Подмодули проекта
+submodules:
+  - name: ekatra
+    repo: http://gitlab.office.ivl.ua/ekatra/ekatra.git
+    tag: 4.5.16
+  - name: tatra
+    repo: http://gitlab.office.ivl.ua/ekatra/tatra.git
+    tag: 4.5.35
+
+# переменная устанавливает домен для исходных образов Docker 
+# как registry.dc.cns.atom.
+vars:
+  source_images_domain: registry.dc.cns.atom
+
+deploy:
+
+  # Выполняет создание директории ${dest_dir}/${domain}
+  # (предположительно используется переменная dest_dir и domain,
+  # которые не определены в данной конфигурации), 
+  # а затем копирует все файлы с именем *install.sh
+  # из всех поддиректорий в эту директорию.
+  - name: copy install
+    shell: &#x27;mkdir -p ${dest_dir}/${domain}; cp -fr */*install.sh ${dest_dir}/${domain}/&#x27;
+
+  # Создает директорию ${dest_dir}/${domain},
+  # затем выполняет команду ls -1t ${dest_dir} | grep &quot;${domain}-&quot;
+  # для получения списка файлов в ${dest_dir},
+  # которые содержат ${domain}-, и сохраняет этот список
+  # в файл ${dest_dir}/${domain}/index.info.
+  - name: update domain index.info
+    shell: mkdir -p ${dest_dir}/${domain}; ls -1t ${dest_dir} | grep &quot;${domain}-&quot; &gt; ${dest_dir}/${domain}/index.info
+
+  - name: &#x27;push images to source_images_domain&#x27;
+    docker_push: all
+
+  # задается source_images_domain со значением registry.sunpp.cns.atom,
+  # и выполняется загрузка Docker образов в этот репозиторий.
+  # docker_push: false означает, что необходимо выполнить только
+  # установку переменной, но не выполнять фактической загрузки.
+  - name: &#x27;push images to registry.sunpp.cns.atom&#x27;
+    docker_push: false
+    vars:
+      source_images_domain: registry.sunpp.cns.atom
+
+  # Выполняет команду через оболочку (shell), которая копирует файл или
+  # директорию ${site} на удаленный сервер st2.dc.cns
+  # в путь /var/ekatra/install/sites.
+  # Опции StrictHostKeyChecking=no и UserKnownHostsFile=/dev/null
+  # используются для обхода проверок ключей хоста и известных хостов
+  # при копировании через SCP.
+  - shell: st2 run --trace-tag=&quot;copy_sunpp_to_dc&quot; core.local cmd=&#x27;scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null &quot;${site}&quot; st2.dc.cns:/var/ekatra/install/sites&#x27;
+
+  # Выполняет аналогичную операцию, но в этом случае рекурсивно (-rp)
+  # копирует содержимое директории ${dest_dir}/${domain}
+  # на удаленный сервер st2.dc.cns 
+  # в ту же целевую директорию /var/ekatra/install/sites.
+  - shell: st2 run --trace-tag=&quot;copy_sunpp_to_dc&quot; core.local cmd=&#x27;scp -rp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -rp &quot;${dest_dir}/${domain}/&quot; st2.dc.cns:/var/ekatra/install/sites&#x27;
+</pre>
+</body>
+</html>

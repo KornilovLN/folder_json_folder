@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>__projects.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>__projects.yaml</h1>
+    <pre>roles:
+  - name: admin
+    description: Role for system admin
+  - name: user
+    description: Role for system user
+
+
+patterns:
+  task_list:
+    type: dbview
+    name: tasks
+    title: &#x27;Подзадачи компиляции&#x27;
+    source: &#x27;st2:///brama.compile_ekatra_project&#x27;
+    parameters:
+      userid: &#x27;{{ userid }}&#x27;
+      brama_user: &#x27;{{ username }}&#x27;
+      working_dir: &#x27;{{ prj.root }}&#x27;
+      labels:
+        ekatra.task: &#x27;processing&#x27;
+        ekatra.title: &#x27;Getting task list&#x27;
+      args: &#x27;list --all --status --deps --template=json&#x27;
+    grid_options:
+      editable: False
+      selectionmode: &#x27;multiplerowsextended&#x27;
+      rowdetails: true
+      rowdetailstemplate:
+        rowdetailsheight: 100
+        url: &#x27;static|brama/doit_task_deps.html&#x27;
+        params:
+          action_edit: &#x27;{{ prj.files.url_action(&quot;command_edit&quot;) }}&#x27;
+    context_menu:
+      - text: &#x27;Recompile&#x27;
+        action: &#x27;up_common_metadata_single&#x27;
+      - text: &#x27;Recompile with deps&#x27;
+        action: &#x27;up_common_metadata_single_deps&#x27;
+    context_fields:
+      - name
+    columns:
+      - text: Group
+        datafield: g
+        width: 150
+      - text: Ид.
+        datafield: name
+        width: 150
+        pinned: True
+      - text: Статус
+        datafield: status
+        width: 100
+        celltemplate: !asis: &quot;&lt;div class=&#x27;type type-{{=it.value}}&#x27;&gt;{{=it.value}}&lt;/div&gt;&quot;
+      - text: Description
+        datafield: doc
+</pre>
+</body>
+</html>

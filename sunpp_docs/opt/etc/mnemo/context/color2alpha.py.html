@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>color2alpha.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>color2alpha.py</h1>
+    <pre>#!/usr/bin/env python
+
+&quot;&quot;&quot;
+Module for making black color of images as transparent
+&quot;&quot;&quot;
+from PIL import Image
+
+
+def add_alpha(img):
+    img = img.convert(&quot;RGBA&quot;)
+    datas = img.getdata()
+    newData = []
+    for item in datas:
+        is_gray = item[0] == item[1] == item[2]
+        if is_gray and item[0] &lt;= 16:
+            alpha = item[0]
+            newData.append((item[0], item[1], item[2], alpha))
+        else:
+            newData.append(item)
+    img.putdata(newData)
+    return img
+
+
+def process(filename, verbose):
+    img = Image.open(filename)
+    if verbose:
+        print(&quot;%s %s&quot; % (filename, img.mode))
+    if not img.mode == &quot;RGBA&quot;:
+
+        img = add_alpha(img)
+        img.save(filename)
+        if verbose:
+            print(&quot;Processed %s %s&quot; % (filename, img.mode))
+        return True
+    return False
+
+
+def main(files, verbose=False):
+    for filename in files:
+        process(filename, verbose)
+
+
+if __name__ == &quot;__main__&quot;:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog=&quot;color2alpha&quot;, usage=&quot;%(prog)s [options] files&quot;
+    )
+    parser.add_argument(
+        &quot;--verbose&quot;, &quot;-v&quot;, dest=&quot;verbose&quot;, help=&quot;verbose output&quot;, action=&quot;store_true&quot;
+    )
+    parser.add_argument(&quot;files&quot;, type=str, metavar=&quot;files&quot;, nargs=&quot;+&quot;)
+    args = parser.parse_args()
+    main(args.files, verbose=args.verbose)
+</pre>
+</body>
+</html>

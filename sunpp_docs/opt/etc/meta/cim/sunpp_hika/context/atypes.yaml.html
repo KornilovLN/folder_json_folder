@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>atypes.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>atypes.yaml</h1>
+    <pre># namespace: &quot;http://sunpp.cns.atom/cim/hika#&quot;
+
+# classes:
+#   - type: Analog
+#     base: mof.Analog
+#     label@ru: Аналоговый Тэг
+#     label@en: Analog Tag
+#     comment@ru: Аналоговый параметр
+#     comment@en: Analog parameter
+#     mask_quality: 0b1000
+#     hints@ru:
+#       0: Норма
+#       1: Нижняя регламентная граница
+#       2: Нижняя аварийная граница
+#       3: Нижний предел измерения
+#       4: Верхняя регламентная граница
+#       5: Верхняя аварийная граница
+#       6: Верхний предел измерения
+#       7: Не контролируется
+# #      8: Недостоверность
+# #     other: Недостоверность
+#     hints@en:
+#       0: Normal
+#       1: Low State
+#       2: Low Low State
+#       3: Low Instrument State
+#       4: Hi State
+#       5: Hi Hi State
+#       6: Hi Instrument State
+#       7: Silent State
+# #      8: Uncertainty
+# #     other: Uncertainty
+
+
+#     states@ru:
+#       0: Норма
+#       1: НРГ
+#       2: НАГ
+#       3: НПИ
+#       4: ВРГ
+#       5: ВАГ
+#       6: ВПИ
+#       7: Не контролируется
+# #      8: НЕД
+# #     other: НЕД
+
+#     states@en:
+#       0: Normal
+#       1: LS
+#       2: LLS
+#       3: LIS
+#       4: HS
+#       5: HHS
+#       6: HIS
+#       7: Silent State
+# #      8: UNC
+# #     other: UNC
+
+#     rts:
+#       0: ok
+#       1: warn L
+#       2: emrg L
+#       3: range L
+#       4: warn H
+#       5: emrg H
+#       6: range H
+#       7: fault errorNotControlled
+# #      8: fault
+# #     other: fault
+
+#   - type: DateTime
+#     base: mof.Analog
+#     label@ru: Тэг DateTime
+#     label@en: DateTime Tag
+#     mask_quality: 0b1000
+#     rts:
+#       default: &#x27;ok&#x27;
+
+#   - type: Time
+#     base: mof.Analog
+#     label@ru: Тэг Time
+#     label@en: Time Tag
+#     mask_quality: 0b1000
+#     rts:
+#       default: &#x27;ok&#x27;
+
+#   - type: KFB
+#     base: mof.Analog
+#     label@ru: Тэг KFB
+#     label@en: KFB Tag
+#     comment@ru: значение является дискретным, статус игнорируется.
+</pre>
+</body>
+</html>

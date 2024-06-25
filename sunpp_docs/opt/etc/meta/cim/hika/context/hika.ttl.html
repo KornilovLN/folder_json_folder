@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>hika.ttl</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>hika.ttl</h1>
+    <pre>@prefix rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;.
+@prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;.
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt;.
+@prefix mof: &lt;http://spd.ivl.cns/cim/rtdbmof#&gt;.
+@prefix : &lt;http://spd.ivl.cns/cim/hika#&gt;.
+
+ :IVSArray a rdfs:Class ;
+    rdfs:label &quot;Массив УСО&quot;@ru ;
+    rdfs:comment &quot;Массив в БД УСО&quot;@ru .
+
+ :typecode a rdf:Property ;
+    rdfs:domain :IVSArray ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Тип&quot;@ru ;
+    rdfs:comment &quot;Код типа массива&quot;@ru .
+
+ :arr_size a rdf:Property ;
+    rdfs:domain :IVSArray ;
+    rdfs:range xsd:int ;
+    rdfs:label &quot;Размер массива&quot;@ru ;
+    rdfs:comment &quot;Размер массива ИВС&quot;@ru .
+
+ :tick a rdf:Property ;
+    rdfs:domain :IVSArray ;
+    rdfs:range xsd:unsignedInt ;
+    rdfs:label &quot;Частота обновления&quot;@ru ;
+    rdfs:comment &quot;Предполагаемая частота обновления массива в секундах&quot;@ru .
+
+ :ramBased a rdf:Property ;
+    rdfs:domain :IVSArray ;
+    rdfs:range xsd:boolean ;
+    rdfs:label &quot;В оператив.памяти&quot;@ru .
+
+ :sso a rdf:Property ;
+    rdfs:domain :IVSArray ;
+    rdfs:range :SSO ;
+    rdfs:label &quot;ССО&quot;@ru ;
+    rdfs:comment &quot;ССО, с которого поступают данные массива&quot;@ru .
+
+ :SSO a rdfs:Class ;
+    rdfs:label &quot;ССО&quot;@ru ;
+    rdfs:comment &quot;ССО&quot;@ru .
+
+ :sso_connection a rdf:Property ;
+    rdfs:domain :SSO ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Точка подключения&quot;@ru .
+
+ :sso_marka a rdf:Property ;
+    rdfs:domain :SSO ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Марка ССО&quot;@ru .
+
+ :sso_type a rdf:Property ;
+    rdfs:domain :SSO ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Тип ССО&quot;@ru .
+
+ :sso_flags a rdf:Property ;
+    rdfs:domain :SSO ;
+    rdfs:range xsd:int ;
+    rdfs:label &quot;Признаки&quot;@ru .
+
+ :ACP a rdf:Property ;
+    rdfs:domain :SSO ;
+    rdfs:range xsd:string .
+
+ :MBD a rdf:Property ;
+    rdfs:domain :SSO ;
+    rdfs:range xsd:string .
+
+  :ProcessingAlgorithm a rdfs:Class ;
+    rdfs:label &quot;Алг.Обр.&quot;@ru ;
+    rdfs:comment &quot;Алгоритм обработки&quot;@ru .
+
+  :sensorType  a rdf:Property ;
+    rdfs:domain :ProcessingAlgorithm ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Тип датч.&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Тип датчика (унифицированный сигнал, тип  термопары и пр.)&quot;&quot;&quot;@ru.
+
+  :NXS a rdf:Property ;
+    rdfs:domain :ProcessingAlgorithm ;
+    rdfs:range xsd:integer ;
+    rdfs:label &quot;НХС&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Номер таблицы компенсации&quot;&quot;&quot;@ru.
+
+  :NTL a rdf:Property ;
+    rdfs:domain :ProcessingAlgorithm ;
+    rdfs:range xsd:integer ;
+    rdfs:label &quot;НТЛ&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Номер таблицы линеаризации&quot;&quot;&quot;@ru.
+
+  :smoothFactor a rdf:Property ;
+    rdfs:domain :ProcessingAlgorithm ;
+    rdfs:range xsd:integer ;
+    rdfs:label &quot;К сглаж.&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Коэффициент сглаживания&quot;&quot;&quot;@ru.
+
+  :majorArea a rdf:Property ;
+    rdfs:domain :ProcessingAlgorithm ;
+    rdfs:range xsd:integer ;
+    rdfs:label &quot;Мажор.&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Зона мажоритарности&quot;&quot;&quot;@ru.
+
+ :HEIR   a rdf:Property ;
+    rdfs:domain :ProcessingAlgorithm ;
+    rdfs:range xsd:float ;
+    rdfs:label &quot;Пред.в.&quot;@ru ;
+    rdfs:label &quot;High El.Instr.Range&quot;@en ;
+    rdfs:comment &quot;&quot;&quot;Верхний электрический предел измерения датчика&quot;&quot;&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;High Electrical Instrument Range.&quot;&quot;&quot;@en .
+
+ :LEIR   a rdf:Property ;
+    rdfs:domain :ProcessingAlgorithm ;
+    rdfs:range xsd:float ;
+    rdfs:label &quot;Пред.н.&quot;@ru ;
+    rdfs:label &quot;Low El.Instr.Range&quot;@en ;
+    rdfs:comment &quot;&quot;&quot;Нижний электрический предел измерения датчика&quot;&quot;&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Low Electrical Instrument Range&quot;&quot;&quot;@en .
+
+ :P_KN   a rdf:Property ;
+    rdfs:domain :ProcessingAlgorithm ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;P_KN&quot;@en .
+
+
+
+ :TIP_OBJ a rdf:Property ;
+    rdfs:domain :Discrete ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Тип объекта&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Тип дискретного объекта&quot;&quot;&quot;@ru .
+
+ :objType a rdf:Property ;
+    rdfs:domain :Discrete ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Тип объекта&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Тип дискретного объекта&quot;&quot;&quot;@ru .
+
+
+
+ :klemma a rdf:Property ;
+    rdfs:domain :ProcessPoint ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Адр.подкл.&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Адрес подключение сигнала (адрес клеммника)&quot;&quot;&quot;@ru .
+
+
+ :TIP_OBR a rdf:Property ;
+    rdfs:domain :Discrete ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Тип об.&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Тип обработки параметра&quot;&quot;&quot;@ru .
+
+ :handlingType a rdf:Property ;
+    rdfs:domain :Discrete ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Тип обработки&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Тип обработки параметра&quot;&quot;&quot;@ru .
+
+
+
+ :paramType a rdf:Property ;
+    rdfs:domain :Discrete ;
+    rdfs:range xsd:string ;
+    rdfs:label &quot;Тип параметра&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Тип параметра&quot;&quot;&quot;@ru .
+
+
+ :aoid a rdf:Property ;
+    rdfs:domain :Analog ;
+    rdfs:range xsd:int ;
+    rdfs:label &quot;N алг.обр.&quot;@ru ;
+    rdfs:comment &quot;Номер алгоритма обработки&quot;@ru .
+
+ :ao a rdf:Property ;
+    rdfs:domain :Analog ;
+    rdfs:range :ProcessingAlgorithm ;
+    rdfs:label &quot;Алг.обр.&quot;@ru ;
+    rdfs:comment &quot;Алгоритм обработки&quot;@ru .
+
+ :ZV a rdf:Property ;
+    rdfs:domain :Analog ;
+    rdfs:label &quot;ЗВ&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;Зона возврата в % от шкалы параметра. Не должна перекрывать расстояние между соседними уставками&quot;&quot;&quot;@ru .
+
+ :ukts a rdf:Property ;
+    rdfs:label &quot;УКТС&quot;@ru ;
+    rdfs:label &quot;UKTS&quot;@en ;
+    rdfs:comment &quot;&quot;&quot;шкаф УКТС, с которого идет кабель/распределительная коробка
+(в общем откуда приходит кабель)
+&quot;&quot;&quot;@ru .
+
+ :format a rdf:Property ;
+    rdfs:domain :Analog ;
+    rdfs:label &quot;FORMAT&quot;@en ;
+    rdfs:label &quot;Формат вывода&quot;@ru ;
+    rdfs:comment &quot;&quot;&quot;
+Заполняется в виде M.N, где
+M – общее количество знаков включая точку и знак ( не более 7);
+N – количество знаков после запятой.
+Научный формат определяется в виде NE, где
+N – общее количество знаков мантиссы, включая точку и знак, ( если он есть).
+Определяет формат  для отображения параметров на РМО и в протоколах регистрации.
+При задании научного формата число представляется в виде стандартно нормализованного числа и соответствующей ему степени  N,NNNE-XX&quot;&quot;&quot;@ru .
+</pre>
+</body>
+</html>

@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_nav_arrays.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_nav_arrays.yaml</h1>
+    <pre># Этот YAML-файл определяет структуру меню для раздела &quot;Массивы&quot;.
+# Корневой элемент меню имеет идентификатор arr,
+# заголовок &quot;Массивы&quot; и использует иконку fa fa-server.
+# В разделе children определены дочерние элементы меню.
+# В данный момент присутствует только один активный дочерний
+# элемент для &quot;УВС энергоблока №3&quot;.
+# Для него указан URL-адрес (href), идентификатор (id),
+# файл с дополнительной структурой меню (menu) 
+# и заголовок (title).
+# Второй дочерний элемент для &quot;ПАМС&quot; закомментирован.
+# Этот файл используется для построения навигационного меню 
+# в пользовательском интерфейсе приложения.
+
+# Определение элемента меню &quot;Массивы&quot;
+id: arr
+title: Массивы
+cssClass: fa fa-server  # Класс иконки для элемента меню
+permit: permit-all  # Разрешение доступа для всех
+
+# Дочерние элементы меню
+children:
+  # Элемент меню для УВС энергоблока №3
+  - href: u3/arr  # URL-адрес
+    id: arr/u3  # Идентификатор
+    menu: u3/arr/nav.json  # Файл с дополнительной структурой меню
+    title: УВС энергоблока №3
+
+  # Закомментированный элемент меню для ПАМС
+  #- href: upams/arr
+  #  id: arr/upams
+  #  menu: upams/arr/nav.json
+  #  title: ПАМС
+</pre>
+</body>
+</html>

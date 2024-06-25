@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>naec.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>naec.mnemo</h1>
+    <pre>from lib.adigital import digital5;
+from lib.termometr import TermometrH;
+from lib.spir import shutter, toggle_button, percent_clock;
+from lib.dtext import dtext;
+from lib.lampuse import lamp;
+
+
+def _clip(p, w, h, m){
+    clipPath(){
+        rect(p.x-m, p.y-m, w+2*m, h+2*m);
+    }
+}
+def _marker(p, r){
+    circle(Origin, height/10., class=(&#x27;Solid&#x27;, &#x27;atag&#x27;), style=&#x27;fill:black&#x27;, bindtype=&#x27;graf_x&#x27;, bind=bind.bind_idx, scale=hist_width/(hir-lir));
+}
+
+def hist_simple(p, w, bind, h=None, inverted=False){
+    mu ?= bind.defined(&#x27;mu&#x27;);
+    label ?= bind.defined(&#x27;label&#x27;, &#x27;label&#x27;);
+    lir ?= bind.defined(&#x27;LIR&#x27;) or 0;
+    hir ?= bind.defined(&#x27;HIR&#x27;) or 0;
+
+    hhl ?= bind.defined(&#x27;HHL&#x27;);
+    hl ?= bind.defined(&#x27;HL&#x27;);
+
+    lll ?= bind.defined(&#x27;LLL&#x27;);
+    ll ?= bind.defined(&#x27;LL&#x27;);
+
+
+    height := h ? h : w /15.;
+    delta := hir - lir;
+    range_ := (lir, hir);
+    let rule_ = ruler(range=range_){
+        rule = line(Origin, Point(w, 0));
+    }
+    range_ := inverted ? &#x27;{};{}&#x27;.format(hir, lir) : &#x27;{};{}&#x27;.format(lir, hir) ;
+
+    group(p){
+        rect(leftcenter=Point(0, height/2.), rightcenter=Point(w, height/2.), height=height, class=(&#x27;pptbgv&#x27;));
+        if(hl &amp;&amp; hl &lt; hir &amp;&amp; hl&gt; lir){
+            rect(leftcenter=Point(rule_.calculate(hl).x, height/2.), rightcenter=Point(rule_.calculate(hir).x, height/2.), height=height, class=(&#x27;Solid&#x27;, &#x27;hist_warn&#x27;));
+        }
+        if(hhl &amp;&amp; hhl &lt; hir &amp;&amp; hhl &gt; lir){
+            rect(leftcenter=Point(rule_.calculate(hhl).x, height/2.), rightcenter=Point(rule_.calculate(hir).x, height/2.), height=height, class=(&#x27;Solid&#x27;, &#x27;hist_emrg&#x27;));
+        }
+        if(ll &amp;&amp; ll &gt; lir &amp;&amp; ll &lt; hir){
+            rect(leftcenter=Point(rule_.calculate(lir).x, height/2.), rightcenter=Point(rule_.calculate(ll).x, height/2.), height=height, class=(&#x27;Solid&#x27;, &#x27;hist_warn&#x27;));
+        }
+        if(lll &amp;&amp; lll &gt; lir &amp;&amp; lll &lt; hir){
+            rect(leftcenter=Point(rule_.calculate(lir).x, height/2.), rightcenter=Point(rule_.calculate(lll).x, height/2.), height=height, class=(&#x27;Solid&#x27;, &#x27;hist_emrg&#x27;));
+        }
+        line(Point(0, 0), Point(0, height), style=&#x27;stroke-width:1px&#x27;);
+        line(Point(w, 0), Point(w, height), style=&#x27;stroke-width:1px&#x27;);
+        zero_x := mappin(0, lir, hir, 0, w);
+        delta := delta == 0 ? 1: delta;
+        group(bindtype=&#x27;astate&#x27;, class=&#x27;ppt atag&#x27;, bind=bind.bind_idx){
+            rect(leftcenter=Point(0, height/2.), rightcenter=Point(w, height/2.), height=height, class=(&#x27;Contour&#x27;, &#x27;astatus&#x27;));
+            start_x := inverted ? w : 0;
+            line_w := inverted ? w : -w;
+            group(bindtype=&#x27;hist&#x27;, class=&#x27;mnemo-def&#x27;, bind=bind.bind_idx, range=range_, transform=(Translate(start_x, 0.5*height)*Rotate(90))){
+                line(Origin, Point(0, line_w), style=(stroke_width=height*0.5), class=&#x27;hist&#x27;);
+            }
+        }
+    }
+}
+
+def exp_hist_simple(p, w, bind, h=None){
+    mu ?= bind.defined(&#x27;mu&#x27;);
+    label ?= bind.defined(&#x27;label&#x27;, &#x27;label&#x27;);
+    lir ?= bind.defined(&#x27;LIR&#x27;) or 0;
+    hir ?= bind.defined(&#x27;HIR&#x27;) or 0;
+
+    hhl ?= bind.defined(&#x27;HHL&#x27;, None);
+    hl ?= bind.defined(&#x27;HL&#x27;, None);
+
+    lll ?= bind.defined(&#x27;LLL&#x27;, None);
+    ll ?= bind.defined(&#x27;LL&#x27;, None);
+
+    height := h ? h : w /15.;
+    delta := hir - lir;
+    range_ := (lir, hir);
+    let rule_ = ruler(range=(lir, hir), hide_rule=True){
+        rule = line(Point(0, 30), Point(w, 30));
+    }
+    range_ := &#x27;{};{}&#x27;.format(lir, hir);
+
+    group(p){
+        rect(leftcenter=Point(0, height/2.), rightcenter=Point(w, height/2.), height=height, class=(&#x27;pptbgv&#x27;));
+        off_end:= hir;
+        off_start := lir;
+        if(hhl){
+            if (hhl &gt; hir){ hhl := hir;}
+            rect(leftcenter=Point(rule_.calculate(hhl, True).x, height/2.), rightcenter=Point(rule_.calculate(hir, True).x, height/2.), height=height, class=(&#x27;Solid&#x27;, &#x27;hist_emrg&#x27;));
+            off_end:=hhl;
+        }
+        if(hl){
+            if (hl &gt; hir){ hl := hir;}
+            rect(leftcenter=Point(rule_.calculate(hl, True).x, height/2.), rightcenter=Point(rule_.calculate(off_end, True).x, height/2.), height=height, class=(&#x27;Solid&#x27;, &#x27;hist_warn&#x27;));
+        }
+        if(lll){
+            if (lll &lt; lir){ lll := lir;}
+            rect(leftcenter=Point(rule_.calculate(lir, True).x, height/2.), rightcenter=Point(rule_.calculate(lll, True).x, height/2.), height=height, class=(&#x27;Solid&#x27;, &#x27;hist_emrg&#x27;));
+            off_start := lll;
+        }
+        if(ll){
+            if (ll &lt; lir){ ll := lir;}
+            rect(leftcenter=Point(rule_.calculate(off_start, True).x, height/2.), rightcenter=Point(rule_.calculate(ll, True).x, height/2.), height=height, class=(&#x27;Solid&#x27;, &#x27;hist_warn&#x27;));
+        }
+        line(Point(0, 0), Point(0, height), style=&#x27;stroke-width:1px&#x27;);
+        line(Point(w, 0), Point(w, height), style=&#x27;stroke-width:1px&#x27;);
+        zero_x := mappin(0, lir, hir, 0, w);
+        delta := delta == 0 ? 1: delta;
+        group(bindtype=&#x27;astate&#x27;, class=&#x27;ppt atag&#x27;, bind=bind.bind_idx){
+            rect(leftcenter=Point(0, height/2.), rightcenter=Point(w, height/2.), height=h, class=(&#x27;Contour&#x27;, &#x27;astatus&#x27;));
+            group(bindtype=&#x27;log_hist&#x27;, class=&#x27;mnemo-def&#x27;, bind=bind.bind_idx, range=range_, transform=(Translate(0, 0.5*h)*Rotate(90))){
+                line(Origin, Point(0, -w), style=(stroke_width=height*0.5), class=&#x27;hist&#x27;);
+            }
+        }
+    }
+}
+def hist_group(p, width, binds, el_height=None, exp=False){
+    // !! LIR HIR and HHL HL LLL LL must be the same in all ppts
+
+    lir ?= binds[0].defined(&#x27;LIR&#x27;);
+    hir ?= binds[0].defined(&#x27;HIR&#x27;);
+    hist_width := width*0.8;
+    height := el_height ? el_height : width /15.;
+    big := height/4.;
+    small := height/8.;
+    barline_width := height/2;
+
+    if (lir!=None &amp;&amp; hir!=None &amp;&amp; lir != hir){
+
+        delta := hir - lir;
+        rule_step ?= delta/5.;
+        range_ := (lir, hir);
+        big_rule_step ?= rule_step;
+        small_rule_step ?= rule_step/2.;
+        ruler_text_style:= (font_size=str(height/3.)+&#x27;px&#x27;);
+
+        if (exp){
+            let rule_ = ruler(range=range_){
+                rule = line(Point(0, len(binds)*height), Point(hist_width, len(binds)*height));
+                line(Point(0,0), Point(0, big), _rulestep=&#x27;^1&#x27;);
+                line(Point(0,0), Point(0, small), _rulestep=&#x27;9/^1&#x27;);
+                text(0, big*1.5, &#x27;%g&#x27;, _rulestep=&#x27;^1&#x27;, class=&#x27;label alignC, alignT&#x27;, style=ruler_text_style);
+            }
+            group(p){
+                iter i(bind=binds){
+                    exp_hist_simple(Point(0, i*height+barline_width/2.), hist_width, bind, height/2.);
+                }
+                group(class=&#x27;hruler&#x27;){
+                    +rule_;
+                }
+            }
+        }else{
+            let rule_ = ruler(range=range_){
+                rule = line(Point(0, len(binds)*height), Point(hist_width, len(binds)*height));
+                line(Point(0,0), Point(0, big), _rulestep=big_rule_step);
+                line(Point(0,0), Point(0, small), _rulestep=small_rule_step);
+                text(0, big*1.5, &#x27;%d&#x27;, _rulestep=big_rule_step, class=&#x27;label alignC alignT&#x27;, style=ruler_text_style);
+            }
+//            start_x := rule_.calculate(lir);
+//            start_y := rule_.calculate(hir);
+//            text(start_x+(0, big*1.5), str(lir), class=&#x27;label alignC alignT&#x27;, style=ruler_text_style);
+//            text(start_y+(0, big*1.5), str(hir), class=&#x27;label alignC alignT&#x27;, style=ruler_text_style);
+            group(p){
+                iter i(bind=binds){
+                    hist_simple(Point(0, i*height+barline_width/2.), hist_width, bind, height/2.);
+                }
+                group(class=&#x27;hruler&#x27;){
+                    +rule_;
+                }
+            }
+        }
+    }
+    iter i (bind=binds){
+        dtext(p+(width*0.81, i*height), width*0.19, height, bind, format = exp ? True : False);
+    }
+
+}
+def pump(p, r, bind, h_version=&#x27;&#x27;){
+    gear := &quot;gear&quot;+str(h_version);
+    group(p, bindtype=&#x27;boolPair&#x27;, class=&#x27;ppt b2tag&#x27;, bind=bind.bind_idx){
+        circle(Origin, r, class=(&quot;Contour&quot;,  gear));
+        polygon(points=(Point(0.85*r-1.14*r, 1.92*r-1.14*r), Point(0.85*r-1.14*r, 1.14*r-1.14*r), Point(0.35*r-1.14*r, 1.14*r-1.14*r), Point(1.14*r-1.14*r, 0.28*r-1.14*r), Point(1.92*r-1.14*r, 1.14*r-1.14*r), Point(1.42*r-1.14*r, 1.14*r-1.14*r), Point(1.42*r-1.14*r, 1.92*r-1.14*r)), class=(&quot;SolidXY&quot;, gear));
+    }
+}
+
+
+def pan_line(p, width, bind){
+    doublehist(p, width*0.6, bind, height=width/10);
+    digital5(p+(0.65*width, 0), width/3., bind, height=width/10);
+}
+
+def term_line(p, width, bind){
+    TermometrH(p+(10, 20), 7, width*0.5, bind);
+    digital5(p+(0.65*width, 0), width/3., bind, height=width/10);
+}
+
+def b_line_shutter(p, width, binds, labels=None){
+    step := width / len(binds);
+    w := 30;
+    start := step/2.- w/2.;
+    group(p){
+        iter i(bind=binds){
+            txt := labels?labels[i]:str(i+1);
+            text(Point(start+i*step-5, w/2.), txt, class=(&#x27;label&#x27;, &#x27;alignR&#x27;, &#x27;alignVC&#x27;));
+            shutter(Point(start+i*step, 0), w, binds[bind]);
+        }
+    }
+}
+def b_line_toggle(p, width, binds, labels=None){
+    step := width / len(binds);
+    start := step/2.;
+    w := 40;
+    group(p){
+        iter i(bind=binds){
+            txt := labels?labels[i]:str(i+1);
+            text(Point(start+i*step-w*0.5, w/2.+5), txt, class=(&#x27;label&#x27;, &#x27;alignR&#x27;, &#x27;alignVC&#x27;));
+            toggle_button(Point(start+i*step, w/2.+5), w, binds[bind]);
+        }
+    }
+}
+
+def b_line_lamp(p, width, binds, labels=None, notext=False){
+    step := width / len(binds);
+    start := step/2.;
+    w := 40;
+    group(p){
+        iter i(bind=binds){
+            if (not(notext)){
+                txt := labels?labels[i]:str(bind);
+                text(Point(start+i*step-w*0.5, w/2.+5), txt, class=(&#x27;label&#x27;, &#x27;alignR&#x27;, &#x27;alignVC&#x27;));
+            }
+            lamp(Point(start+i*step, w/2.+5), w*0.5, binds[bind], class=&#x27;MostlyF boolR1 boolG0&#x27;);
+        }
+    }
+}
+
+def b_line_percent_clock(p, width, binds, labels=None){
+    step := width / len(binds);
+    start := step/2.;
+    w := 40;
+    group(p){
+        iter i(bind=binds){
+            txt := labels?labels[i]:str(i+1);
+            text(Point(start+i*step-w*0.5, w/2.+5), txt, class=(&#x27;label&#x27;, &#x27;alignR&#x27;, &#x27;alignVC&#x27;));
+            percent_clock(Point(start+i*step, w/2.+5), w*0.5, binds[bind]);
+        }
+    }
+}
+
+def b_line_pump(p, width, binds, labels=None, h_version=&#x27;&#x27;){
+    step := width / len(binds);
+    start := step/2.;
+    w := 40;
+    group(p){
+        iter i(bind=binds){
+            txt := labels?labels[i]:str(i+1);
+            text(Point(start+i*step-w*0.5, w/2.+5), txt, class=(&#x27;label&#x27;, &#x27;alignR&#x27;, &#x27;alignVC&#x27;));
+            pump(Point(start+i*step, w/2.+5), w*0.4, binds[bind], h_version);
+        }
+    }
+}
+
+def in_block(p, w, h, title=&#x27;&#x27;, lclass=&#x27;&#x27;){
+    if (title){
+        text(p+(w/2., 0), title, class=(&#x27;label&#x27;, &#x27;alignC&#x27;, &#x27;alignT&#x27;, lclass));
+        gp:= p + Point(0, 15);
+    }else{
+        gp:= p;
+    }
+    rect(p, w, h, class=&#x27;_SKIP&#x27;);
+    group(gp+(0, 5)){
+        @
+    }
+}</pre>
+</body>
+</html>

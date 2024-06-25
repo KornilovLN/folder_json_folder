@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_mainview.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_mainview.py</h1>
+    <pre># Описание применения:
+
+# Этот модуль mainview.py содержит функции и маршруты для отображения
+# главной страницы приложения BRAMA. Он определяет Blueprint comps 
+# для регистрации маршрутов и представлений.
+# Основной маршрут /show/ обрабатывается функцией show_default_component().
+# Эта функция рендерит HTML-шаблон welcome.html и отображает его в главном контенте страницы.
+# Она также получает количество пользователей, активных пользователей, мнемосхем и метрик,
+# используя вспомогательные функции get_users_count(), get_acting_users_count(),
+# get_screens_count() и get_metrics_count().
+
+# Функции get_metrics_count() и get_screens_count()
+# выполняют SPARQL-запросы для подсчета количества метрик и мнемосхем соответственно.
+# Результаты этих функций кэшируются с помощью декоратора lru_cache для повышения производительности.
+# Если приложение имеет объект mqtt, эти функции также подписываются на событие обновления
+# пространства имен для очистки кэша при необходимости.
+
+# Функция query() используется для выполнения SPARQL-запросов,
+# получая URL-адрес SPARQL-конечной точки из модуля sparql_query.
+
+# Этот модуль также импортирует необходимые модули и классы из других частей приложения BRAMA,
+# таких как ekatra.brama.components, ekatra.brama.auth и ekatra.brama.sparql_query.
+
+from ekatra.brama.components import ComponentWithViews, action, factory
+from ekatra.brama.components import WidgetView
+from ekatra.brama import io_subdomain
+from ekatra.brama import auth
+from ekatra.brama import sparql_query
+
+# Импорт необходимых модулей Flask
+from flask import current_app
+from flask import Blueprint
+from fastcache import lru_cache
+
+import requests
+import flask
+
+# Создание Blueprint для маршрутов и представлений
+comps = Blueprint(&#x27;mainview&#x27;, __name__, template_folder=&#x27;templates&#x27;)
+
+# Функция для инициализации Blueprint в приложении Flask
+def app_init(app):
+    app.register_blueprint(comps)
+
+# Маршрут для отображения главной страницы
+@comps.route(&#x27;/show/&#x27;, subdomain=io_subdomain)
+def show_default_component():
+    # Получение объекта ответа Flask
+    response = flask.request.appio_response
+    
+    # Установка заголовка компонента
+    response.html(&quot;#component_title&quot;, &#x27;Welcome to the BRAMA&#x27;)
+    
+    # Создание JavaScript-кода для инициализации вкладки
+    js = &quot;$(&#x27;#mainTabs&#x27;).brama_tab({uid: &#x27;%s&#x27;, label: &#x27;Welcome&#x27;})&quot; % (&#x27;main_content&#x27;)
+    
+    # Рендеринг HTML-шаблона welcome.html и получение HTML-кода
+    html = flask.render_template(&#x27;welcome.html&#x27;,
+                                  total_users=auth.get_users_count(),
+                                  total_acting_users=auth.get_acting_users_count(),
+                                  total_screens=get_screens_count(),
+                                  total_metrics=get_metrics_count(),
+                                  widgets=current_app.config.get(&#x27;BRAMA_WELCOME_PAGE_WIDGETS&#x27;, [])
+                                 )
+    
+    # Установка HTML-кода в ответ
+    response.html(&#x27;#main_content&#x27;, html)
+    
+    # Добавление JavaScript-кода в ответ
+    response.script(js)
+
+# Функция для выполнения SPARQL-запроса
+def query(query):
+    # Получение URL-адреса SPARQL-конечной точки
+    url = sparql_query.get_sparql_endpoint()
+    
+    # Выполнение SPARQL-запроса и возвращение результата
+    return sparql_query.get(url, query)
+
+# Функция для получения количества метрик с кэшированием результата
+@lru_cache(maxsize=1)
+def get_metrics_count():
+    try:
+        # SPARQL-запрос для подсчета количества метрик
+        q = &#x27;prefix mof:&lt;http://spd.ivl.cns/cim/rtdbmof#&gt;select(count(?m)as?count)where{?m mof:arr_index ?a}&#x27;
+        
+        # Выполнение запроса и получение количества метрик
+        data = query(q)
+        count = data[0].get(&#x27;count&#x27;).get(&#x27;value&#x27;)
+    except:
+        # Если произошла ошибка, установить значение &#x27;?&#x27;
+        count = &#x27;?&#x27;
+
+    # Если приложение имеет объект mqtt, подписаться на событие обновления пространства имен
+    if (hasattr(current_app, &#x27;mqtt&#x27;)):
+        current_app.mqtt.listen(&#x27;semantic/ns/updated&#x27;, _metrics_count_cache_clear)
+
+    return count
+
+# Функция для очистки кэша количества метрик
+def _metrics_count_cache_clear(*args, **kw):
+    get_metrics_count.cache_clear()
+
+# Функция для получения количества мнемосхем с кэшированием результата
+@lru_cache(maxsize=1)
+def get_screens_count():
+    try:
+        # SPARQL-запрос для подсчета количества мнемосхем
+        q = &#x27;prefix mmi:&lt;http://spd.ivl.cns/cim/mmi#&gt;select(count(?m)as?count)where{?m a mmi:Mnemo}&#x27;
+        
+        # Выполнение запроса и получение количества мнемосхем
+        data = query(q)
+        count = data[0].get(&#x27;count&#x27;).get(&#x27;value&#x27;)
+    except:
+        # Если произошла ошибка, установить значение &#x27;?&#x27;
+        count = &#x27;?&#x27;
+
+    # Если приложение имеет объект mqtt, подписаться на событие обновления пространства имен
+    if (hasattr(current_app, &#x27;mqtt&#x27;)):
+        current_app.mqtt.listen(&#x27;semantic/ns/updated&#x27;, _metrics_count_cache_clear)
+
+    return count
+
+# Функция для очистки кэша количества мнемосхем
+def _screens_count_cache_clear(*args, **kw):
+    get_screens_count.cache_clear()
+</pre>
+</body>
+</html>

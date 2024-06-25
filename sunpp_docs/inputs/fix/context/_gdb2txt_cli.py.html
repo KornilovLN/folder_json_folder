@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_gdb2txt_cli.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_gdb2txt_cli.py</h1>
+    <pre>#! /usr/bin/env python
+&quot;&quot;&quot;
+импортируются модули: логирования, ОС, кодеки, Json
+&quot;&quot;&quot;
+import logging
+import os
+import codecs
+import json
+
+&quot;&quot;&quot;
+кодировка по-умолчанию, может быть изменена по ходу  программы
+В Python констант как таковых нет. Это просто глобальная переменная
+&quot;&quot;&quot;
+ENCODING = &#x27;utf-8&#x27;
+
+def cellproc(x, vtype):
+    &quot;&quot;&quot;
+    Функция для обработки ячеек данных
+
+      Аргументы:
+        x - значение ячейки
+        vtype - тип данных ячейки
+
+      Если значение - строка, пытаемся декодировать его в указ. кодировке
+      Если тип данных начинается с &#x27;BLOB SUB_TYPE BINARY&#x27;,
+      то используем кодировку &#x27;utf-8&#x27;, иначе глобальную ENCODING
+      В случае ошибки возвращаем представление объекта
+      Если значение не является строкой, возвращаем его в формате unicode
+    &quot;&quot;&quot;
+    if isinstance(x, basestring):
+        try:
+            e = &#x27;utf-8&#x27; if vtype.startswith(&#x27;BLOB SUB_TYPE BINARY&#x27;) else ENCODING
+            return x.decode(e) if x is not None else &#x27;None&#x27;
+        except:
+            return repr(x)
+    else:
+        return unicode(x)
+
+
+def jsoncell(x, name, vtype):
+    &quot;&quot;&quot;
+    Функция подготовки данных ячейки для JSON
+
+      Аргументы:
+        x - объект рассмотреня
+        name - тазвание ячейки
+        vtype - тип ячейки
+    &quot;&quot;&quot;
+    if x is None:
+        return
+    if isinstance(x, basestring):
+        try:
+            e = &#x27;utf-8&#x27; if vtype.startswith(&#x27;BLOB SUB_TYPE BINARY&#x27;) else ENCODING
+            r = x.decode(e)
+        except:
+            r = repr(x)
+    elif isinstance(x, (int, long, float)):
+        r = x
+    else:
+        r = u&quot;{}:{}&quot;.format(type(x), x)
+    return name, r
+
+
+def save(con, tbl, out, ext):
+    &quot;&quot;&quot;
+    Функция сохранения данных из таблицы в файл
+      Сохранение в файл с указанным расширением типа файла
+
+      Аргументы: 
+        con - подключение к базе данных
+        tbl - таблица базы данных
+        out - out - имя файла для вывода
+        ext - расширение файла вывода
+    &quot;&quot;&quot;
+    cur = con.cursor()
+    names = []
+    types = []
+    for c in tbl.columns:
+        names.append(c.name)
+        types.append(c.datatype)
+    cur.execute(&quot;select %s from %s&quot; % (&#x27;,&#x27;.join(names), tbl.name))
+
+    #--- Сохранение данных в формате JSON
+    if ext in &#x27;.json&#x27;:
+        with codecs.open(out+ext, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+            for r in cur:
+                d = dict(filter(lambda x: x is not None, map(lambda x: jsoncell(*x), zip(r, names, types))))
+                f.write(json.dumps(d, ensure_ascii=False)+&#x27;\n&#x27;)
+    #--- Сохранение данных в другом текстовом формате
+    else:
+        with codecs.open(out+ext, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+            f.write(u&quot;%s\n&quot; % u&quot;;&quot;.join([u&quot;%s: %s&quot; % x for x in zip(names, types)]))
+            for r in cur:
+                f.write(u&quot;%s\n&quot; % u&quot;;&quot;.join(map(lambda x: cellproc(*x), zip(r, types))))
+
+
+    def process(args):
+    &quot;&quot;&quot;
+    Функция обработки аргументов и выполнения основных действий
+
+      Использует глобальную константу ENCODING = &#x27;utf-8&#x27;
+      Импортирует итератор баз данных gdb и создает алиас GdbIterator 
+      получает путь из аргумента output и проверяет наличие средствами ОС
+      Затем проверяет наличие точки в txt, и добавляет ее, если ее нет
+
+      создается объект итератора для сканирования базы по ргументам:
+        база, пользователь, пароль
+
+      Далее - цикл по базе с помощью итератора с аргументами
+      В этом цикле каждая строка из таблицы базы считывается, сохраняется
+      в файл с указанным  расширением
+      В случае сбоя - выводится сообщение об ошибке
+    &quot;&quot;&quot;
+    global ENCODING
+    from gdb_iterator import GdbIterator
+    outpath = args.output
+    if not os.path.exists(outpath):
+        os.makedirs(outpath)
+    ENCODING = args.encoding
+    ext = args.ext
+    if not ext.startswith(&#x27;.&#x27;):
+        ext = &#x27;.&#x27;+ext
+    iterator = GdbIterator(args.database, user=args.user, password=args.password)
+    for tbl in iterator.run(args.output):
+        try:
+            save(iterator.con, tbl, os.path.join(outpath, tbl.name), ext)
+        except Exception as e:
+            print(&quot;Error on table &#x27;{}&#x27; processing:\n  {}&quot;.format(tbl.name, str(e).strip(&#x27;()&#x27;).replace(&#x27;\\n&#x27;, &#x27;\n  &#x27;)))
+
+
+def main():
+    &quot;&quot;&quot;
+    Основная функция определения, обработки аргументов командной строки
+      Импортирует библиотеку argparse
+      Создает объект parser для разбора аргументов методом ArgumentParser 
+      Собирает аргументы в стуктуру для дальнейшей передачи функции
+      process(parser.parse_args())          
+    &quot;&quot;&quot;
+    import argparse
+    parser = argparse.ArgumentParser(prog=&#x27;gdb2txt&#x27;, usage=&#x27;%(prog)s [options] database&#x27;)
+    &quot;&quot;&quot;
+    на примере первого шага: для ключа &#x27;--user&#x27; или сокращения &#x27;-u&#x27;
+    даныые запомнить в поле &#x27;user&#x27; как тип str с привязкой к
+    metavar=&#x27;user&#x27; с подсказкой &quot;имя пользователя&quot;
+    все остальные шаги применения parser.add_argument() -аналогичны  
+    &quot;&quot;&quot;
+    parser.add_argument(&#x27;--user&#x27;, &#x27;-u&#x27;,
+                        dest=&#x27;user&#x27;,
+                        type=str,
+                        metavar=&#x27;&lt;user&gt;&#x27;, help=&quot;имя пользователя&quot;)
+
+    parser.add_argument(&#x27;--password&#x27;, &#x27;-p&#x27;,
+                        dest=&#x27;password&#x27;,
+                        type=str,
+                        metavar=&#x27;&lt;password&gt;&#x27;, help=&quot;пароль пользователя&quot;)
+
+    parser.add_argument(&#x27;--output&#x27;, &#x27;-o&#x27;,
+                        dest=&#x27;output&#x27;, default=&quot;.&quot;,
+                        type=str,
+                        metavar=&#x27;&lt;output&gt;&#x27;, help=&quot;сохранить в указанный каталог&quot;)
+
+    parser.add_argument(&#x27;--ext&#x27;, &#x27;-t&#x27;,
+                        dest=&#x27;ext&#x27;, default=&quot;csv&quot;,
+                        type=str,
+                        metavar=&#x27;&lt;output&gt;&#x27;, help=&quot;расширение целевого файла&quot;)
+
+    parser.add_argument(&#x27;--encoding&#x27;, &#x27;-e&#x27;,
+                        dest=&#x27;encoding&#x27;,
+                        type=str, default=&#x27;koi8_r&#x27;,
+                        help=&quot;кодировка базы данных&quot;)
+
+    parser.add_argument(&#x27;database&#x27;,
+                        type=str,
+                        metavar=&#x27;database&#x27;)
+
+    process(parser.parse_args())
+
+
+if __name__ == &#x27;__main__&#x27;:
+    logging.basicConfig(format=&#x27;%(message)s&#x27;)
+    main()
+
+</pre>
+</body>
+</html>

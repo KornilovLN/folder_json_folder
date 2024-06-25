@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_0_extract_full_tgz.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_0_extract_full_tgz.sh</h1>
+    <pre># Удаляет директорию ./inputs, если она существует, с принудительным
+# удалением всех вложенных файлов и каталогов
+rm -r -f ./inputs_full
+
+# Запуск конт Docker с польз-лем 1000:1000 и переменной среды LANG=C.UTF8
+# Опция -it запускает контейнер в интерактивном режиме с псевдотерминалом
+# Опция --rm удаляет контейнер после завершения его работы
+# Опция -v монтирует тек дир ($(pwd)) в контейнер в директорию /build
+# Монтирует также локальную директорию с инструментами в контейнер
+docker run -u 1000:1000 -e LANG=C.UTF8 -it --rm \
+    -v &quot;$(pwd):/build&quot; \
+    -v &quot;/home/max/gitlab_2/ekatra/tools/ekatra/tools:/usr/local/lib/python3.7/dist-packages/ekatra/tools&quot; \
+    registry.master.cns/compiler:latest \
+    deepextract -e &#x27;koi8-r&#x27; -u -o /build/inputs_full /build/IO-7.3-76.tar.gz
+
+
+
+</pre>
+</body>
+</html>

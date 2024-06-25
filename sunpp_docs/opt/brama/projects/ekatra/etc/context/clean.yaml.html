@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>clean.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>clean.yaml</h1>
+    <pre>paths:
+  - &quot;/var/ekatra/rtdb/*/*&quot;
+  - &quot;/var/ekatra/hub/*/*&quot;
+  - &quot;/var/ekatra/spd/*/*&quot;
+  - &quot;/var/ekatra/tmp/*/*&quot;
+  - &quot;/ekatra/brama/projects/*/.doit.db&quot;
+db:
+  -
+    &#x27;conn&#x27;: &quot;mongodb://mongo/ekatra&quot;
+    &#x27;mask&#x27;: &quot;mnemo.*$&quot;
+
+</pre>
+</body>
+</html>

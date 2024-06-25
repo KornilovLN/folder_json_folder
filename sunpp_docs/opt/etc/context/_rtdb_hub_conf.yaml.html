@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_rtdb_hub_conf.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_rtdb_hub_conf.yaml</h1>
+    <pre># Назначение файла и описание:
+# Этот файл содержит конфигурацию для RTDB Hub.
+# Он определяет источники данных, параметры подключения и настройки логирования.
+
+# Конфигурация источников данных RTDB
+rtdb:
+#
+#  - type: sio
+##    server_url: ws://rtdb-hub-prod.sunpp.cns/socket.io/
+#    server_url: ws://brama.master.cns/ekatra/hub/socket.io/
+#
+#    timeout: 15
+#    filter: /^z.+/
+
+#  - type: simulate
+#    root: /var/ekatra/rtdb/
+#    root_pg: /var/ekatra/hub/
+#    cell:
+#      probability: 0.5
+#      gauss: 0.5
+
+  # Источник данных типа &quot;rtdb&quot;
+  - type: rtdb
+    root: /var/ekatra/rtdb/
+    root_pg: /var/ekatra/hub/
+
+  # Источник данных типа &quot;mqtt&quot;
+  - type: mqtt
+    host: mq
+    filter: netra
+
+# Конфигурация логирования
+logging:
+  version: 1
+  
+  # Форматтеры логов
+  formatters:
+    default:
+      format: &#x27;%(asctime)s %(levelname)-8s %(name)-15s %(message)s&#x27;
+      datefmt: &#x27;%Y-%m-%d %H:%M:%S&#x27;
+  
+  # Обработчики логов
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: default
+      level: INFO
+      stream: ext://sys.stdout
+  
+  # Корневой логгер
+  root:
+    level: INFO
+    handlers:
+      - console
+  
+  # Настройки логгеров для отдельных модулей
+  loggers:
+    engineio:
+      level: INFO
+      handlers:
+        - console
+</pre>
+</body>
+</html>

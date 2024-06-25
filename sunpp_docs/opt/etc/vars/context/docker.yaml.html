@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>docker.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>docker.yaml</h1>
+    <pre>images_domain: registry.sunpp.cns.atom
+image_list:
+- st2
+- netra
+- brama
+- frontend
+- backend
+- rtdb
+#- compiler
+- pki
+images:
+  registry: &#x27;{{ images_domain }}/registry:2.7.1&#x27;
+  traefik: &#x27;{{ images_domain }}/traefik:1.7.9&#x27;
+  mongodb: &#x27;{{ images_domain }}/mongodb:3.4.15&#x27;
+#  opentsdb: &#x27;{{ images_domain }}/opentsdb:2.3.1&#x27;
+  virtuoso: &#x27;{{ images_domain }}/virtuoso:7.2.5.1&#x27;
+  rabbitmq: &#x27;{{ images_domain }}/rabbitmq:3.7.13&#x27;
+  postgres: &#x27;{{ images_domain }}/postgres:10-19.03.20&#x27;
+  compiler: &#x27;{{ images_domain }}/lmzmq/compiler:latest&#x27;</pre>
+</body>
+</html>

@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>showon-fragments.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>showon-fragments.sh</h1>
+    <pre>#!/usr/bin/env bash
+
+#xmlstarlet sel -T -t -m //param -v @mas -o &#x27;;&#x27; -v @nom -o &#x27;;&#x27; -v @iden -o &#x27;;&#x27; -f -n $1/*.xml \
+#    | sort --field-separator=&#x27;;&#x27; -V| uniq
+
+xmlstarlet sel -T -t -m //param -i @mas -v @mas -o &#x27;;&#x27; -v @nom -o &#x27;;&#x27; -v @iden -o &#x27;;&#x27; -f -n \
+    --elif @mas_x -v @mas_x -o &#x27;;&#x27; -v @nom_x -o &#x27;;&#x27; -v @iden_x -o &#x27;;&#x27; -f -n \
+                  -v @mas_y -o &#x27;;&#x27; -v @nom_y -o &#x27;;&#x27; -v @iden_y -o &#x27;;&#x27; -f -n -b $1/*.xml \
+    | sort --field-separator=&#x27;;&#x27; -V| uniq
+</pre>
+</body>
+</html>

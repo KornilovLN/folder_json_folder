@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_sqlfunctions.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_sqlfunctions.py</h1>
+    <pre># -*- coding: utf-8 -*-
+from __future__ import unicode_literals, absolute_import 
+import logging
+import six
+from ekatra.compiler import fixnames
+import rdflib
+
+# Определение пространств имен RDF
+SH = rdflib.Namespace(&quot;http://sunpp.cns.atom/cim/hika#&quot;)
+MOF = rdflib.Namespace(&quot;http://spd.ivl.cns/cim/rtdbmof#&quot;)
+RDFS = rdflib.RDFS
+
+# Словарь для хранения идентификаторов
+_idset = {}
+log = logging.getLogger(__name__)
+
+def init_idset(_):
+    &quot;&quot;&quot;Инициализирует набор идентификаторов&quot;&quot;&quot;
+    _idset.clear()
+
+def fix_rufloatstr(v):
+    &quot;&quot;&quot;(str)-&gt;str
+    Исправляет строку с плавающей запятой, заменяя запятые на точки и другие символы
+    &quot;&quot;&quot;
+    if isinstance(v, six.string_types):
+        v = v.replace(&#x27;,&#x27;, &#x27;.&#x27;).replace(&#x27;−&#x27;, &#x27;-&#x27;).replace(&#x27;Е&#x27;, &#x27;e&#x27;)
+    return v
+
+def replace(string1, string_to_replace, replacement_string):
+    &quot;&quot;&quot;(str, str, str)-&gt;str
+    Заменяет подстроку в строке
+    &quot;&quot;&quot;
+    if isinstance(string1, six.string_types):
+        return string1.replace(string_to_replace, replacement_string)
+    return string1
+
+def form_type(unit, mtype, t=None):
+    &quot;&quot;&quot;(int, int, str?)-&gt;str
+    Формирует тип на основе переданных параметров
+    &quot;&quot;&quot;
+    log.info(&quot;form_type: %s %s %s&quot;, unit, mtype, t)
+    return t
+
+def rm_su_unit_from_name(unit, plantid):
+    &quot;&quot;&quot;(int, str?)-&gt;str
+    Удаляет идентификатор блока из имени установки
+    &quot;&quot;&quot;
+    if plantid is not None:
+        unit = str(unit)
+        if plantid.startswith(unit):
+            return plantid[len(unit):]
+        else:
+            return plantid
+
+def fix_su_name(unit, plantid):
+    &quot;&quot;&quot;(int, str?)-&gt;str
+    Исправляет имя установки, добавляя идентификатор блока
+    &quot;&quot;&quot;
+    if unit == 0:
+        return plantid
+    if plantid is not None:
+        unit = str(unit)
+        if plantid.startswith(unit):
+            return plantid
+        else:
+            return unit + plantid
+
+def fix_su_format(rt, ft=None):
+    &quot;&quot;&quot;(int, int?)-&gt;str
+    Исправляет формат установки
+    &quot;&quot;&quot;
+    if ft is None:
+        return
+    if ft &lt; 7:
+        return &#x27;{}.{}&#x27;.format(7 - ft, ft)
+    return &#x27;5G&#x27;
+
+def fix_r_name(unit, plantid):
+    &quot;&quot;&quot;(int, str?)-&gt;str
+    Исправляет имя установки, добавляя префикс &#x27;R&#x27;
+    &quot;&quot;&quot;
+    plantid = fixnames.fix_name(plantid)
+    if unit == 0:
+        unit = &#x27;R&#x27;
+    if plantid is not None:
+        unit = str(unit)
+        if plantid.startswith(unit):
+            return plantid
+        else:
+            return unit + plantid
+
+def fix_name(name, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str, str?)-&gt;str
+    Исправляет имя, добавляя префикс
+    &quot;&quot;&quot;
+    if name is not None:
+        return prefix + fixnames.fix_name(name)
+
+def fix_id(iden, altid=None, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str, str?, str?)-&gt;str
+    Исправляет идентификатор, добавляя префикс и уникальный суффикс
+    &quot;&quot;&quot;
+    if iden is None:
+        if altid is None:
+            r = None
+        else:
+            r = fix_name(altid, prefix) + &#x27;_Q&#x27;
+    else:
+        r = fix_name(iden, prefix)
+
+    if r is None:
+        pass
+    elif r in _idset:
+        q = _idset[r] + 1
+        n = r + fix_name(altid, &#x27;_q&#x27;)
+        _idset[r] = q
+        log.warn(&#x27;Re-ident %s to %s&#x27;, r, n)
+        r = n
+    else:
+        _idset[r] = 0
+    return r
+
+def choose_id(masterid, iden, altid=None, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str, str, str?, str?)-&gt;str
+    Выбирает идентификатор на основе masterid, иначе строит уникальный идентификатор на основе iden, altid и prefix
+    &quot;&quot;&quot;
+    return fix_id(masterid, altid) if masterid else fix_id(iden, altid=altid, prefix=prefix)
+
+def check_scale(name, lir, lll, ll, hl, hhl, hir):
+    &quot;&quot;&quot;(str, float, float, float, float, float, float)-&gt;bool
+    Проверяет правильность шкалы. Если значения не возрастают, возвращает True, иначе None
+    &quot;&quot;&quot;
+    scale = [x for x in (lir, lll, ll, hl, hhl, hir) if x is not None]
+    if scale and scale != sorted(scale):
+        log.warn(&quot;Wrong scale %s %s&quot;, name, (lir, lll, ll, hl, hhl, hir))
+        return True
+
+def calc_su_format(type_string, display_format, decimal_places):
+    &quot;&quot;&quot;(str, int, int)-&gt;str
+    Вычисляет формат на основе типа, формата отображения и количества десятичных знаков
+    &quot;&quot;&quot;
+    r = None
+    if type_string in (&quot;SIC&quot;,):
+        r = &quot;d&quot;
+    elif type_string in (&quot;SAC&quot;, &quot;SACNA&quot;):
+        if display_format == 0 and decimal_places &lt; 7:
+            r = &quot;{}.{}&quot;.format(7 - decimal_places, decimal_places)
+        else:
+            r = &quot;5E&quot;
+    return r
+
+def calcFormatByRange(predn, predv):
+    &quot;&quot;&quot;(float, float)-&gt;str
+    Вычисляет формат на основе диапазона значений
+    &quot;&quot;&quot;
+    if not(predn is None or predv is None):
+        d = predv - predn
+        if d &lt; 0.04095:
+            return &quot;5E&quot;
+        if d &lt;= 0.4095:
+            return &quot;6.4&quot;
+        if d &lt; 4.095:
+            return &quot;6.3&quot;
+        if d &lt; 40.95:
+            return &quot;6.2&quot;
+        if d &lt; 409.5:
+            return &quot;6.1&quot;
+        if d &lt; 409500:
+            return &quot;6.0&quot;
+    return &quot;5E&quot;
+
+def processpont_validity(processor):
+    &quot;&quot;&quot;Проверяет, что каждая точка процесса в массиве &quot;MOF.array&quot; имеет &quot;http://sunpp.cns.atom/cim/hika#id&quot;
+    Используется в SUNPP
+    &quot;&quot;&quot;
+    graph = processor.result
+    key = SH.id
+    for point in graph.subjects(predicate=MOF.array):
+        items = list(graph.objects(point, key))
+        if not len(items):
+            log.error(&quot;object %s without meta-information check the list of arrays&quot;, point)
+
+def test_uniq(processor):
+    &quot;&quot;&quot;Проверяет уникальность меток и идентификаторов&quot;&quot;&quot;
+    graph = processor.result
+    labels = set()
+
+    for sub, label in graph.subject_objects(RDFS.label):
+        if label in labels:
+            log.warn(&quot;No unique labels: %s&quot; % label)
+        labels.add(label)
+
+    for uid, count in _idset.items():
+        if count:
+            log.warn(&quot;No unique id: %s&quot; % uid)</pre>
+</body>
+</html>

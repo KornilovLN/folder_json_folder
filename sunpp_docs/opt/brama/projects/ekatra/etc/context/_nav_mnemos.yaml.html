@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_nav_mnemos.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_nav_mnemos.yaml</h1>
+    <pre># Этот YAML-файл определяет структуру меню для раздела &quot;Мнемосхемы&quot;.
+# Корневой элемент меню имеет заголовок &quot;Мнемосхемы&quot; и использует
+# иконку fa fa-tachometer.
+# В разделе children определены дочерние элементы меню.
+# В данный момент присутствует только одна активная ссылка на файл nav.yaml
+# из директории u3/etc.
+# Этот файл, вероятно, содержит дополнительную структуру меню для мнемосхем,
+# связанных с УВС энергоблока №3.
+# Остальные ссылки на файлы nav.yaml из других директорий (z4/etc, z6/etc и reglament/etc)
+# закомментированы.
+# Этот файл используется для построения навигационного меню в пользовательском
+# интерфейсе приложения, в частности, для отображения раздела &quot;Мнемосхемы&quot;
+# и его дочерних элементов.
+
+# Заголовок элемента меню
+title: Мнемосхемы
+
+# Класс иконки для элемента меню
+cssClass: fa fa-tachometer
+
+# Дочерние элементы меню
+children:
+  # Ссылка на файл nav.yaml из директории u3/etc
+  - $ref: &quot;../../u3/etc/nav.yaml&quot;
+
+  # Закомментированные ссылки на файлы nav.yaml из других директорий
+  # - $ref: &quot;../../z4/etc/nav.yaml&quot;
+  # - $ref: &quot;../../z6/etc/nav.yaml&quot;
+  # - $ref: &quot;../../reglament/etc/nav.yaml&quot;
+</pre>
+</body>
+</html>

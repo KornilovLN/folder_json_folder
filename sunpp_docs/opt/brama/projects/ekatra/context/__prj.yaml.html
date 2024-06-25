@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>__prj.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>__prj.yaml</h1>
+    <pre>title: EKATRA
+role:
+  - supervisor
+  - admin
+
+menu:
+  - name: up_common_metadata
+    title: Update common metadata
+    action:
+    - st2action: brama.up_common_metadata
+      trace_tag: up_common_metadata
+      parameters:
+        userid: &#x27;{{ userid }}&#x27;
+        brama_user: &#x27;{{ username }}&#x27;
+        working_dir: &#x27;{{ prj.root }}/etc/&#x27;
+        labels:
+          ekatra.task: processing
+          ekatra.title: Update common metadata
+        args: &#x27;-a&#x27;
+
+  - name: _deploy
+    title: Deploy
+    items:
+    - name: deploy
+      title: Deploy to Production
+      action:
+      - st2action: sunpp.deploy2production
+        trace_tag: deploy2prod
+        parameters:
+#          timeout: 420
+          build_force: false
+          userid: &#x27;{{ userid }}&#x27;
+          brama_user: &#x27;{{ username }}&#x27;
+    - name: stop_production
+      title: Stop Production
+      action:
+      - st2action: sunpp.stop_production
+        trace_tag: stop2prod
+        parameters:
+#          timeout: 420
+          userid: &#x27;{{ userid }}&#x27;
+          brama_user: &#x27;{{ username }}&#x27;
+
+
+#  - name: clean_projects
+#    title: Clean projects
+#    action:
+#    - st2action: sunpp.clean_app
+#      trace_tag: &#x27;{{ prj.name }}.clean_app&#x27;
+#      parameters:
+#        userid: &#x27;{{ userid }}&#x27;
+#        brama_user: &#x27;{{ username }}&#x27;
+#        working_dir: &#x27;{{ prj.files.etc.path }}&#x27;
+
+
+views:
+  - type: filer
+    name: files
+    title: &#x27;Файлы&#x27;
+
+    volumes:
+      - id: etc
+        title: Настройки
+        path: /ekatra/brama/projects/ekatra/etc
+
+      - id: etcdomain
+        title: Глобальные Настройки
+        path: /ekatra/etc
+
+      - id: iso
+        title: ISO образы УВС
+        path: /var/ekatra/tmp/ISO
+        mqtt_topic: files/ISO
+        onupload:
+          - mqtt: &#x27;brama-noty&#x27;
+            payload:
+              category: success
+              userid: &#x27;{{ userid }}&#x27;
+              message: |
+                upload
+                {{ path }}
+
+              theme: semanticui
+            qos: 0
+            retain: no
+
+#      - id: hub
+#        title: HUB
+#        path: /var/ekatra/hub
+#
+#      - id: rtdb
+#        title: RTDB
+#        path: /var/ekatra/rtdb
+#
+#      - id: spd
+#        title: spd
+#        path: /var/ekatra/spd
+
+      - id: log
+        title: Nginx Logs
+        path: /var/ekatra/log/nginx
+
+      - id: service
+        title: Production services
+        path: /var/ekatra/tmp/service
+        
+
+  - pattern: task_list
+    name: metatasks
+    title: Common metadata
+    source: st2:///brama.up_common_metadata2
+    parameters:
+      userid: &#x27;{{ userid }}&#x27;
+      brama_user: &#x27;{{ username }}&#x27;
+      working_dir: &#x27;{{ prj.root }}/etc&#x27;
+      args: &#x27;list --all --status --deps --template=json&#x27;
+
+    menu:
+      - name: up_common_metadata_single
+        action:
+        - st2action: brama.up_common_metadata
+          trace_tag: up_common_metadata
+          parameters:
+            userid: &#x27;{{ userid }}&#x27;
+            brama_user: &#x27;{{ username }}&#x27;
+            working_dir: &#x27;{{ prj.root }}/etc/&#x27;
+            labels:
+              ekatra.task: processing
+              ekatra.title: Update common metadata
+            args: &#x27;-as {{ data.name }}&#x27;
+
+      - name: up_common_metadata_single_deps
+        action:
+        - st2action: brama.up_common_metadata
+          trace_tag: up_common_metadata
+          parameters:
+            userid: &#x27;{{ userid }}&#x27;
+            brama_user: &#x27;{{ username }}&#x27;
+            working_dir: &#x27;{{ prj.root }}/etc/&#x27;
+            labels:
+              ekatra.task: processing
+              ekatra.title: Update common metadata
+            args: &#x27;-a {{ data.name }}&#x27;
+</pre>
+</body>
+</html>

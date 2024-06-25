@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>do_extract.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>do_extract.sh</h1>
+    <pre>
+cd /tmp
+tar xzf /build/IO-7.3-76.tar.gz
+
+deepextract -c /build/hika7.yaml -u -o /build/.inputs /tmp/IO-7.3-76/
+
+cd /build/.inputs/db
+gbak -REP algor_blk.gbk algor_blk.gdb
+gbak -REP algor_kzb.gbk algor_kzb.gdb
+gbak -REP algor_rnp.gbk algor_rnp.gdb
+gbak -REP algor_vpb.gbk algor_vpb.gdb
+gbak -REP isc4.gbk      isc4.gdb
+gbak -REP skv_tep.gbk   skv_tep.gdb
+gbak -REP uso.gbk       uso.gdb
+
+gdb2txt --output /build/.uso -e koi8-r /build/.inputs/db/uso.gdb</pre>
+</body>
+</html>

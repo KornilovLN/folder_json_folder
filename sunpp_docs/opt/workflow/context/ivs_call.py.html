@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ivs_call.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>ivs_call.py</h1>
+    <pre># -*- coding: utf-8 -*-
+
+import colander
+import deform
+import deform.widget as widget
+
+__all__ = []
+
+# class Mapping(colander.Schema):
+#     name = colander.SchemaNode(
+#         colander.String(),
+#         description=&#x27;Content name&#x27;)
+#     date = colander.SchemaNode(
+#         colander.Date(),
+#         widget=deform.widget.DatePartsWidget(),
+#         description=&#x27;Content date&#x27;)
+
+choices = [(&#x27;z{}&#x27;.format(x), u&#x27;№ {}&#x27;.format(x)) for x in range(1, 7)]
+
+
+class Tasks(colander.SequenceSchema):
+    task = colander.SchemaNode(
+        colander.String(),
+        title=&#x27;Task pattern&#x27;,
+    )
+
+class Schema(colander.Schema):
+    units = colander.SchemaNode(
+        colander.Set(),
+        title=u&quot;УВСы:&quot;,
+        widget=widget.CheckboxChoiceWidget(values=choices, inline=True),
+        validator=colander.Length(min=1),
+        )
+
+    force = colander.SchemaNode(
+        colander.Boolean(),
+        description=&#x27;always execute tasks even if up-to-date&#x27;,
+        widget=deform.widget.CheckboxWidget(),
+        label=&#x27;Always&#x27;,
+        title=&#x27;Force execution&#x27;)
+
+    single = colander.SchemaNode(
+        colander.Boolean(),
+        description=&#x27;Execute only specified tasks ignoring their dependencies&#x27;,
+        widget=deform.widget.CheckboxWidget(),
+        label=&#x27;Single&#x27;,
+        title=&#x27;only specified tasks&#x27;)
+
+    keepon = colander.SchemaNode(
+        colander.Boolean(),
+        description=&#x27;continue executing tasks even after a failure&#x27;,
+        widget=deform.widget.CheckboxWidget(),
+        label=&#x27;continue&#x27;,
+        title=&#x27;Continue execution&#x27;)
+
+    tasks = Tasks()
+
+
+class SelectUnit(colander.Schema):
+    unit = colander.SchemaNode(
+        colander.String(),
+        title=u&quot;Выберите УВС:&quot;,
+        widget=widget.RadioChoiceWidget(values=choices, inline=True),
+        )
+
+
+
+schema = Schema()
+select_unit =SelectUnit()</pre>
+</body>
+</html>

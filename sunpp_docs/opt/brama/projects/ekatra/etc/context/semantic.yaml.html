@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>semantic.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>semantic.yaml</h1>
+    <pre>domain: sunpp
+
+meta:
+  mofstates: true
+  upload_url: &#x27;http://www/spd/meta/&#x27;
+  upload_path: /var/ekatra/spd/meta/
+  graphs:
+  - sources: /usr/local/lib/python3.7/dist-packages/ekatra/semantic/cim/*/
+  - sources: /ekatra/etc/meta/cim/*/
+
+nav:
+  src: /ekatra/brama/projects/ekatra/etc/nav.yaml
+  dest: /var/ekatra/spd/nav.json
+
+#synchronize:
+#  src: /ekatra/brama/projects/ekatra/etc/nav.json
+#  dest: /var/ekatra/spd/nav.json
+
+doit_config:
+    backend: sqlite3
+    verbosity: 2
+
+logging:
+  level: INFO</pre>
+</body>
+</html>

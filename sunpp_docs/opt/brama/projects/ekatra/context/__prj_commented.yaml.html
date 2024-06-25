@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>__prj_commented.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>__prj_commented.yaml</h1>
+    <pre># Секция title задает отображаемое название проекта
+title: EKATRA
+
+# Секция role определяет роли, которые могут получить доступ к этому проекту
+role:
+  - supervisor
+  - admin
+
+# Секция menu определяет пункты меню и действия, доступные в интерфейсе Brama для этого проекта
+menu:
+  - name: up_common_metadata  # Пункт меню &quot;Update common metadata&quot;
+    title: Update common metadata  # Отображаемое название пункта меню
+    action:  # Действия, которые будут выполняться при выборе этого пункта меню
+    - st2action: brama.up_common_metadata  # Вызов действия brama.up_common_metadata
+      trace_tag: up_common_metadata  # Тег для отслеживания выполнения действия
+      parameters:  # Параметры, передаваемые в действие
+        userid: &#x27;{{ userid }}&#x27;  # Идентификатор пользователя
+        brama_user: &#x27;{{ username }}&#x27;  # Имя пользователя Brama
+        working_dir: &#x27;{{ prj.root }}/etc/&#x27;  # Рабочая директория
+        labels:  # Метки для действия
+          ekatra.task: processing
+          ekatra.title: Update common metadata
+        args: &#x27;-a&#x27;  # Аргументы для действия
+
+  - name: _deploy  # Пункт меню &quot;Deploy&quot;
+    title: Deploy  # Отображаемое название пункта меню
+    items:  # Вложенные пункты меню
+    - name: deploy  # Пункт меню &quot;Deploy to Production&quot;
+      title: Deploy to Production  # Отображаемое название пункта меню
+      action:  # Действия, которые будут выполняться при выборе этого пункта меню
+      - st2action: sunpp.deploy2production  # Вызов действия sunpp.deploy2production
+        trace_tag: deploy2prod  # Тег для отслеживания выполнения действия
+        parameters:  # Параметры, передаваемые в действие
+          build_force: false  # Параметр build_force
+          userid: &#x27;{{ userid }}&#x27;  # Идентификатор пользователя
+          brama_user: &#x27;{{ username }}&#x27;  # Имя пользователя Brama
+    - name: stop_production  # Пункт меню &quot;Stop Production&quot;
+      title: Stop Production  # Отображаемое название пункта меню
+      action:  # Действия, которые будут выполняться при выборе этого пункта меню
+      - st2action: sunpp.stop_production  # Вызов действия sunpp.stop_production
+        trace_tag: stop2prod  # Тег для отслеживания выполнения действия
+        parameters:  # Параметры, передаваемые в действие
+          userid: &#x27;{{ userid }}&#x27;  # Идентификатор пользователя
+          brama_user: &#x27;{{ username }}&#x27;  # Имя пользователя Brama
+
+# Секция views определяет различные представления (views), такие как файловый менеджер и списки задач
+# Секция views определяет различные представления (views), такие как файловый менеджер и списки задач
+views:
+  - type: filer  # Определяет представление типа &quot;Файловый менеджер&quot;
+    name: files  # Имя представления
+    title: &#x27;Файлы&#x27;  # Отображаемое название представления
+
+    volumes:  # Разделы, которые будут отображаться в файловом менеджере
+      - id: etc  # Идентификатор раздела
+        title: Настройки  # Отображаемое название раздела
+        path: /ekatra/brama/projects/ekatra/etc  # Путь на файловой системе для этого раздела
+
+      # Другие разделы файлового менеджера
+      - id: etcdomain
+        title: Глобальные Настройки
+        path: /ekatra/etc
+
+      - id: iso
+        title: ISO образы УВС
+        path: /var/ekatra/tmp/ISO
+        mqtt_topic: files/ISO  # Топик MQTT для уведомлений об изменениях в этом разделе
+        onupload:  # Действия, выполняемые при загрузке файлов в этот раздел
+          - mqtt: &#x27;brama-noty&#x27;  # Отправка уведомления через MQTT
+            payload:  # Содержимое уведомления
+              category: success
+              userid: &#x27;{{ userid }}&#x27;
+              message: |
+                upload
+                {{ path }}
+              theme: semanticui
+            qos: 0
+            retain: no
+
+      # Другие разделы файлового менеджера
+      - id: log
+        title: Nginx Logs
+        path: /var/ekatra/log/nginx
+
+      - id: service
+        title: Production services
+        path: /var/ekatra/tmp/service
+
+  - pattern: task_list  # Определяет представление типа &quot;Список задач&quot;
+    name: metatasks  # Имя представления
+    title: Common metadata  # Отображаемое название представления
+    source: st2:///brama.up_common_metadata2  # Источник данных для списка задач
+    parameters:  # Параметры для получения данных
+      userid: &#x27;{{ userid }}&#x27;
+      brama_user: &#x27;{{ username }}&#x27;
+      working_dir: &#x27;{{ prj.root }}/etc&#x27;
+      args: &#x27;list --all --status --deps --template=json&#x27;
+
+    menu:  # Меню действий, доступных для каждой задачи в списке
+      - name: up_common_metadata_single  # Пункт меню &quot;Update single metadata&quot;
+        action:  # Действия, выполняемые при выборе этого пункта меню
+        - st2action: brama.up_common_metadata
+          trace_tag: up_common_metadata
+          parameters:
+            userid: &#x27;{{ userid }}&#x27;
+            brama_user: &#x27;{{ username }}&#x27;
+            working_dir: &#x27;{{ prj.root }}/etc/&#x27;
+            labels:
+              ekatra.task: processing
+              ekatra.title: Update common metadata
+            args: &#x27;-as {{ data.name }}&#x27;
+
+      - name: up_common_metadata_single_deps  # Пункт меню &quot;Update single metadata with dependencies&quot;
+        action:
+        - st2action: brama.up_common_metadata
+          trace_tag: up_common_metadata
+          parameters:
+            userid: &#x27;{{ userid }}&#x27;
+            brama_user: &#x27;{{ username }}&#x27;
+            working_dir: &#x27;{{ prj.root }}/etc/&#x27;
+            labels:
+              ekatra.task: processing
+              ekatra.title: Update common metadata
+            args: &#x27;-a {{ data.name }}&#x27;</pre>
+</body>
+</html>

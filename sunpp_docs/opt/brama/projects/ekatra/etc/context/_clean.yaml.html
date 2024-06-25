@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_clean.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_clean.yaml</h1>
+    <pre># Этот файл определяет пути файловой системы и 
+# базы данных MongoDB, которые должны быть очищены.
+# Секция paths содержит список путей, где будут удалены
+# все файлы и подкаталоги. 
+# Секция db содержит список баз данных MongoDB и
+# маски для коллекций, которые должны быть очищены
+# в каждой базе данных
+
+# Список путей для очистки
+paths:
+  # Удалить все файлы и директории в /var/ekatra/rtdb/
+  - &quot;/var/ekatra/rtdb/*/*&quot;
+  # Удалить все файлы и директории в /var/ekatra/hub/  
+  - &quot;/var/ekatra/hub/*/*&quot;
+  # Удалить все файлы и директории в /var/ekatra/spd/
+  - &quot;/var/ekatra/spd/*/*&quot;
+  # Удалить все файлы и директории в /var/ekatra/tmp/
+  - &quot;/var/ekatra/tmp/*/*&quot;
+  # Удалить файл .doit.db в каждом проекте /ekatra/brama/projects/
+  - &quot;/ekatra/brama/projects/*/.doit.db&quot;
+
+# Список баз данных для очистки
+db:
+  # Очистить коллекции, соответствующие маске &quot;mnemo.*&quot; в базе данных ekatra
+  # на MongoDB, доступном по адресу mongodb://mongo/ekatra
+  -
+    &#x27;conn&#x27;: &quot;mongodb://mongo/ekatra&quot;
+    &#x27;mask&#x27;: &quot;mnemo.*$&quot;
+</pre>
+</body>
+</html>

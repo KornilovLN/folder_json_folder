@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>site.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>site.yaml</h1>
+    <pre>submodules:
+  - name: ekatra
+    repo: http://gitlab.office.ivl.ua/ekatra/ekatra.git
+    tag: 4.5.16
+  - name: tatra
+    repo: http://gitlab.office.ivl.ua/ekatra/tatra.git
+    tag: 4.5.35
+
+vars:
+  source_images_domain: registry.dc.cns.atom
+
+deploy:
+
+  - name: copy install
+    shell: &#x27;mkdir -p ${dest_dir}/${domain}; cp -fr */*install.sh ${dest_dir}/${domain}/&#x27;
+
+  - name: update domain index.info
+    shell: mkdir -p ${dest_dir}/${domain}; ls -1t ${dest_dir} | grep &quot;${domain}-&quot; &gt; ${dest_dir}/${domain}/index.info
+
+  - name: &#x27;push images to source_images_domain&#x27;
+    docker_push: all
+
+  - name: &#x27;push images to registry.sunpp.cns.atom&#x27;
+    docker_push: false
+    vars:
+      source_images_domain: registry.sunpp.cns.atom
+
+  - shell: st2 run --trace-tag=&quot;copy_sunpp_to_dc&quot; core.local cmd=&#x27;scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null &quot;${site}&quot; st2.dc.cns:/var/ekatra/install/sites&#x27;
+  - shell: st2 run --trace-tag=&quot;copy_sunpp_to_dc&quot; core.local cmd=&#x27;scp -rp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -rp &quot;${dest_dir}/${domain}/&quot; st2.dc.cns:/var/ekatra/install/sites&#x27;
+</pre>
+</body>
+</html>

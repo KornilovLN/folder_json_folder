@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>REPORT_ALGOR.md</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>REPORT_ALGOR.md</h1>
+    <pre>
+### Statistics of algorithms used in mnemo
+
+source: /var/ekatra/tmp/ISO/IO-7.3-76.tar.gz
+
+```
+cd /var/lib/docker/volumes/sunpp-var-data/_data/tmp/u3/results/mnemos
+grep -f *.mnemo  | grep &quot;algor&quot; | \
+   awk -e &#x27;match($0, /algor=[&#x27;\&#x27;\&quot;&#x27;][^&#x27;\&#x27;\&quot;&#x27;]*[&#x27;\&#x27;\&quot;&#x27;]/) {print substr($0, RSTART+0, RLENGTH-0)}&#x27; | \
+   sed &quot;s/\&quot;/&#x27;/g&quot;| \
+   sort | \
+   uniq -c | \
+   sort -bnr
+
+```
+
+```
+   [x] 9861 algor=&#x27;&#x27;
+   [x] 4395 algor=&#x27;D&#x27;
+   [x] 3231 algor=&#x27;S&#x27;
+   [-] 1844 algor=&#x27;KNOP_g&#x27;
+   [ ] 1627 algor=&#x27;DTEXT_ANALOG&#x27;
+   [x] 1317 algor=&#x27;F&#x27;
+   [x] 1194 algor=&#x27;M&#x27;
+   [x] 1018 algor=&#x27;C&#x27;
+   [-]  441 algor=&#x27;KNOP_SIGN&#x27;
+   [x]  375 algor=&#x27;t&#x27;
+   [?]  349 algor=&#x27;x&#x27;
+   [x]  156 algor=&#x27;TABLO_M&#x27;
+   [x]  137 algor=&#x27;G&#x27;
+   [?]   98 algor=&#x27;o&#x27;
+   [x]   96 algor=&#x27;TABLO_DISKR&#x27;
+   [x]   83 algor=&#x27;I&#x27;
+   [?]   66 algor=&#x27;Y&#x27;
+   [?]   38 algor=&#x27;k&#x27;
+   [ ]   25 algor=&#x27;DTEXT_TABLO&#x27;
+   [x]   14 algor=&#x27;r&#x27;
+   [x]   10 algor=&#x27;R&#x27;
+   [ ]    9 algor=&#x27;DTEXT_TIMER_T&#x27;
+   [x]    8 algor=&#x27;z&#x27;
+   [x]    8 algor=&#x27;v&#x27;
+   [-]    6 algor=&#x27;KNOP_G&#x27;
+   [-]    3 algor=&#x27;KNOP_R&#x27;
+   [-]    3 algor=&#x27;KNOP_A&#x27;
+   [ ]    3 algor=&#x27;DTEXT_TIMER&#x27;
+   [x]    2 algor=&#x27;V&#x27;
+   [x]    1 algor=&#x27;H&#x27;
+
+```
+
+algor=&#x27;x&#x27;
+//Дискретный агрегатный name_alg=&quot;Сигнал о состоянии защиты(блокировки)&quot;
+//needed kind B, B
+Структуры B не достаточно для корректной интерпретации состояний.
+
+</pre>
+</body>
+</html>

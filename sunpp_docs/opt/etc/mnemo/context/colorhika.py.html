@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>colorhika.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>colorhika.py</h1>
+    <pre># -*- coding: utf-8 -*-
+import os
+from mnemo.colour import Color, Pallet
+from mnemo.tree.node import Ref
+import mnemo.runtime as runtime
+import yaml
+
+try:
+    from hika_data import id_to_colors, name_to_id, id_to_fid, fid_to_data  # if there is no file for some reason
+except Exception as e:
+    id_to_colors = {}
+    name_to_id = {}
+
+
+try:
+    base_path = os.path.dirname(__file__)
+    file_pallet = os.path.join(base_path, &#x27;pallete_hika.yaml&#x27;)
+    with open(file_pallet, &#x27;r&#x27;) as f:
+        pal = yaml.load(f, Loader=yaml.SafeLoader)
+except Exception as e:
+    pal = {}
+
+
+LIGHT_BACKGROUNDS = (
+    Color(&#x27;#aeaeae&#x27;),
+    Color(&#x27;#c9c9c9&#x27;),
+)
+
+BACKGROUND_COLORS = LIGHT_BACKGROUNDS + (
+    None,
+    Color(&#x27;black&#x27;),
+    Color(&#x27;#030303&#x27;),
+    Color(&#x27;#040404&#x27;),
+)
+
+
+class HikaColorMapper:
+
+    def __init__(self, ids, names):
+        self._name_to_id = names
+        self._id_to_colors = ids
+
+    def get(self, v):
+        return self[v]
+
+    def __getitem__(self, item):
+        try:
+            item = int(item)
+        except:
+            pass
+        name = self._name_to_id.get(item) if isinstance(item, str) else item
+        r = self._id_to_colors.get(name)
+        return r
+
+
+hika_color_map = HikaColorMapper(id_to_colors, name_to_id)  # fixme path to color file
+
+# _color_map_advanced = {
+#     u&quot;НЕД&quot;     : Color(&#x27;#f5f&#x27;),
+#     u&quot;НОРМА&quot;   : Color(&#x27;#0f0&#x27;),
+#     u&quot;НРГ&quot;     : Color(&#x27;#ff0&#x27;),
+#     u&quot;НАГ&quot;     : Color(&#x27;#f00&#x27;),
+#     u&quot;НВГ&quot;     : Color(&#x27;#fff&#x27;),
+#     u&quot;ВРГ&quot;     : Color(&#x27;#ff0&#x27;),
+#     u&quot;ВАГ&quot;     : Color(&#x27;#f00&#x27;),
+#     u&quot;ВВГ&quot;     : Color(&#x27;#fff&#x27;),
+#     u&quot;ЗАПР&quot;    : Color(&#x27;#e87f3d&#x27;),
+#     u&quot;АВАРИЯ&quot;  : Color(&#x27;#f00&#x27;),
+# }
+
+
+class Styler(object):
+
+    tablo_color_table = {
+        Color(&#x27;red&#x27;): &#x27;R&#x27;,
+        Color(&#x27;white&#x27;): &#x27;W&#x27;,
+        Color(&#x27;blue&#x27;): &#x27;B&#x27;,
+        Color(&#x27;yellow&#x27;): &#x27;Y&#x27;,
+        Color(&#x27;lime&#x27;): &#x27;G&#x27;,
+        Color(&#x27;green&#x27;): &#x27;G&#x27;,
+        Color(&#x27;#4b8a44&#x27;): &#x27;G&#x27;,
+        Color(&#x27;#b4b4b4&#x27;): &#x27;F&#x27;,
+        Color(&#x27;cyan&#x27;): &#x27;C&#x27;,
+        Color(&#x27;orange&#x27;): &#x27;O&#x27;,
+        Color(&#x27;#3c3c3c&#x27;): &#x27;D&#x27;,
+    }  # fixme
+
+    default_font_sizes = {
+        &quot;6&quot;: &quot;font-size-6&quot;,
+        &quot;8&quot;: &quot;font-size-8&quot;,
+        &quot;12&quot;: &quot;font-size-12&quot;,
+        &quot;14&quot;: &quot;font-size-14&quot;,
+        &quot;18&quot;: &quot;font-size-18&quot;,
+        &quot;24&quot;: &quot;font-size-24&quot;,
+        &quot;30&quot;: &quot;font-size-30&quot;,
+        &quot;36&quot;: &quot;font-size-36&quot;,
+        &quot;48&quot;: &quot;font-size-48&quot;,
+    }
+
+    def __init__(self):
+        self._pallet = Pallet(pal)
+        self.color_mapper = HikaColorMapper(id_to_colors, name_to_id)
+        self.bg = None
+
+    def set_background_color(self, color):
+        self.bg = self.get_color(color)
+
+    @property
+    def background_color_is_transparent(self):
+        return self.bg in BACKGROUND_COLORS
+
+    def _styling(self, cl, style):
+        r = {}
+        if style:
+            r[&#x27;style&#x27;] = style
+        if cl:
+            r[&#x27;CLASS&#x27;] = cl
+        if r:
+            return r
+
+    def get_color_index(self, v, default):
+        return self._pallet.get_color(v, default)
+
+    def get_color(self, v):
+        &#x27;&#x27;&#x27;
+
+        :param v: int or  str or Color or Ref
+        :return: Ref or Color or None
+        &#x27;&#x27;&#x27;
+        if isinstance(v, Color):
+            result = v
+        else:
+            color = self.color_mapper.get(v)
+            try:
+                result = Color(color) if color else None
+            except:
+                result = None
+        if result is None:
+            try:
+                result = Color(v)
+            except:
+                runtime.console.warning(u&quot;No color in hika grset pallet with id - `%s`&quot;, v)
+                result = None
+        return result
+
+    def calc_color(self, v):
+        if v is None or isinstance(v, Ref):
+            return v
+        color = self.get_color(v)
+
+        if color is None:
+            res = None
+        else:
+            if self.bg == color:
+                color = Color(&quot;black&quot;)
+            elif self.bg in LIGHT_BACKGROUNDS:  # INVERTING COLORS
+                color.invert_luminance()
+            res = self.get_color_index(color, color.get_hex_l())
+            if not isinstance(res, int):
+                runtime.console.debug(u&quot;Color `%s` not in palette and will be added inline&quot; % color)
+        return res
+
+    def process_font_family(self, ff):
+        fcl = []
+        if &quot;monospace&quot; in ff:
+            fcl.append(&quot;font-monospace&quot;)
+        if &quot;arial&quot; in ff.lower():
+            fcl.append(&quot;font-sansserif&quot;)
+        if &quot;times&quot; in ff.lower():
+            fcl.append(&quot;font-serif&quot;)
+        return fcl
+
+    def get_font(self, v):
+        cl, st = [], {}
+        if v.startswith(&#x27;$&#x27;):
+            fid = id_to_fid.get(v.replace(&#x27;$&#x27;, &#x27;&#x27;))
+        else:
+            fid = v
+        if fid is None:
+            runtime.console.warning(u&quot;No such font %s in forfonts set&quot; % v)
+            return (), {}
+        data = fid_to_data.get(fid)
+        if data is None:
+            runtime.console.warning(u&quot;No such font id %s in fonts set&quot; % v)
+            return (), {}
+
+        fs = data.get(&quot;fs&quot;)  # Font size
+        fsc = self.default_font_sizes.get(fs)
+        if fsc:
+            cl.append(fsc)
+        else:
+            st[&quot;font-size&quot;] = &quot;{}px&quot;.format(fs)
+
+        fb = data.get(&quot;fb&quot;, False)  # Font boldness
+        if fb:
+            cl.append(&quot;font-bold&quot;)
+
+        fi = data.get(&quot;fi&quot;, False)  # Font italic
+        if fi:
+            cl.append(&quot;font-italic&quot;)
+
+        cl.extend(self.process_font_family(data.get(&#x27;ff&#x27;)))  # Font family
+        return cl, st
+
+    def text_styling(self, color=None, font=None, **kwargs):
+        style = {}
+        cl = []
+        color = self.calc_color(color)
+        if isinstance(color, int):
+            cl.append(&#x27;bc{}&#x27;.format(color))
+        elif color is not None:
+            style[&#x27;fill&#x27;] = color
+        if font:
+            fcl, fst = self.get_font(font)
+            cl.extend(fcl)
+            style.update(fst)
+        return self._styling(cl, style)
+
+    def styling(self, **kwargs):
+        style = {}
+        cl = []
+        v = kwargs.get(&#x27;pw&#x27;)
+        if v is not None:
+            style[&#x27;stroke-width&#x27;] = v or 1
+
+        v = kwargs.get(&#x27;ps&#x27;)
+        if v is not None:
+            cl.append(v)
+
+        v = self.calc_color(kwargs.get(&#x27;pc&#x27;))
+        if isinstance(v, int):
+            cl.append(&#x27;pc{}&#x27;.format(v))
+        elif v is not None:
+            style[&#x27;stroke&#x27;] = v
+
+        v = self.calc_color(kwargs.get(&#x27;fill&#x27;, kwargs.get(&#x27;bc&#x27;)))
+        if isinstance(v, int):
+            cl.append(&#x27;bc{}&#x27;.format(v))
+        elif v is not None:
+            style[&#x27;fill&#x27;] = v
+
+        return self._styling(cl, style)
+
+    def tablo_style(self, din, colors):
+        style = {}
+        cl = []
+        v = colors.get(&#x27;contour&#x27;)
+
+        v = self.calc_color(v)
+        if isinstance(v, int):
+            cl.append(&#x27;pc{}&#x27;.format(v))
+        elif v is not None:
+            style[&#x27;stroke&#x27;] = v
+
+        v = colors.get(&#x27;stat&#x27;)
+        v = self.calc_color(v)
+        if isinstance(v, int):
+            cl.append(&#x27;bc{}&#x27;.format(v))
+        elif v is not None:
+            style[&#x27;fill&#x27;] = v
+
+        r = self._styling(cl, style)
+
+        return r
+
+    def tablo_class(self, colors):
+        norm = nenorm = None
+        v = colors.get(&#x27;norm&#x27;)
+        if v is not None:
+            color_s = self.tablo_color_table.get(self.get_color(v), None)
+            if color_s:
+                norm = &#x27;bool{}0&#x27;.format(color_s)
+            else:
+                runtime.console.warning(u&quot;Can&#x27;t create tablo color for %s&quot; % self.get_color(v))
+
+        v = colors.get(&#x27;nenorm&#x27;)
+        if v is not None:
+            color_s = self.tablo_color_table.get(self.get_color(v), None)
+            if color_s:
+                nenorm = &#x27;bool{}1&#x27;.format(color_s)
+            else:
+                runtime.console.warning(u&quot;Can&#x27;t create tablo color for %s&quot; % self.get_color(v))
+        return norm, nenorm
+
+    def block_style(self, colors):
+        style = {}
+        cl = []
+        v = colors.get(&#x27;contour&#x27;)
+        v = self.calc_color(v)
+        if isinstance(v, int):
+            cl.append(&#x27;pc{}&#x27;.format(v))
+        elif v is not None:
+            style[&#x27;stroke&#x27;] = v
+
+        v = colors.get(&#x27;stat&#x27;)
+        v = self.calc_color(v)
+
+        if isinstance(v, int):
+            cl.append(&#x27;bc_{}&#x27;.format(v))
+        elif v is not None:
+            style[&#x27;fill&#x27;] = v
+        return self._styling(cl, style)
+</pre>
+</body>
+</html>

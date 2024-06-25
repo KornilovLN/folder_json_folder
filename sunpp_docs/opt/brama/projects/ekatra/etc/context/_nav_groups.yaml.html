@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_nav_groups.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_nav_groups.yaml</h1>
+    <pre># Этот YAML-файл определяет структуру меню для раздела &quot;Группы&quot;.
+# Корневой элемент меню использует иконку fa fa-tags и имеет
+# заголовок &quot;Группы&quot;.
+# Разрешение доступа установлено на permit-all, что означает,
+# что этот раздел меню доступен для всех пользователей.
+# В разделе children определен один дочерний элемент меню 
+# для &quot;Приватных групп&quot;. Для него указан URL-адрес (href),
+# идентификатор (id) и заголовок (title).
+# Этот файл используется для построения навигационного меню
+#в пользовательском интерфейсе приложения, в частности, для
+#отображения раздела &quot;Группы&quot; и подраздела &quot;Приватные группы&quot;.
+
+# Определение класса иконки для элемента меню
+cssClass: fa fa-tags
+
+# Разрешение доступа для всех
+permit: permit-all
+
+# Заголовок элемента меню
+title: Группы
+
+# Дочерние элементы меню
+children:
+
+  # Элемент меню для приватных групп пользователей
+  - href: ../user/groups  # URL-адрес
+    id: user/groups  # Идентификатор
+    title: Приватные группы  # Заголовок
+</pre>
+</body>
+</html>

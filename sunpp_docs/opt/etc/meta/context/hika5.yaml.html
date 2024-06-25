@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>hika5.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>hika5.yaml</h1>
+    <pre>encoding: &#x27;koi8-r&#x27;
+targets:
+  &#x27;listinfo.cks&#x27;: &#x27;&#x27;
+  &#x27;info.ver&#x27;: &#x27;&#x27;
+  &#x27;RPMS/info_rex.+\.rpm&#x27;:
+    &#x27;.+/GES/.+_SRSunit\d.tar.gz&#x27;:
+#      &#x27;SRSunit.+\.xml&#x27;: &#x27;db/etc&#x27;
+      &#x27;SRSunit.+\.csv&#x27;: &#x27;db&#x27;
+      #&#x27;SRSunit\d/srs/.+&#x27;: &#x27;uso&#x27;
+#  &#x27;RPMS/info_database\.(uso|video).+\.rpm&#x27;:
+  &#x27;RPMS/info_database.+\.rpm&#x27;:
+    &#x27;.+\.gbk&#x27;: &#x27;db&#x27;
+  &#x27;RPMS/info_ris-.+\.i386.rpm&#x27;:
+    &#x27;.+/ris/grset&#x27;: &#x27;ris/etc&#x27;
+    &#x27;.+/ris/[^/]+\.xml&#x27;: &#x27;ris&#x27;
+    &#x27;.+/ris/[^/]+\.(bmp|png)&#x27;: &#x27;ris&#x27;
+    &#x27;.+/ris/kfb/[^/]+\.xml&#x27;: &#x27;ris/kfb&#x27;
+    &#x27;.+/ris/kfb/[^/]+\.(bmp|png)&#x27;: &#x27;ris/kfb&#x27;
+
+</pre>
+</body>
+</html>

@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>__init__.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>__init__.py</h1>
+    <pre># -*- coding: utf-8 -*-
+
+import os
+import copy
+import re
+import datetime
+from collections import OrderedDict
+
+from lxml import etree as ET
+from lxml.etree import tostring
+from lxml.builder import E
+from rdflib import Graph
+from rdflib import Namespace, RDF, Graph, URIRef, BNode, Literal
+import logging
+
+
+__verion__ = &#x27;1.0&#x27;
+
+log = logging.getLogger(__name__)
+
+MOF = Namespace(&quot;http://spd.ivl.cns/cim/rtdbmof#&quot;)
+SH = Namespace(&quot;http://sunpp.cns.atom/cim/hika#&quot;)
+MOF_EX = MOF.exchangeList
+MOF_TITLE = MOF.title
+REX = re.compile(r&#x27;(?P&lt;Prefix&gt;[SR])(?P&lt;GlobalID&gt;\d{3})(?P&lt;DataType&gt;\w)(?P&lt;LocalID&gt;\d{3})\.(?P&lt;Version&gt;\d{3})&#x27;)
+
+
+CFG_DEFAULTS = OrderedDict([
+    (&quot;XmlRpcPort&quot;, &quot;NoXmlRpcPort&quot;),
+    (&quot;TaskId&quot;, 1),
+    (&quot;CPUMask&quot;, dict(text=2, comment=u&#x27;Маска для запуска задачи на определенном процессоре: 1-CPU0,2-CPU1&#x27;)),
+    (&quot;ProcessStatusPoint&quot;, dict(text=&#x27;$ProcessStatusPoint&#x27;, comment=u&#x27;Диагностические параметры состояния работы задачи и состояния обменов&#x27;)),
+    (&quot;LinkStatusPoint&quot;, &#x27;$LinkStatusPoint&#x27;),
+    (&quot;DebugMode&quot;, dict(text=&#x27;No&#x27;, comment=u&#x27;Режим отладки&#x27;)),
+    (&quot;UseLocalTime&quot;, dict(text=0, comment=u&#x27;значение 0 - используется локальное время UTC&#x27;)),
+    (&quot;SendGroupIP&quot;, dict(text=0, comment=u&#x27;IP адрес и порт источника данных&#x27;)),
+    (&quot;SendPort&quot;, 9090),
+    (&quot;LocalIP&quot;, &#x27;$LoaclIP_NAEC&#x27;),
+    (&quot;LoopBack&quot;, 0),
+    (&quot;Window&quot;, 0),
+    (&quot;Period&quot;, dict(text=1, comment=u&#x27;Период отправки данных и таймаут на прием&#x27;)),
+    (&quot;Timeout&quot;, 2),
+    (&quot;MaxPacketSize&quot;, dict(text=1472, comment=u&#x27;Максимальный размер пакета данных&#x27;)),
+    (&quot;WorkWithUnknownPoints&quot;, dict(text=&#x27;False&#x27;, comment=u&#x27;Работа с неопределенными в ОБД параметрами&#x27;)),
+    (&quot;DiagnosticPoint&quot;, &#x27;$DiagnosticPoint&#x27;),
+])
+
+
+def get_array_index(graph, arr_subject):
+    &quot;&quot;&quot;
+    :type graph: rdflib.Graph
+    :type arr_subject: rdflib.term
+    :rtype: dict ((arr_index, PLANEID))
+    &quot;&quot;&quot;
+    exchange_list_index = {}
+    for point in graph.subjects(predicate=MOF.array, object=arr_subject):
+        try:
+            arr_index = [idx.toPython() for idx in graph.objects(point, MOF.arr_index)]
+            key_value = [sh_id.toPython() for sh_id in graph.objects(point, SH.id)]
+            if not arr_index:
+                log.warn(&quot;mof:arr_index is not a property of an %s&quot;, point)
+            elif not key_value:
+                log.warn(&quot;s_hika:id is not a property of an %s&quot;, point)
+            else:
+                arr_index = arr_index[0]
+                key_value = key_value[0]
+                exchange_list_index[int(arr_index)] = key_value.split(&#x27;:&#x27;)[-1]
+        except Exception as ex:
+            log.exception(&quot;%s&quot;, ex)
+    return exchange_list_index
+
+
+def add_constant(root, cfg):
+    &quot;&quot;&quot;
+    :type root: lxml.etree._Element
+    :type cfg: dict
+    :rtype: None
+    &quot;&quot;&quot;
+    for key, val in cfg.items():
+        if isinstance(val, dict):
+            comment = val.get(&#x27;comment&#x27;)
+            if comment:
+                root.append(ET.Comment(comment))
+            text = val.get(&#x27;text&#x27;, &#x27;&#x27;)
+        else:
+            text = val
+        el = ET.Element(key)
+        el.text = u&quot;%s&quot; % text
+        root.append(el)
+
+
+def add_exchange_lists(el, rdf_filename):
+    &quot;&quot;&quot;
+    :type el: lxml.etree._Element
+    :type rdf_filename: str
+    :rtype: None
+    &quot;&quot;&quot;
+    g = Graph()
+    g.parse(rdf_filename, format=&#x27;turtle&#x27;)
+    for arr_subject in sorted(g.subjects(object=MOF.Array)):
+        ex_list = [ex_list.toPython() for ex_list in g.objects(subject=arr_subject, predicate=MOF_EX)]
+        if ex_list:
+            m = REX.match(ex_list[0])
+            if m:
+                exchange_list = E.ExchangeList(**m.groupdict())
+                el.append(exchange_list)
+
+                arr_title = [t.toPython() for t in g.objects(subject=arr_subject, predicate=MOF_TITLE)]
+                if arr_title:
+                    exchange_list.append(ET.Comment(arr_title[0]))
+                exchange_list_index = get_array_index(g, arr_subject)
+
+                # add points
+                if exchange_list_index:
+                    max_index = max(exchange_list_index.keys())
+                    for idx in range(1, max_index):
+                        name = exchange_list_index.get(idx, &#x27;NONAME&#x27;)
+                        exchange_list.append(E.Point(Name=name))
+
+            else:
+                log.warn(&#x27;exchangeList not match by %s, %s&#x27;, arr_subject, ex_list)
+        else:
+            log.warn(&#x27;exchangeList not found by %s&#x27;, arr_subject)
+
+
+def add_header_comment(root, generator_name):
+    wlinkxikaconfig_h_id = &#x27; @(#) $Id: {generator}, v {version} {dt} operator Exp $ &#x27;
+    dt = datetime.datetime.utcnow().isoformat()
+    comment = wlinkxikaconfig_h_id.format(dt=dt, generator=__file__, version=__verion__)
+    root.addprevious(ET.Comment(comment))
+
+
+def generate_hika_gateway_config(targets, changed=None, meta_url=None, prefix=None, 
+                                 dependencies=None, ns=None, rdf_filename=None, 
+                                 encoding=&#x27;utf-8&#x27;, **kwargs):
+    &quot;&quot;&quot;
+    :type targets: (list, None)
+    :type rdf_filename: (str, None)
+    :type encoding: str
+    :rtype: None
+    &quot;&quot;&quot;
+
+
+    root = E.Config()
+
+    # add top level comment
+    if targets:
+        add_header_comment(root, targets[0])
+
+    # append kwargs
+    cfg = copy.deepcopy(CFG_DEFAULTS)
+    cfg.update(kwargs)
+    add_constant(root, cfg)
+
+    # append ExchangeData
+    if rdf_filename:
+        exchange_data = E.ExchangeData()
+        root.append(exchange_data)
+        add_exchange_lists(exchange_data, rdf_filename)
+
+    # dump xml
+    tree = ET.ElementTree(root)
+    xml_body = tostring(tree, pretty_print=True, xml_declaration=True, encoding=encoding)
+    xml_body = xml_body.replace(&#x27;\r\n&#x27;, &#x27;\n&#x27;).replace(&#x27;\n&#x27;, &#x27;\r\n&#x27;)
+    if targets and targets[0]:
+        # append top level comment
+        with open(targets[0], &#x27;wb&#x27;) as xmlfile:
+            xmlfile.write(xml_body)
+    else:
+        print(xml_body)
+
+if __name__ == &quot;__main__&quot;:
+    generate_hika_gateway_config(
+        None, 
+        rdf_filename=&#x27;graph.ttl&#x27;,
+        DebugMode=True
+    )
+
+</pre>
+</body>
+</html>

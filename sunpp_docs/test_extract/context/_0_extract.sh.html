@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_0_extract.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_0_extract.sh</h1>
+    <pre># Удаляет директорию ./inputs, если она существует, с принудительным
+# удалением всех вложенных файлов и каталогов
+rm -r -f ./inputs
+
+# Удаляет директорию ./tmp, если она существует, с принудительным
+# удалением всех вложенных файлов и каталогов
+rm -r -f ./tmp
+
+# Создает директорию ./tmp, если она не существует
+mkdir -p ./tmp
+
+# Распаковывает архив IO-7.3-76.tar.gz в директорию ./tmp
+# --strip-components=1 удаляет верх уровень вложенности каталога из арх
+tar -v -xzf IO-7.3-76.tar.gz -C ./tmp/ --strip-components=1
+
+# Запуск конт Docker с пользователем 1000:1000 и перем среды LANG=C.UTF8
+# Опция -it запуск контейнер в интерактивном режиме с псевдотерминалом
+# Опция --rm удаляет контейнер после завершения его работы
+# Опция -v монтир. тек. директорию ($(pwd)) в конт. в директорию /build
+# Монтирует также локальную директорию с инструментами в контейнер
+# где registry.master.cns/compiler:latest - образ Docker для запуска
+# deepextract -c /build/hika7.yaml -u -o /build/inputs /build/tmp    -
+# указывает команду для выполнения внутри контейнера.
+docker run -u 1000:1000 -e LANG=C.UTF8 -it --rm \
+    -v &quot;$(pwd):/build&quot; \
+    -v &quot;/home/max/gitlab_2/ekatra/tools/ekatra/tools:/usr/local/lib/python3.7/dist-packages/ekatra/tools&quot; \
+    registry.master.cns/compiler:latest \
+    deepextract -c /build/hika7.yaml -u -o /build/inputs /build/tmp
+
+
+
+</pre>
+</body>
+</html>

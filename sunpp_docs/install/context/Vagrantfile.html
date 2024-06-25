@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Vagrantfile</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>Vagrantfile</h1>
+    <pre># Usage:
+# vagrant up on_ubuntu
+
+Vagrant.require_version &quot;&gt;= 1.7.0&quot;
+
+Vagrant.configure(&quot;2&quot;) do |config|
+
+  config.vm.define &quot;on_ubuntu&quot;, autostart: true do |on_debian|
+        on_debian.vm.box = &quot;ubuntu/bionic64&quot;
+        on_debian.vm.network &quot;private_network&quot;, ip: &quot;172.16.0.8&quot;
+        on_debian.vm.hostname = &quot;sunpp&quot;
+
+        on_debian.vm.provider :virtualbox do |vb|
+           vb.name = &quot;sunpp&quot;
+           vb.memory = 9096
+           vb.cpus = 4
+        end
+
+        on_debian.vm.provision &quot;shell&quot;, inline: &lt;&lt;-SHELL
+          apt install -y curl python3
+          bash -c &quot;echo &#x27;172.16.0.1 sdn.dc.cns.atom registry.dc.cns.atom&#x27; &gt;&gt; /etc/hosts&quot;
+          bash -c &quot;cd /vagrant/;./net-install.sh setup&quot;
+         SHELL
+  end
+
+end
+</pre>
+</body>
+</html>

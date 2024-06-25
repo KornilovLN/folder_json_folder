@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>sqlfunctions3.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>sqlfunctions3.py</h1>
+    <pre># -*- coding: utf-8 -*-
+import re
+import unidecode
+import logging
+#from string import maketrans
+import rdflib
+from ekatra.compiler import fixnames
+from collections import defaultdict
+from ekatra.tools import crc8
+log = logging.getLogger(__name__)
+
+H = rdflib.Namespace(&quot;http://spd.ivl.cns/cim/hika#&quot;)
+MOF = rdflib.Namespace(&quot;http://spd.ivl.cns/cim/rtdbmof#&quot;)
+MMI = rdflib.Namespace(&quot;http://spd.ivl.cns/cim/mmi#&quot;)
+array_prop = MOF.array
+arr_index_prop = MOF.arr_index
+
+
+# _nom_text_to_type_ = {
+#  &quot;1&quot;: &quot;Valve&quot;,
+#  &quot;2&quot;: &quot;FastValve&quot;,
+#  &quot;3&quot;: &quot;Mechanizm&quot;,
+#  &quot;4&quot;: &quot;BoolDiscrete&quot;,
+#  &quot;5&quot;: &quot;FastVent&quot;,
+#  &quot;6&quot;: &quot;Vent&quot;,
+#  &quot;7&quot;: &quot;SimpleBool&quot;,
+#  &quot;8&quot;: &quot;Signal&quot;,
+#  &quot;9&quot;: &quot;State&quot;,
+#  &quot;10&quot;: &quot;SimpleState&quot;,
+#  &quot;11&quot;: &quot;InvSignal&quot;,
+#  &quot;12&quot;: &quot;Vent1&quot;,
+#  &quot;18&quot;: &quot;Trigger&quot;,
+#  &quot;16&quot;: &quot;Trigger1&quot;,
+#  &quot;17&quot;: &quot;Mechanizm1&quot;,
+#  &quot;14&quot;: &quot;Control&quot;,
+#  &quot;19&quot;: &quot;Control1&quot;,
+#  &quot;15&quot;: &quot;Command&quot;,
+#  &quot;20&quot;: &quot;Command1&quot;,
+#  &quot;21&quot;: &quot;Blockage&quot;,
+#  &quot;22&quot;: &quot;State1&quot;,
+# }
+#
+# obj_types = {
+#     &quot;S&quot;: u&quot;Задвижка запорная&quot;,
+#     &quot;D&quot;: u&quot;Одиночный дискрет&quot;,
+#     &quot;M&quot;: u&quot;Механизм&quot;,
+#     &quot;C&quot;: u&quot;Сигнал диагностики ИВС&quot;,
+#     &quot;F&quot;: u&quot;Формируемый диск.сигнал&quot;,
+#     &quot;G&quot;: u&quot;ГС, обобщенные по диагн.ИВС&quot;,
+#     &quot;Y&quot;: u&quot;Усл.выполнения команд&quot;,
+#     &quot;X&quot;: u&quot;Команда КЗБ&quot;,
+#     &quot;a&quot;: u&quot;Аналоговые парам.структуры АМ&quot;,
+#     &quot;r&quot;: u&quot;Аналоговые парам.структуры РВ&quot;,
+#     &quot;g&quot;: u&quot;ГС по категориям&quot;,
+# }
+
+#1
+# {&quot;TIP_SIGN_ID&quot;: 2, &quot;TIP_PAR&quot;: &quot;Д&quot;, &quot;NAME_PAR&quot;: &quot;Дискретные параметры (ДМ)&quot;}
+# {&quot;TIP_SIGN_ID&quot;: 2, &quot;TIP_PAR&quot;: &quot;Д&quot;, &quot;NAME_PAR&quot;: &quot;Измеряемые дискретные&quot;}
+
+# {&quot;TIP_SIGN_ID&quot;: 1, &quot;TIP_PAR&quot;: &quot;Р&quot;, &quot;NAME_PAR&quot;: &quot;Аналоговые параметры&quot;}
+# {&quot;TIP_SIGN_ID&quot;: 1, &quot;TIP_PAR&quot;: &quot;А&quot;, &quot;NAME_PAR&quot;: &quot;Измеряемые аналоговые&quot;}
+
+# {&quot;TIP_SIGN_ID&quot;: 2, &quot;TIP_PAR&quot;: &quot;Ф&quot;, &quot;NAME_PAR&quot;: &quot;Формируемые дискретные&quot;}
+
+# {&quot;TIP_SIGN_ID&quot;: 2, &quot;TIP_PAR&quot;: &quot;С&quot;, &quot;NAME_PAR&quot;: &quot;Состояния технических средств&quot;}
+# {&quot;TIP_SIGN_ID&quot;: 2, &quot;TIP_PAR&quot;: &quot;С&quot;, &quot;NAME_PAR&quot;: &quot;Диагностика ИВС (СД)&quot;}
+
+# {&quot;TIP_SIGN_ID&quot;: 1, &quot;TIP_PAR&quot;: &quot;Р&quot;, &quot;NAME_PAR&quot;: &quot;Расчетные аналоговые&quot;}
+# {&quot;TIP_SIGN_ID&quot;: 1, &quot;TIP_PAR&quot;: &quot;Р&quot;, &quot;NAME_PAR&quot;: &quot;Аналог.расч.и аналог.от МСКУ4&quot;}
+
+# {&quot;TIP_SIGN_ID&quot;: 2, &quot;TIP_PAR&quot;: &quot;В&quot;, &quot;NAME_PAR&quot;: &quot;Выходные дискретные (команды)&quot;}
+# {&quot;TIP_SIGN_ID&quot;: 2, &quot;TIP_PAR&quot;: &quot;В&quot;, &quot;NAME_PAR&quot;: &quot;Команды ЦОЗ (М64)&quot;}
+
+
+# {&quot;NAME_TIP&quot;: &quot;1-й конт. задв. обратное. подключение&quot;, &quot;TIP_OBR&quot;: &quot;T&quot;}
+# {&quot;NAME_TIP&quot;: &quot;2-й контакт механизма&quot;, &quot;TIP_OBR&quot;: &quot;N&quot;}
+# {&quot;NAME_TIP&quot;: &quot;2-й конт. задв. прямое и обр. подключ.&quot;, &quot;TIP_OBR&quot;: &quot;P&quot;}
+# {&quot;NAME_TIP&quot;: &quot;1-й контакт механизма&quot;, &quot;TIP_OBR&quot;: &quot;M&quot;}
+# {&quot;NAME_TIP&quot;: &quot;Быстрые сигналы&quot;, &quot;TIP_OBR&quot;: &quot;B&quot;}
+# {&quot;NAME_TIP&quot;: &quot;Одиночные дискретные&quot;, &quot;TIP_OBR&quot;: &quot;D&quot;}
+# {&quot;NAME_TIP&quot;: &quot;1-й контакт задв. прямое подключение&quot;, &quot;TIP_OBR&quot;: &quot;S&quot;}
+# {&quot;NAME_TIP&quot;: &quot;Инверсный сигнал&quot;, &quot;TIP_OBR&quot;: &quot;I&quot;}
+# {&quot;NAME_TIP&quot;: &quot;Ключи упр.механизмами и задв&quot;, &quot;TIP_OBR&quot;: &quot;K&quot;}
+
+
+
+_idset = {}
+_dtypes = {
+    &#x27;M&#x27;: H.Mechanizm,
+    &#x27;S&#x27;: H.Valve3V,
+    &#x27;T&#x27;: H.Valve3V,
+    &#x27;N&#x27;: H.NContact,
+    &#x27;P&#x27;: H.PContact,
+    &#x27;K&#x27;: H.Key
+}
+
+
+def identify_dtype(P, ALGOR, IMG):
+    if P is not None:
+        t = _dtypes.get(P)
+        if t is not None:
+            return t
+    return H.Bool
+
+
+def fix_name(name, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str,str?)-&gt;str&quot;&quot;&quot;
+    if name is not None:
+        return prefix + fixnames.fix_name(name)
+
+
+def sensortype_id(tip):
+    if tip is not None:
+        return fix_name(tip, &#x27;stp&#x27;).replace(&#x27;__&#x27;, &#x27;_&#x27;)
+
+
+def sensortype_label(tip):
+    if tip is not None:
+        return tip.replace(&#x27;.&#x27;, &#x27; &#x27;)
+
+
+def fix_rueng_name(name, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str,str?)-&gt;str&quot;&quot;&quot;
+    if name is not None:
+        return prefix + fixnames.fix_rueng_name(name)
+
+
+def fix_id(iden, altid=None, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str,str?,str?)-&gt;str&quot;&quot;&quot;
+#    global _idset
+    if iden is None:
+        r = None if altid is None else fix_name(altid, prefix) + &#x27;_Q&#x27;
+    else:
+        r = fix_name(iden, prefix)
+        if r in _idset:
+            q = _idset[r] + 1
+            n = r + fix_name(altid, &#x27;_q&#x27;)
+            _idset[r] = q
+            r = n
+        else:
+            _idset[r] = 0
+    return r
+
+
+mass_id_rex = re.compile(r&#x27;^(KT|XC)\d+$&#x27;)
+
+
+def fix_aname(iden, altid):
+    if iden is not None and mass_id_rex.match(iden):
+        return fix_id(u&#x27;{}_m{}&#x27;.format(iden, altid[:4]), altid, prefix=&#x27;a&#x27;)
+    return fix_id(iden, altid, prefix=&#x27;a&#x27;)
+
+
+def fix_dname(iden, altid, SEMTYPE):
+    &quot;&quot;&quot;(str?,str?,str?)-&gt;str&quot;&quot;&quot;
+    prefix = &#x27;d&#x27; if SEMTYPE in (H.Mechanizm, H.Valve3V) else &#x27;b&#x27;
+    return fix_id(iden, altid, prefix=prefix)
+
+
+def exclude_contacts(P, result):
+    &quot;&quot;&quot;(str?,str?)-&gt;str&quot;&quot;&quot;
+    if P not in(&quot;N&quot;,&quot;P&quot;):
+        return result
+
+
+def init_idset(_):
+    global _idset
+    _idset = {}
+
+
+_shifrrex = re.compile(r&quot;^(\w)(\d)(\d{2}).+&quot;)
+
+
+def shifr2exchangelist(shifr, unit):
+    &quot;&quot;&quot;(str,str)-&gt;str&quot;&quot;&quot;
+    if shifr is not None:
+        m = _shifrrex.match(shifr)
+        if m:
+            return &quot;S00{}{}{}{}.000&quot;.format(unit[-1], &#x27;B&#x27; if m.group(1) == &#x27;D&#x27; else &#x27;A&#x27;, m.group(3), m.group(2))
+
+
+_img_formats = {
+    &#x27;ANAL8.7&#x27;:  &#x27;7.2&#x27;,
+    &#x27;ANAL8F.7&#x27;: &#x27;7.2&#x27;,
+    &#x27;ANAL.7&#x27;:   &#x27;7.2&#x27;,
+    &#x27;ANAL8K.5&#x27;: &#x27;5.1&#x27;,
+    &#x27;AKRBK&#x27;:   &#x27;.1&#x27;,
+    &#x27;AKRBTP&#x27;:  &#x27;.1&#x27;,
+    &#x27;AKRBTL&#x27;:  &#x27;.1&#x27;,
+}
+
+
+def identify_format(title, mu, imgs, predn, predv):
+    &quot;&quot;&quot;(str?, str?, str?, float?,float?)-&gt;str&quot;&quot;&quot;
+    if title is not None:
+        title = title.upper()
+        if title.startswith(u&#x27;ПOPЯДOK&#x27;) or title.startswith(u&#x27;HAПPABЛEHИE CБOPA&#x27;) :
+            return &#x27;d&#x27;
+    if mu is None:
+        return &#x27;d&#x27;
+    if imgs is not None:
+        for img in imgs.split(&#x27;,&#x27;):
+            f = _img_formats.get(img)
+            if f is not  None:
+                return f
+    if not (predn is None or predv is None):
+        d = predv - predn
+        if d &lt; 0.04095:
+            return &quot;5E&quot;
+        if d &lt;= 0.4095:
+            return &quot;6.4&quot;
+        if d &lt; 4.095:
+            return &quot;6.3&quot;
+        if d &lt; 40.95:
+            return &quot;6.2&quot;
+        if d &lt; 409.5:
+            return &quot;6.1&quot;
+        if d &lt; 409500:
+            return &quot;6.0&quot;
+
+    return &quot;d&quot;
+
+
+def ephemeral_subs(s, graph, ephemeral_graph):
+    for sub in s:
+        newsubs = str(sub).split(&#x27;_q&#x27;)
+        if len(newsubs) == 1:
+            try:
+                idx = graph.value(sub, arr_index_prop)
+                if idx is None:
+                    continue
+                arr = graph.value(sub, array_prop).rsplit(&#x27;/&#x27;, 1)[1][3:]
+                newsuffix = u&#x27;_q{}{}&#x27;.format(arr, idx)
+                newsub = rdflib.URIRef(newsubs[0] + newsuffix)
+            except:
+                log.error(
+                    &quot;Where is pp {}: {} {}&quot;.format(sub, graph.value(sub, array_prop), graph.value(sub, arr_index_prop)))
+                continue
+                # for s, p, o in graph.triples((sub, None, None)):
+                #     graph.remove((sub, p, o))
+        else:
+            newsub = sub
+            # newsuffix = None
+        for s, p, o in graph.triples((sub, None, None)):
+            graph.remove((sub, p, o))
+#             if p == MOF.id:
+#                 continue
+            ephemeral_graph.add((newsub, p, o))
+        ephemeral_graph.add((newsub, MOF.ephemeral, rdflib.Literal(True)))
+
+
+# def fragment_list2hex(fs):
+#     fs = list(fs)
+#     fs.sort()
+#     r = &#x27;&#x27;.join(fs)
+#     if r:
+#         return hex(ord(crc8(r)))[2:].zfill(2)
+
+
+def create_ephemeral_graph(processor):
+    global _idset
+    graph = processor.result
+    ids = defaultdict(set)
+    for k, c in _idset.iteritems():
+        if c:
+            ll = u&#x27;{}.{}&#x27;.format(processor.params[&#x27;prefix&#x27;], k)
+            for sub, obj in graph.subject_objects(MOF.id):
+                if obj.startswith(ll):
+                    ids[k].add(sub)
+    ephemeral_graph = graph.__class__(namespace_manager=graph.namespace_manager)
+    showon = MMI.showon
+    for s in ids.itervalues():
+        subs = defaultdict(set)
+        for sub in s:
+            try:
+                fragments = frozenset(map(lambda x: str(x).rsplit(&#x27;/&#x27;, 1)[1], graph.objects(sub, showon)))
+            except Exception as e:
+                raise Exception(&quot;{}: {} {}&quot;, e, sub, list(graph.objects(sub, showon)))
+            subs[fragments].add(sub)
+        for k, s in subs.iteritems():
+            if len(k) == 0:
+                ephemeral_subs(s, graph, ephemeral_graph)
+#             elif len(s) == 1:
+#                 sub = list(s)[0]
+#                 suffix = fragment_list2hex(k)
+#                 if suffix:
+#                     suffix = &#x27;_f&#x27;+suffix
+#                 newsub = str(sub).split(&#x27;_q&#x27;)[0]
+#                 newsub = rdflib.URIRef(&#x27;{}{}&#x27;.format(newsub, suffix))
+#                 for s, p, o in graph.triples((sub, None, None)):
+#                     graph.remove((sub, p, o))
+#                     if p == MOF.id and suffix:
+#                         new_o = o.split(&#x27;_q&#x27;)[0]
+#                         o = rdflib.Literal(new_o + suffix)
+#                     graph.add((newsub, p, o))
+            else:
+                ephemeral_subs(s, graph, ephemeral_graph)
+    if len(ephemeral_graph):
+        p = processor.output.parent / &#x27;ephemeral{}&#x27;.format(processor.output.ext)
+        ephemeral_graph.serialize(p.open(&#x27;wb&#x27;), format=processor.format)
+
+
+def identify_atype1(TIP_PAR, ALGOR, IMG):
+    &quot;&quot;&quot;(str?, str?, str?)-&gt;str&quot;&quot;&quot;
+    if TIP_PAR is not None or ALGOR is not None or IMG is not None:
+        return u&#x27;{}-{}-{}&#x27;.format(TIP_PAR, ALGOR, IMG)
+
+def identify_dtype1(P, ALGOR, IMG):
+    &quot;&quot;&quot;(str?, str?, str?)-&gt;str&quot;&quot;&quot;
+    if P is not None or ALGOR is not None or IMG is not None:
+        return u&#x27;{}-{}-{}&#x27;.format(P, ALGOR, IMG)
+
+</pre>
+</body>
+</html>

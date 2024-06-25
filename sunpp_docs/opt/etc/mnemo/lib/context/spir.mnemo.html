@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>spir.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>spir.mnemo</h1>
+    <pre>def MarkerArrow(size, c)
+{
+    marker(viewBox=rect(0,0,20,20), ref=Point(5,10), units=&quot;userSpaceOnUse&quot;,  orient=&quot;auto&quot;, size=(size,size))
+    {
+        polyline(Point(0,0), Point(20,10), Point(0,20), Point(2,10), class=c);
+    }
+}
+
+
+def shutter(p, w, bind)
+{
+  group(bindtype=&#x27;boolPair&#x27;, bind=bind.bind_idx, class=&#x27;ppt b2tag&#x27;)
+  {
+    c := Point(p.x+w/2, p.y+w/2);
+    line_half := int(w*0.42);
+
+    rect(p.x, p.y, w, w, class=&#x27;Contour mostlyG&#x27;);
+    line(c-(0, line_half), c+(0, line_half), class=&#x27;closed mostlyG&#x27;);
+    line(c-(line_half, 0), c+(line_half, 0), class=&#x27;opened mostlyG&#x27;);
+  }
+}
+
+def square_light(p, size, bind, label=None, txtclass=&#x27;&#x27;)
+{
+  group(bindtype=&#x27;boolPair&#x27;, bind=bind.bind_idx, class=&#x27;ppt b2tag&#x27;)
+  {
+    rect(center=p, width=size, height=size, class=(&#x27;mostlyF&#x27;, &#x27;pairWXX&#x27;, &#x27;closeG&#x27;, &#x27;openDR&#x27;, &#x27;SolidEq&#x27;));
+    if (label){
+            text(p.x, p.y+size/4., label, class=(&#x27;label&#x27;, &#x27;alignC&#x27;, txtclass));
+        }
+  }
+}
+
+def toggle_button(p, size, bind){
+  strw := &#x27;{}px&#x27;.format(size/8.);
+  group(bindtype=&#x27;boolPair&#x27;, bind=bind.bind_idx, class=&#x27;ppt b2tag&#x27;)
+  {
+    a := arc(p, size/2.5, size/2.5, angles=(310, 230));
+    l := line(p1=p-(0, size/2.), p2=p-(0, size/6.));
+    path(class=(&#x27;mostlyF&#x27;, &#x27;pairWXX&#x27;, &#x27;closeG&#x27;, &#x27;openDR&#x27;, &#x27;Contour&#x27;),
+        style=(stroke_linecap=&#x27;round&#x27;, stroke_width=strw)){
+        +a; +l;
+    }
+  }
+}
+
+def histog(p, width, length, angle, bind){
+    lir := bind.defined(&#x27;LIR&#x27;, 0);
+    hir := bind.defined (&#x27;HIR&#x27;, 10);
+    group(bindtype=&#x27;hist&#x27;, class=&#x27;atag&#x27;, bind=bind.bind_idx, range=(lir, &#x27;;&#x27;, hir), transform=(Translate(p)*Rotate(90+angle))){
+        polyline(points=(Origin, Point(0, -length)), style=(stroke_width=(width+1)), class=&quot;mnemo-hist-bg&quot;);
+        line(Origin, Point(0, -length), style=&#x27;stroke-width:{}&#x27;.format(width));
+    }
+}
+
+@pins(
+    TP = (p, -90),
+    BT = (p, 90),
+    LT = (p, 180),
+    RT = (p, 0)
+)
+def arrow_object(p, size, angle, style=&#x27;&#x27;){
+    path(transform=Rotate(angle, p), style=style){
+        .M(p);
+        .v(size);
+        .l(size, -size);
+        .l(-size, -size);
+        .z();
+    }
+}
+
+def percent_clock(p, r, bind, stroke=3){
+    group(p, bindtype=&#x27;percent_clock&#x27;, bind=bind.bind_idx, range=(&#x27;-100;100&#x27;), radi=r, class=&#x27;ppt atag&#x27;){
+        circle(Origin, r-stroke/2., class=&#x27;mnemo-pclock-circle&#x27;, style=(stroke_width=stroke));
+        path(class=&#x27;mnemo-clock-path mnemo-pclock-pf&#x27;, style=(stroke_width=stroke)){
+            .M(0, 0);
+            .l(0, -r);
+            .a(Point(r, r), 0, 1, 0, Point(0.1, 0));
+            .z();
+        }
+    }
+}
+def cursor_round(p, length, radius=0, angle=0){
+    radius := radius? radius : length/10.;
+    group(p, class=&#x27;mnemo-connector&#x27;, transform=Rotate(angle), style=(stroke_width=&#x27;1px&#x27;)){
+        circle(Origin, radius);
+        line(p1 = Point(radius, 0), p2 = Point(length, 0));
+    }
+}
+
+@pins(
+    out = p+(width/2,0),
+    in = (p-(width/2,0), 180)
+    )
+def gvalve(p, width=10, style=(stroke= &#x27;#0cc&#x27;, fill=&#x27;none&#x27;))
+{
+    w := width/2;
+    h := w/2;
+
+   polygon(points=(p-(w,h), p+(w,h), p+(w,-h), p+(-w,h)), style=style);
+}
+
+@pins(
+    out = (p+(0,height/2), 90),
+    in = (p-(0,height/2), -90)
+    )
+def vvalve(p, height=10, style=(stroke= &#x27;#0cc&#x27;, fill=&#x27;none&#x27;))
+{
+    h := height/2;
+    w := h/2;
+
+   polygon(points=(p-(w,h), p+(w,h), p+(-w,h), p+(w,-h)), style=style);
+}
+</pre>
+</body>
+</html>

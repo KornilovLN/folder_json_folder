@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>dtypes.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>dtypes.yaml</h1>
+    <pre>namespace: &quot;http://spd.ivl.cns/cim/hika#&quot;
+
+classes:
+  - type: Bool
+    base: mof.Bool
+    mask_quality: 0b1000
+    label@en: Bool
+
+  - type: RBool
+    base: mof.RBool
+    mask_quality: 0b1000
+    label@en: RBool
+
+  - type: GroupAlarm
+    base: mof.Alarm
+    mask_quality: 0b1000
+    label@en: GroupAlarm
+    states:
+      0: Нарушение
+      1: Норма
+
+  - type: Key
+    base: mof.Bool
+    mask_quality: 0b1000
+    label@en: Key
+
+  - type: State
+    base: mof.Alarm
+    mask_quality: 0b1000
+    label@en: State
+    states:
+      0: Норма
+      1: Отказ
+
+  - type: RState
+    base: mof.Alarm
+    mask_quality: 0b1000
+    label@en: RState
+    states:
+      0: Отказ
+      1: Норма
+
+  - type: RStateBool
+    base: mof.DiscreteBool
+    mask_quality: 0b1000
+    label@en: RStateBool
+    states:
+      0: Не норма
+      1: Норма
+
+  - type: Trigger
+    base: mof.DiscreteBool
+    mask_quality: 0b1000
+    label@en: Trigger
+    states:
+      0: Триггер сброшен
+      1: Триггер взведен
+
+  - type: Condition
+    base: mof.DiscreteBool
+    mask_quality: 0b1000
+    label@ru: Условие
+    label@en: Condition
+    states:
+      0: Условие не выпол.
+      1: Условие выпол.
+
+  - type: Command
+    base: mof.DiscreteBool
+    mask_quality: 0b1000
+    label@ru: Команда
+    label@en: Command
+    states:
+      0: Команда выполнена
+      1: Команда не выполнена
+
+  - type: Mechanizm
+    base: mof.Mechanizm
+    mask_quality: 0b1000
+    label@en: Mechanizm
+    states:
+      0: Недостоверность технологическая
+      1: Включен
+      2: Отключен
+      3: Недостоверность технологическая
+
+  - type: NContact
+    base: mof.DiscreteBool
+    mask_quality: 0b1000
+    label@ru: 2-й контакт механизма
+    label@en: NContact
+    states:
+      0: Не Отключен
+      1: Отключен
+
+  - type: Valve
+    base: mof.Valve
+    mask_quality: 0b1000
+    label@ru: Задвижка
+    label@en: Valve
+    states:
+      0: Недостоверность технологическая
+      1: Открыт
+      2: Закрыт
+      3: Ход
+
+  - type: Valve3V
+    base: mof.Valve
+    mask_quality: 0b1000
+    label@en: Valve3V
+    states:
+      0: Ход
+      1: Открыт
+      2: Закрыт
+      3: Недостоверность технологическая
+
+  - type: PContact
+    base: mof.DiscreteBool
+    mask_quality: 0b1000
+    label@ru: 2-й конт. задв.
+    label@en: PContact
+    states:
+      0: Не закрыт
+      1: Закрыт
+</pre>
+</body>
+</html>

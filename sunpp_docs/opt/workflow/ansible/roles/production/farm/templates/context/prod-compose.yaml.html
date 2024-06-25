@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>prod-compose.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>prod-compose.yaml</h1>
+    <pre># {{ ansible_managed }}
+version: &#x27;3.4&#x27;
+{% set logging %}
+    logging:
+      driver: &quot;json-file&quot;
+      options:
+        max-size: &quot;200k&quot;
+        max-file: &quot;5&quot;
+{% endset %}
+{% if ekatra_sites is mapping and ekatra_sites[ekatra_mode] is defined %}
+{% set ekatra_site_domain = ekatra_sites[ekatra_mode] %}
+{% else %}
+{% set ekatra_site_domain = &#x27;ekatra.&#x27; + ekatra_full_domain %}
+{% endif %}
+
+{%- macro is_ttl_site(site) -%}{% if ttl_sites is defined  and site in ttl_sites %}https,http{% else %}http{% endif %}{%- endmacro %}
+
+networks:
+  default:
+    external:
+      name: &quot;{{ ekatra_domain }}&quot;
+{% if weave_network is defined %}
+  weave:
+    external:
+      name: weave
+{% endif %}
+
+volumes:
+  rtdb-data: {}
+  ekatra-data: {}
+
+services:
+  &quot;{{ ekatra_mode }}www&quot;:
+    container_name: &quot;www-{{ ekatra_mode }}&quot;
+    hostname: &quot;www-{{ ekatra_mode }}&quot;
+    image: &quot;{{ images_domain }}/{{ ekatra_domain }}/frontend&quot;
+    restart: always
+#    command: &quot;nginx -c /var/ekatra/spd/nginx/nginx.conf -g &#x27;daemon off;&#x27;&quot;
+{{ logging }}
+    labels:
+      - &quot;ekatra.service=www&quot;
+      - &quot;ekatra.title=Nginx Web Server&quot;
+      - &quot;ekatra.tail_log=tail -f /var/log/nginx/*.log&quot;
+{% if CDN_DOMAIN is defined and CDN_DOMAIN %}
+#      - &quot;traefik.frontend.headers.referrerPolicy=strict-origin-when-cross-origin&quot;
+      - &quot;traefik.frontend.headers.customResponseHeaders=Access-Control-Allow-Origin:*&quot;
+      - &quot;traefik.cdn.frontend.rule=Host:{{ (&#x27;XXX://&#x27;+ CDN_DOMAIN) | urlsplit(&#x27;hostname&#x27;) }};PathPrefixStrip:{{ (&#x27;XXX://&#x27;+CDN_DOMAIN) | urlsplit(&#x27;path&#x27;) }}&quot;
+{% endif %}
+      - &quot;traefik.ekatra-spd.frontend.rule=Host:{{ ekatra_site_domain }};PathPrefix:/spd/&quot;
+      - &quot;traefik.ekatra-vendors.frontend.rule=Host:{{ ekatra_site_domain }};PathPrefix:/vendors/&quot;
+      - &quot;traefik.ekatra-static.frontend.rule=Host:{{ ekatra_site_domain }};PathPrefix:/static/;AddPrefix:/ekatra/&quot;
+      - &quot;traefik.frontend.passHostHeader=true&quot;
+      - &quot;traefik.frontend.entryPoints={{ is_ttl_site(&#x27;www&#x27;) }}&quot;
+      - &quot;traefik.port=80&quot;
+      - &quot;traefik.enable=true&quot;
+      - &quot;traefik.docker.network={{ ekatra_domain }}&quot;
+
+
+{% if &#x27;backend&#x27; in images %}
+  &quot;{{ ekatra_mode }}backend&quot;:
+    container_name: &quot;backend-{{ ekatra_mode }}&quot;
+    image: &quot;{{ images_domain }}/{{ ekatra_domain }}/backend&quot;
+    restart: always
+{% if weave_network is defined %}
+    hostname: &#x27;backend-{{ ekatra_mode }}.{{ ekatra_domain }}.cns&#x27;
+    networks:
+      - weave
+      - default
+    dns:
+      - {{ weave_dns }}
+    dns_search:
+      - cns
+{% if dns_search is defined %}
+      - {{ dns_search }}
+{% endif %}
+{% else %}
+    hostname: &quot;backend-{{ ekatra_mode }}&quot;
+{% endif %}
+    volumes:
+      - &#x27;ekatra-data:/var/ekatra/&#x27;
+{{ logging }}
+    labels:
+      - &quot;ekatra.service=backend&quot;
+      - &quot;ekatra.title=Ekatra Backend Server&quot;
+      - &quot;traefik.backend=backend-{{ ekatra_mode }}&quot;
+      - &quot;traefik.frontend.rule=Host:{{ ekatra_site_domain }};&quot;
+      - &quot;traefik.frontend.passHostHeader=true&quot;
+      - &quot;traefik.frontend.entryPoints={{ is_ttl_site(&#x27;www&#x27;) }}&quot;
+      - &quot;traefik.port=8080&quot;
+      - &quot;traefik.enable=true&quot;
+      - &quot;traefik.docker.network={{ ekatra_domain }}&quot;
+{% endif %}
+
+
+{% if &#x27;virtuoso&#x27; in images %}
+  &quot;{{ ekatra_mode }}meta&quot;:
+    container_name: &quot;meta-{{ ekatra_mode }}&quot;
+    hostname: &quot;meta-{{ ekatra_mode }}&quot;
+    image: &quot;{{ images_domain }}/{{ ekatra_domain }}/meta&quot;
+    restart: always
+    working_dir: /var/ekatra/meta
+{{ logging }}
+    labels:
+      - &quot;ekatra.service=meta&quot;
+      - &quot;ekatra.title=Virtuoso Server&quot;
+{% endif %}
+
+
+{% if &#x27;rtdb&#x27; in images %}
+  &quot;{{ ekatra_mode }}rtdb-hub&quot;:
+    container_name: &quot;rtdb-hub-{{ ekatra_mode }}&quot;
+    image: &quot;{{ images_domain }}/{{ ekatra_domain }}/rtdb&quot;
+    restart: always
+    volumes:
+      - &#x27;rtdb-data:/var/ekatra/&#x27;
+{% if weave_network is defined %}
+    hostname: &#x27;rtdb-hub-{{ ekatra_mode }}.{{ ekatra_domain }}.cns&#x27;
+    networks:
+      - weave
+      - default
+    dns:
+      - {{ weave_dns }}
+    dns_search:
+      - cns
+{% if dns_search is defined %}
+      - {{ dns_search }}
+{% endif %}
+{% else %}
+    hostname: &quot;rtdb-hub-{{ ekatra_mode }}&quot;
+{% endif %}
+{{ logging }}
+    labels:
+      - &quot;ekatra.service=rtdb-hub&quot;
+      - &quot;ekatra.title=Ekatra RTDB-HUB Server&quot;
+      - &quot;traefik.backend=rtdb-hub-{{ ekatra_mode }}&quot;
+      - &quot;traefik.frontend.rule=Host:{{ ekatra_site_domain }};PathPrefixStrip:/hub&quot;
+      - &quot;traefik.frontend.entryPoints={{ is_ttl_site(&#x27;www&#x27;) }}&quot;
+      - &quot;traefik.port=80&quot;
+      - &quot;traefik.enable=true&quot;
+      - &quot;traefik.docker.network={{ ekatra_domain }}&quot;
+{% endif %}
+
+
+{% for file in bridge_services.files|sort(attribute=&#x27;path&#x27;) %}
+{% set bridgeconf = lookup(&#x27;file&#x27;, file.path) | from_yaml %}
+
+  &quot;{{ ekatra_mode }}rtdb-hikabridge-{{ bridgeconf.prefix }}&quot;:
+    container_name: &quot;rtdb-hikabridge-{{ bridgeconf.prefix }}-{{ ekatra_mode }}&quot;
+    hostname: &quot;rtdb-hikabridge-{{ bridgeconf.prefix }}-{{ ekatra_mode }}&quot;
+    image: &quot;{{ images_domain }}/{{ ekatra_domain }}/rtdb&quot;
+    restart: always
+    volumes:
+      - type: volume
+        source: rtdb-data
+        target: /var/ekatra/
+        volume:
+          nocopy: true
+    command: bash -c &quot;sleep 4;cd /var/ekatra/rtdb/{{ bridgeconf.prefix }};/usr/local/bin/rtdbrun&quot;
+    working_dir: &quot;/&quot;
+    network_mode: &quot;host&quot;
+{{ logging }}
+    labels:
+       - &quot;ekatra.service=rtdb-bridge&quot;
+       - &quot;ekatra.title=Bridge HIKA2RTDB {{ bridgeconf.prefix }}&quot;
+{% endfor %}
+
+
+{% for file in collect_services.files|sort(attribute=&#x27;path&#x27;) %}
+{% set collectconf = lookup(&#x27;file&#x27;, file.path) | from_yaml %}
+{% if collectconf.exec is defined %}
+  {% set cmd = collectconf.exec %}
+{% else %}
+  {% set cmd = &#x27;bash -c &quot;sleep 6;cd /var/ekatra/rtdb;ekatra-collector -S &#x27;+ collectconf.type +&#x27; -i RTDB -H tsdb -d /var/ekatra/rtdb/ /var/ekatra/rtdb/&#x27;+ collectconf.prefix +&#x27;/collect.pg&quot;&#x27; %}
+{% endif %}
+
+  &quot;{{ ekatra_mode }}rtdb-collect-{{ collectconf.type | lower }}-{{ collectconf.prefix }}&quot;:
+    container_name: &quot;rtdb-collect-{{ collectconf.type | lower }}-{{ collectconf.prefix }}-{{ ekatra_mode }}&quot;
+    hostname: &quot;rtdb-collect-{{ collectconf.type | lower }}-{{ collectconf.prefix }}-{{ ekatra_mode }}&quot;
+    image: &quot;{{ images_domain }}/{{ ekatra_domain }}/rtdb&quot;
+    restart: always
+    volumes:
+      - type: volume
+        source: rtdb-data
+        target: /var/ekatra/
+        volume:
+          nocopy: true
+    command: &#x27;{{ cmd }}&#x27;
+    working_dir: &quot;/&quot;
+{{ logging }}
+    labels:
+       - &quot;ekatra.service=rtdb-collect&quot;
+       - &quot;ekatra.title=Collector {{ collectconf.type | lower }} {{ collectconf.prefix }}&quot;
+{% endfor %}
+</pre>
+</body>
+</html>

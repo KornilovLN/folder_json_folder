@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>gdb2txt_cli.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>gdb2txt_cli.py</h1>
+    <pre>#! /usr/bin/env python
+import logging
+import os
+import codecs
+import json
+
+ENCODING = &#x27;utf-8&#x27;
+
+
+def cellproc(x, vtype):
+    if isinstance(x, basestring):
+        try:
+            e = &#x27;utf-8&#x27; if vtype.startswith(&#x27;BLOB SUB_TYPE BINARY&#x27;) else ENCODING
+            return x.decode(e) if x is not None else &#x27;None&#x27;
+        except:
+            return repr(x)
+    else:
+        return unicode(x)
+
+
+def jsoncell(x, name, vtype):
+    if x is None:
+        return
+    if isinstance(x, basestring):
+        try:
+            e = &#x27;utf-8&#x27; if vtype.startswith(&#x27;BLOB SUB_TYPE BINARY&#x27;) else ENCODING
+            r = x.decode(e)
+        except:
+            r = repr(x)
+    elif isinstance(x, (int, long, float)):
+        r = x
+    else:
+        r = u&quot;{}:{}&quot;.format(type(x), x)
+    return name, r
+
+
+def save(con, tbl, out, ext):
+    cur = con.cursor()
+    names = []
+    types = []
+    for c in tbl.columns:
+        names.append(c.name)
+        types.append(c.datatype)
+    cur.execute(&quot;select %s from %s&quot; % (&#x27;,&#x27;.join(names), tbl.name))
+
+    if ext in &#x27;.json&#x27;:
+        with codecs.open(out+ext, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+            for r in cur:
+                d = dict(filter(lambda x: x is not None, map(lambda x: jsoncell(*x), zip(r, names, types))))
+                f.write(json.dumps(d, ensure_ascii=False)+&#x27;\n&#x27;)
+    else:
+        with codecs.open(out+ext, &#x27;w&#x27;, encoding=&#x27;utf-8&#x27;) as f:
+            f.write(u&quot;%s\n&quot; % u&quot;;&quot;.join([u&quot;%s: %s&quot; % x for x in zip(names, types)]))
+            for r in cur:
+                f.write(u&quot;%s\n&quot; % u&quot;;&quot;.join(map(lambda x: cellproc(*x), zip(r, types))))
+
+
+def process(args):
+    global ENCODING
+    from gdb_iterator import GdbIterator
+    outpath = args.output
+    if not os.path.exists(outpath):
+        os.makedirs(outpath)
+    ENCODING = args.encoding
+    ext = args.ext
+    if not ext.startswith(&#x27;.&#x27;):
+        ext = &#x27;.&#x27;+ext
+    iterator = GdbIterator(args.database, user=args.user, password=args.password)
+    for tbl in iterator.run(args.output):
+        try:
+            save(iterator.con, tbl, os.path.join(outpath, tbl.name), ext)
+        except Exception as e:
+            print(&quot;Error on table &#x27;{}&#x27; processing:\n  {}&quot;.format(tbl.name, str(e).strip(&#x27;()&#x27;).replace(&#x27;\\n&#x27;, &#x27;\n  &#x27;)))
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(prog=&#x27;gdb2txt&#x27;, usage=&#x27;%(prog)s [options] database&#x27;)
+
+    parser.add_argument(&#x27;--user&#x27;, &#x27;-u&#x27;,
+                        dest=&#x27;user&#x27;,
+                        type=str,
+                        metavar=&#x27;&lt;user&gt;&#x27;, help=&quot;user name&quot;)
+
+    parser.add_argument(&#x27;--password&#x27;, &#x27;-p&#x27;,
+                        dest=&#x27;password&#x27;,
+                        type=str,
+                        metavar=&#x27;&lt;password&gt;&#x27;, help=&quot;user password&quot;)
+
+    parser.add_argument(&#x27;--output&#x27;, &#x27;-o&#x27;,
+                        dest=&#x27;output&#x27;, default=&quot;.&quot;,
+                        type=str,
+                        metavar=&#x27;&lt;output&gt;&#x27;, help=&quot;save to a given dir&quot;)
+
+    parser.add_argument(&#x27;--ext&#x27;, &#x27;-t&#x27;,
+                        dest=&#x27;ext&#x27;, default=&quot;csv&quot;,
+                        type=str,
+                        metavar=&#x27;&lt;output&gt;&#x27;, help=&quot;target ext&quot;)
+
+    parser.add_argument(&#x27;--encoding&#x27;, &#x27;-e&#x27;,
+                        dest=&#x27;encoding&#x27;,
+                        type=str, default=&#x27;koi8_r&#x27;,
+                        help=&quot;database encoding&quot;)
+
+    parser.add_argument(&#x27;database&#x27;,
+                        type=str,
+                        metavar=&#x27;database&#x27;)
+
+    process(parser.parse_args())
+
+if __name__ == &#x27;__main__&#x27;:
+    logging.basicConfig(format=&#x27;%(message)s&#x27;)
+    main()
+
+
+</pre>
+</body>
+</html>

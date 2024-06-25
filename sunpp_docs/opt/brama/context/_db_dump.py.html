@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_db_dump.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_db_dump.py</h1>
+    <pre>#!/usr/bin/env python
+
+#  Используется для обеспечения совместимости с Python 2.x
+from __future__ import print_function
+
+import sys
+import yaml
+
+# Импорт базы данных db из приложения ekatra.brama
+from ekatra.brama import db
+
+# Импорт моделей User и Role из пакета ekatra.brama.auth.models
+from ekatra.brama.auth.models import User, Role
+
+# Использование gevent для многопоточности.
+# monkey.patch_all() применяет монки-патчинг к стандартным библиотекам
+# Python для поддержки асинхронного программирования.
+from gevent import monkey
+monkey.patch_all()
+
+
+# преобразует объект строки SQLAlchemy (row) в словарь Python (d),
+# содержащий атрибуты объекта строки.
+def row2dict(row):
+    d = {}
+    for column in row.__table__.columns:
+        v = getattr(row, column.name)
+        if v is not None:
+            d[column.name] = v
+
+    if row.__table__.name == &#x27;user&#x27;:
+        for c in row.__mapper__.relationships:
+            v = None
+            if c.key == &#x27;roles&#x27;:
+                v = [i.name for i in row.__getattribute__(c.key)]
+            if v is not None:
+                d[c.key] = v
+
+    return d
+
+
+def dump_db(db):
+    # Использует SQLAlchemy для выполнения запроса ко всем пользователям
+    # (db.session.query(User).all()) и каждого пользователя преобразует
+    # в словарь с помощью функции row2dict, добавляя его в список users.
+    users = []
+    for u in db.session.query(User).all():
+        users.append(row2dict(u))
+
+    # выполняет запрос ко всем ролям (db.session.query(Role).all()) и
+    # каждую роль преобразует в словарь, добавляя его в список roles.
+    roles = []
+    for r in db.session.query(Role).all():
+        roles.append(row2dict(r))
+
+    # Возвращает словарь с ключами &#x27;users&#x27; и &#x27;roles&#x27;
+    return { &#x27;users&#x27;: users,
+#            &#x27;roles&#x27;: roles
+           }
+
+
+def main(fn):
+    dump = dump_db(db)
+    if fn == &#x27;-&#x27;:
+        f = sys.stdout
+    else:
+        f = open(fn, &#x27;w&#x27;)
+
+    f.write(yaml.safe_dump(dump, default_flow_style=False))
+    f.close()
+
+
+if __name__ == &#x27;__main__&#x27;:
+    # Импортирует argparse для обработки аргументов командной строки.
+    import argparse
+
+    # Создает парсер аргументов командной строки
+    # с одним аргументом --output (или -o),который по умолчанию &#x27;-&#x27;
+    # и предназначен для указания имени файла для вывода дампа.
+    parser = argparse.ArgumentParser()
+    parser.add_argument(&#x27;--output&#x27;, &#x27;-o&#x27;, default=&#x27;-&#x27;, type=str, help=&quot;file name for the dump output&quot;)
+
+    # Парсит аргументы командной строки с помощью parser.parse_args()
+    # и сохраняет результат в переменной args.
+    args = parser.parse_args()
+
+    # Завершает скрипт
+    sys.exit(main(args.output))
+</pre>
+</body>
+</html>

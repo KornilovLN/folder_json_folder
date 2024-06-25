@@ -14,12 +14,6 @@
                 "directories": {
                     "etc": {
                         "files": {
-                            "st2_keys_defaults.json": {
-                                "name": "st2_keys_defaults",
-                                "extension": "json",
-                                "include": true,
-                                "size": 319
-                            },
                             "rtdb_hub_conf.yaml": {
                                 "name": "rtdb_hub_conf",
                                 "extension": "yaml",
@@ -211,11 +205,65 @@
                                 "directories": {
                                     "lib": {
                                         "files": {
+                                            "hikalib7.mnemo": {
+                                                "name": "hikalib7",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 32447
+                                            },
+                                            "termometr.mnemo": {
+                                                "name": "termometr",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 9758
+                                            },
+                                            "s_func7.mnemo": {
+                                                "name": "s_func7",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 25830
+                                            },
+                                            "spir.mnemo": {
+                                                "name": "spir",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 3308
+                                            },
+                                            "panel.mnemo": {
+                                                "name": "panel",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 2237
+                                            },
+                                            "naec.mnemo": {
+                                                "name": "naec",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 10950
+                                            },
                                             "hikabinder7.py": {
                                                 "name": "hikabinder7",
                                                 "extension": "py",
                                                 "include": true,
                                                 "size": 18201
+                                            },
+                                            "adigital.mnemo": {
+                                                "name": "adigital",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 6226
+                                            },
+                                            "dtext.mnemo": {
+                                                "name": "dtext",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 905
+                                            },
+                                            "lampuse.mnemo": {
+                                                "name": "lampuse",
+                                                "extension": "mnemo",
+                                                "include": true,
+                                                "size": 3088
                                             }
                                         },
                                         "directories": {}
@@ -372,6 +420,18 @@
                                                         "include": true,
                                                         "size": 2596
                                                     },
+                                                    "fVSYAU_T3.mnemo": {
+                                                        "name": "fVSYAU_T3",
+                                                        "extension": "mnemo",
+                                                        "include": true,
+                                                        "size": 4501
+                                                    },
+                                                    "fVSYAU2_T.mnemo": {
+                                                        "name": "fVSYAU2_T",
+                                                        "extension": "mnemo",
+                                                        "include": true,
+                                                        "size": 4527
+                                                    },
                                                     "fVSYAU2_T3.yaml": {
                                                         "name": "fVSYAU2_T3",
                                                         "extension": "yaml",
@@ -383,6 +443,18 @@
                                                         "extension": "yaml",
                                                         "include": true,
                                                         "size": 1424
+                                                    },
+                                                    "fYAPPY.mnemo": {
+                                                        "name": "fYAPPY",
+                                                        "extension": "mnemo",
+                                                        "include": true,
+                                                        "size": 8500
+                                                    },
+                                                    "fParBGSVX_3.mnemo": {
+                                                        "name": "fParBGSVX_3",
+                                                        "extension": "mnemo",
+                                                        "include": true,
+                                                        "size": 5357
                                                     },
                                                     "fParBGSVX_3.yaml": {
                                                         "name": "fParBGSVX_3",
@@ -814,6 +886,12 @@
                             },
                             "scripts": {
                                 "files": {
+                                    "blocks-from-fragments.sh": {
+                                        "name": "blocks-from-fragments",
+                                        "extension": "sh",
+                                        "include": true,
+                                        "size": 385
+                                    },
                                     "block2type.py": {
                                         "name": "block2type",
                                         "extension": "py",
@@ -838,11 +916,29 @@
                                         "include": true,
                                         "size": 655
                                     },
+                                    "meta-from-fragments.sh": {
+                                        "name": "meta-from-fragments",
+                                        "extension": "sh",
+                                        "include": true,
+                                        "size": 278
+                                    },
+                                    "meta-from-fragments3.sh": {
+                                        "name": "meta-from-fragments3",
+                                        "extension": "sh",
+                                        "include": true,
+                                        "size": 296
+                                    },
                                     "collect_algor_img.py": {
                                         "name": "collect_algor_img",
                                         "extension": "py",
                                         "include": true,
                                         "size": 1259
+                                    },
+                                    "showon-fragments.sh": {
+                                        "name": "showon-fragments",
+                                        "extension": "sh",
+                                        "include": true,
+                                        "size": 465
                                     }
                                 },
                                 "directories": {}
@@ -1125,16 +1221,41 @@
                 }
             },
             "install": {
-                "files": {},
+                "files": {
+                    "net-install.sh": {
+                        "name": "net-install",
+                        "extension": "sh",
+                        "include": true,
+                        "size": 8033
+                    }
+                },
                 "directories": {}
             },
             "inputs": {
                 "files": {
+                    "do_extract.sh": {
+                        "name": "do_extract",
+                        "extension": "sh",
+                        "include": true,
+                        "size": 452
+                    },
+                    "extract.sh": {
+                        "name": "extract",
+                        "extension": "sh",
+                        "include": true,
+                        "size": 245
+                    },
                     "hika7.yaml": {
                         "name": "hika7",
                         "extension": "yaml",
                         "include": true,
                         "size": 523
+                    },
+                    "deepextract.sh": {
+                        "name": "deepextract",
+                        "extension": "sh",
+                        "include": true,
+                        "size": 193
                     }
                 },
                 "directories": {
@@ -1153,11 +1274,35 @@
             },
             "test_extract": {
                 "files": {
+                    "1_compile.sh": {
+                        "name": "1_compile",
+                        "extension": "sh",
+                        "include": true,
+                        "size": 856
+                    },
+                    "0_extract.sh": {
+                        "name": "0_extract",
+                        "extension": "sh",
+                        "include": true,
+                        "size": 405
+                    },
+                    "2_gdb2txt.sh": {
+                        "name": "2_gdb2txt",
+                        "extension": "sh",
+                        "include": true,
+                        "size": 337
+                    },
                     "hika7.yaml": {
                         "name": "hika7",
                         "extension": "yaml",
                         "include": true,
                         "size": 553
+                    },
+                    "0_extract_full_tgz.sh": {
+                        "name": "0_extract_full_tgz",
+                        "extension": "sh",
+                        "include": true,
+                        "size": 329
                     }
                 },
                 "directories": {}
@@ -1166,11 +1311,12 @@
     },
     "stats": {
         "directories": 72,
-        "files": 133,
+        "files": 157,
         "files_py": 28,
         "files_yaml": 95,
         "files_ttl": 8,
-        "files_json": 1,
-        "files_html": 1
+        "files_mnemo": 13,
+        "files_html": 1,
+        "files_sh": 12
     }
 }

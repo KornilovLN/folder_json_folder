@@ -1,0 +1,36 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>blocks-from-fragments.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>blocks-from-fragments.sh</h1>
+    <pre>#!/usr/bin/env bash
+# print sorted massive name;index in massive;nameof block
+
+xmlstarlet sel -T -t -m //block//param -v ./@mas -o &#x27;;&#x27; -v ./@nom -o &#x27;;&#x27; -v ./ancestor::block/img/@name -n $1/*.xml | sort --field-separator=&#x27;;&#x27; -V | uniq -u
+#xmlstarlet sel -T -t -m //block -v ./img/@name -o &#x27;;&#x27; -m .//param -v ./@mas -o &#x27;;&#x27; -v ./@nom -n $1/*.xml | sort --field-separator=&#x27;;&#x27; -V | uniq -u
+</pre>
+</body>
+</html>

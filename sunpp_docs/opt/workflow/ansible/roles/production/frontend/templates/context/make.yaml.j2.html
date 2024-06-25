@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>make.yaml.j2</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>make.yaml.j2</h1>
+    <pre># {{ ansible_managed }}
+
+image:
+- name: frontend
+  description: frontend image for domain *.{{ ekatra_full_domain }}
+  from: &#x27;{{ images.frontend }}&#x27;
+  target: &#x27;{{ images_domain }}/{{ ekatra_domain }}/frontend&#x27;
+  author: ekatra
+  build:
+    - tasks:
+        - file: &quot;path=&#x27;/etc/nginx/sites-available/&#x27; state=directory mode=0777&quot;
+        - file: &quot;path=&#x27;{{ dest_dir }}/spd/&#x27; state=directory mode=0777&quot;
+    - copy:
+        src: &#x27;{{ src_dir }}/spd_{{ ekatra_mode }}/&#x27;
+        dest: &#x27;{{ dest_dir }}/spd/&#x27;
+    - copy:
+        src: &#x27;{{ work_dir }}/nginx/&#x27;
+        dest: &#x27;/etc/nginx/&#x27;
+
+  configuration:
+    command: [&quot;nginx&quot;, &quot;-c&quot;, &quot;/etc/nginx/nginx.conf&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]
+</pre>
+</body>
+</html>

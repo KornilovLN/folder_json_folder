@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_sqlfunctions5.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_sqlfunctions5.py</h1>
+    <pre># -*- coding: utf-8 -*-
+import re
+import logging
+import re
+from ekatra.compiler import fixnames
+from ekatra.semantic.fixmu import mu as fixmu
+from rdflib import Namespace
+import rdflib
+
+# Настройка логирования
+log = logging.getLogger(__name__)
+
+# Словарь типов объектов
+obj_types = {
+    &quot;S&quot;: u&quot;Задвижка запорная&quot;,
+    &quot;D&quot;: u&quot;Одиночный дискрет&quot;,
+    &quot;M&quot;: u&quot;Механизм&quot;,
+    &quot;C&quot;: u&quot;Сигнал диагностики ИВС&quot;,
+    &quot;F&quot;: u&quot;Формируемый диск.сигнал&quot;,
+    &quot;G&quot;: u&quot;ГС, обобщенные по диагн.ИВС&quot;,
+    &quot;Y&quot;: u&quot;Усл.выполнения команд&quot;,
+    &quot;X&quot;: u&quot;Команда КЗБ&quot;,
+    &quot;a&quot;: u&quot;Аналоговые парам.структуры АМ&quot;,
+    &quot;r&quot;: u&quot;Аналоговые парам.структуры РВ&quot;,
+    &quot;g&quot;: u&quot;ГС по категориям&quot;,
+}
+
+# Словарь типов параметров
+_tip_par = {
+    u&quot;Д&quot;: u&quot;Измеряемые дискретные&quot;,
+    u&quot;А&quot;: u&quot;Измеряемые аналоговые&quot;,
+    u&quot;Ф&quot;: u&quot;Формируемые дискретные&quot;,
+    u&quot;Р&quot;: u&quot;Расчетные аналоговые и аналоговые от МСКУ4&quot;,
+    u&quot;В&quot;: u&quot;Выходные дискретные (команды)&quot;
+}
+
+# Словарь типов обработки
+_tip_obr = {
+    &quot;S&quot;: u&quot;1-й контакт задв. прямое подключение&quot;,
+    &quot;T&quot;: u&quot;1-й конт. задв. обратное. подключение&quot;,
+    &quot;N&quot;: u&quot;2-й контакт механизма&quot;,
+    &quot;P&quot;: u&quot;2-й конт. задв. прямое и обр. подключ.&quot;,
+    &quot;M&quot;: u&quot;1-й контакт механизма&quot;,
+    &quot;B&quot;: u&quot;Быстрые сигналы&quot;,
+    &quot;D&quot;: u&quot;Одиночные дискретные&quot;,
+    &quot;I&quot;: u&quot;Инверсный сигнал&quot;,
+    &quot;K&quot;: u&quot;Ключи упр.механизмами и задв&quot;
+}
+
+# Глобальные переменные
+PROCESSOR = None
+NOM_TEXT_TO_CLASS = {}
+
+# Пространства имен RDF
+TabloURL = u&quot;Tablo&quot;
+H = Namespace(&quot;http://spd.ivl.cns/cim/hika#&quot;)
+MOF = Namespace(&quot;http://spd.ivl.cns/cim/rtdbmof#&quot;)
+KFBURL = H.KFB
+BoolURL = MOF.Bool
+AnalogURL = H.Analog
+TimeURL = H.Time
+DateTimeURL = H.DateTime
+
+# Инициализация глобальных переменных
+def init_parameters_vars(processor):
+    global PROCESSOR
+    PROCESSOR = processor
+    if hasattr(processor, &#x27;params&#x27;) and isinstance(processor.params, dict):
+        globals().update(processor.params)
+        log.info(&#x27;initialization of global variables&#x27;)
+
+# Определение типа атрибута
+def identify_atype(TIP_PAR, RAZM_ID, title, ALGOR, IMG):
+    &quot;&quot;&quot;(str?, int?, str?, str?, str?)-&gt;str&quot;&quot;&quot;
+    if TIP_PAR == u&#x27;Р&#x27;:
+        if ALGOR is None:
+            if RAZM_ID is None and (title.startswith(u&quot;Режим&quot;) or title.startswith(u&quot;Подрежим&quot;)):
+                return TabloURL
+        elif &#x27;DTEXT_TABLO&#x27; in ALGOR:
+            return TabloURL
+        elif &#x27;DTEXT_TIMER_AHK&#x27; in ALGOR:
+            return DateTimeURL
+        elif &#x27;DTEXT_TIME&#x27; in ALGOR or &#x27;DTEXT_TEPND_R&#x27; in ALGOR:
+            return TimeURL
+
+        if IMG is not None:
+            if u&#x27;kfb&#x27; in IMG:
+                return KFBURL
+            if u&#x27;TIME&#x27; in IMG:
+                return TimeURL
+        if title.startswith(u&#x27;Состояние КФБ&#x27;):
+            return KFBURL
+        if title.startswith(u&#x27;Исправность стоек АКНП&#x27;):
+            return BoolURL
+    return AnalogURL
+
+# Регулярное выражение для поиска числовых значений
+int_rex = re.compile(u&#x27;^((Значение (\d+)\-го макс KQ)|(Номер)|(Кол\-во)|(Количество))&#x27;, re.UNICODE)
+
+# Определение формата
+def identify_format(FORMAT, TIP_PAR, TYPE, RAZM_ID, title):
+    &quot;&quot;&quot;(str?, str?, str?, int?, str?)-&gt;str&quot;&quot;&quot;
+    if TYPE in (TabloURL, BoolURL):
+        return None
+    if TYPE == DateTimeURL:
+        return &#x27;%d.%m.%Y %H:%M&#x27;
+    if TYPE == TimeURL:
+        return &#x27;%H:%M:%S&#x27;
+    if TIP_PAR == u&#x27;Р&#x27; and RAZM_ID is None \
+            and (int_rex.search(title) or TYPE==KFBURL):
+        return &quot;d&quot;
+    return FORMAT
+
+# Регулярное выражение для поиска процентов
+percent_rex = re.compile(u&#x27;(((проц))|(в проц.)|(проценты))&#x27;, re.UNICODE)
+
+# Определение единицы измерения
+def identify_mu(mu_name, title):
+    &quot;&quot;&quot;(str?, str?)-&gt;str&quot;&quot;&quot;
+    r = fixmu(mu_name)
+    if r is None and percent_rex.search(title):
+        r = u&#x27;%&#x27;
+    return r
+
+# Исправление имени атрибута
+def fix_aname(name, ttype):
+    &quot;&quot;&quot;(str,str?)-&gt;str&quot;&quot;&quot;
+    return fix_name(name, &#x27;ad&#x27; if ttype in (TabloURL, BoolURL) else &quot;a&quot;)
+
+# Расширение URI
+def extend_uri(uri, ctx=None):
+    if uri is None:
+        r = None
+    elif &#x27;/&#x27; not in uri: # is url
+        items = uri.split(&#x27;:&#x27;, 1) if &quot;:&quot; in uri else uri.split(&#x27;.&#x27;, 1)
+        if len(items) == 0:
+            ns = &#x27;&#x27;
+            term = items
+        else:
+            ns, term = items
+
+        ctx = ctx or PROCESSOR and dict(PROCESSOR.result.namespaces()) or {}
+        uriref = ctx.get(ns)
+        if uriref:
+            r = uriref + term
+        else:
+            log.warn(&#x27;Context not found by %s&#x27;, uri)
+            r = rdflib.term.URIRef(uri)
+    else:
+        r = rdflib.term.URIRef(uri)
+    return r
+
+# Определение типа данных
+def identify_dtype(TIP_OBJ, TIP_PAR, TIP_OBR, NOM_TEXT, NAME, ALGOR, IMG, nom_text_to_class=None):
+    cl = extend_uri(NOM_TEXT_TO_CLASS.get(NOM_TEXT))
+    if cl:
+        cl = cl
+    if cl == H.Mechanizm and TIP_OBR == &#x27;N&#x27;:
+        cl = H.NContact
+    elif cl == H.Valve and TIP_OBR == &#x27;P&#x27;:
+        cl = H.PContact
+    elif cl == H.Bool and TIP_OBR == &#x27;K&#x27;:
+        cl = H.Key
+    elif cl is None and TIP_PAR == u&quot;Ф&quot; and TIP_OBR == &quot;D&quot;:
+        return H.Bool
+    return cl or &#x27;DiscreteX&#x27;
+
+# Исправление имени данных
+def fix_dname(IDEN, SEMTYPE):
+    prefix = &#x27;d&#x27; if SEMTYPE in (H.Mechanizm, H.Valve) else &#x27;b&#x27;
+    return fix_name(IDEN, prefix)
+
+# Исключение контактов
+def exclude_contacts(SEMTYPE, ID):
+    if SEMTYPE not in (H.PContact,  H.NContact):
+        return ID
+
+# Определение типа
+def identify_type(TIP_OBJ, TIP_PAR, TIP_OBR, NOM_TEXT, ALGOR, IMG):
+    &quot;&quot;&quot;(str?, str?, str?, int?, str?, str?)-&gt;str&quot;&quot;&quot;
+    return u&#x27;{}-{}-{}-{}-{}-{}&#x27;.format(obj_types.get(TIP_OBJ,TIP_OBJ), _tip_par.get(TIP_PAR, TIP_PAR), _tip_obr.get(TIP_OBR, TIP_OBR), NOM_TEXT, ALGOR, IMG)
+
+# Исправление идентификатора
+def fix_id(name, prefix):
+    return H[fix_name(name, prefix)]
+
+# Исправление имени
+def fix_name(name, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str,str?)-&gt;str&quot;&quot;&quot;
+    if name is not None:
+        return prefix + fixnames.fix_name(name)
+
+# Исправление имени на русском и английском языках
+def fix_rueng_name(name, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str,str?)-&gt;str&quot;&quot;&quot;
+    if name is not None:
+        return prefix + fixnames.fix_rueng_name(name)
+
+# Исправление имени с номером
+def fix_name_num(name, num, prefix=&#x27;&#x27;):
+    &quot;&quot;&quot;(str,int?, str?)-&gt;str&quot;&quot;&quot;
+    if name is not None:
+        if num is not None:
+            return prefix + u&#x27;{}{}&#x27;.format(fixnames.fix_name(name), num)
+        return prefix + fixnames.fix_rueng_name(name)
+
+# Исправление имени с числовым идентификатором
+def fix_int2name(id, prefix):
+    &quot;&quot;&quot;(int,str)-&gt;str&quot;&quot;&quot;
+    if id is not None:
+        return prefix + (str(id) if id &gt;=0 else &#x27;_%d&#x27; % -id)
+
+# Регулярное выражение для поиска идентификаторов
+_ivsmasrex = re.compile(r&quot;^(?P&lt;prefix&gt;[^\d]+)(?P&lt;kco&gt;\d)(?P&lt;cco&gt;\d{2})$&quot;)
+
+# Обмен идентификаторами
+def etc_exchange_id(massive, unit, mtype=None):
+    &quot;&quot;&quot;(str,str,str?)-&gt;str&quot;&quot;&quot;
+    if massive is not None:
+        m = _ivsmasrex.match(massive)
+        if m:
+            if mtype is None:
+                mtype = &#x27;B&#x27; if u&#x27;Д&#x27; in m.group(&#x27;prefix&#x27;) else &#x27;A&#x27;
+            return &quot;S00{}{}{}{}.000&quot;.format(unit[-1], mtype, m.group(&#x27;cco&#x27;), m.group(&#x27;kco&#x27;))
+
+# Определение типа атрибута (альтернативный метод)
+def identify_atype1(TIP_PAR, ALGOR, IMG):
+    &quot;&quot;&quot;(str?, str?, str?)-&gt;str&quot;&quot;&quot;
+    return u&#x27;{}-{}-{}&#x27;.format(TIP_PAR, ALGOR, IMG)</pre>
+</body>
+</html>

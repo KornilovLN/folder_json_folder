@@ -1,0 +1,390 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_net-install.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_net-install.sh</h1>
+    <pre>#!/bin/sh
+
+set -e
+
+# Определяем имя файла для сайта, используя второй аргумент командной строки или значение по умолчанию
+SITE_FILE_NAME=&quot;${2:-sunpp-20.09.03}.tgz&quot;
+IMAGE_DOMAIN=&quot;registry.sunpp.cns.atom&quot;
+WEAVE_FILE_NAME=&quot;weave-2.5.1.tar.gz&quot;
+CERT_FILE_NAME=&quot;certificates.tgz&quot;
+BASE_URL=&quot;http://sdn.dc.cns.atom/install/&quot;
+INSTALL_DIR=&quot;/opt/ekatra/&quot;
+SCRIPT_VERSION=&quot;0.3.0&quot;
+
+# Функция вывода информации о использовании скрипта
+# cat &gt;&amp;2 &lt;&lt;EOF:    Это начало конструкции, которая направляет вывод текста в стандартный поток ошибок (&gt;&amp;2).
+#                   Здесь &lt;&lt;EOF указывает на начало многострочного текста, который будет передан в команду cat для вывода
+# Usage::           Это заголовок, который указывает пользователю, что выводится информация о способах использования скрипта.
+# $0:               Эта переменная представляет имя текущего скрипта
+# --help | help:    Это описание первой строки справки, которая объясняет, как получить помощь по использованию скрипта.
+#                   Когда пользователь вызывает скрипт с --help или help, он ожидает увидеть эту информацию.
+# --version | version:   Следующая строка справки объясняет, как получить текущую версию скрипта.
+#                        Пользователь может запросить версию скрипта, вызвав --version или version.
+# setup             может инициировать установку необходимых зависимостей или настроек.
+# upgrade           может выполнять обновление программного обеспечения или конфигураций.
+# download          может загружать необходимые файлы или данные.
+# changelog         может выводить изменения и исправления в последней версии программы или скрипта.
+# EOF:              Это ключевое слово, которое завершает блок многострочного текста, который будет передан в cat для вывода.
+#                   Он указывает на конец текста справки.
+usage() {
+    cat &gt;&amp;2 &lt;&lt;EOF
+Usage:
+$0 --help | help
+      --version | version
+      setup
+      upgrade
+      download
+      changelog
+EOF
+}
+
+# Функция сохранения образов Docker
+# docker images:                        выводит список всех Docker образов в системе.
+# grep &quot;$IMAGE_DOMAIN&quot;:                 Фильтрует вывод, оставляя строки содержащие указанный домен (например, registry.sunpp.cns.atom).
+# awk &#x27;{printf &quot;%s:%s &quot;, $1, $2}&#x27;:      для форматирования вывода docker images. Он берёт первый ($1) и второй ($2) столбцы каждой строки вывода #                                       (обычно это репозиторий и тег образа) и выводит их в формате репозиторий:тег .
+# xargs --no-run-if-empty docker save:  Xargs - для передачи форматированного списка образов команде docker save.
+#                                       Флаг --no-run-if-empty предотвращает выполнение команды, если список пуст.
+#                                       docker save сохраняет указанные образы в архив.
+# gzip -c &gt; images.gz:                  gzip упаковывает данные, которые были сохранены docker save, и записывает результат в файл images.gz.
+save_images() {
+    docker images | grep &quot;$IMAGE_DOMAIN&quot; | awk &#x27;{printf &quot;%s:%s &quot;, $1, $2}&#x27; | xargs --no-run-if-empty docker save | gzip -c &gt; images.gz
+}
+
+# Функция пуша образов Docker в реестр
+# Тут следует дать пояснение:
+# while read -r line; do docker push $line ;done;:  
+#     Этот блок выполняет цикл по каждой строке вывода, прочитанной из предыдущего шага.
+#     Каждая строка, содержащая пару репозиторий:тег, передаётся в команду docker push $line,
+#     где $line представляет собой текущую строку с репозиторием и тегом образа.
+#     Команда docker push загружает (пушит) образ на указанный реестр Docker.
+push_images() {
+    docker images | grep &quot;$IMAGE_DOMAIN&quot; | awk &#x27;{printf &quot;%s:%s\n&quot;, $1, $2}&#x27; | while read -r line; do docker push $line ;done;
+}
+
+# Функция сбора информации о системе
+gather_facts() {
+
+    # Проверяем наличие необходимых команд в системе и если нет - выход
+    if [ ! -x /usr/bin/curl ] ; then
+        command -v curl &gt;/dev/null 2&gt;&amp;1 || { echo &gt;&amp;2 &quot;Please install curl&quot;; exit 1; }
+    fi
+
+    if [ ! -x /usr/bin/python ] ; then
+         echo &gt;&amp;2 &quot;Please install python&quot;; exit 1;
+    fi
+
+    # Определяем операционную систему хоста
+    # Если команда lsb_release доступна в системе
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS=$NAME
+        VER=$VERSION_ID
+    # иначе если /etc/lsb-release существует, то содержимое загружается 
+    elif type lsb_release &gt;/dev/null 2&gt;&amp;1; then
+        OS=$(lsb_release -si)
+        VER=$(lsb_release -sr)
+    elif [ -f /etc/lsb-release ]; then
+        . /etc/lsb-release
+        OS=$DISTRIB_ID
+        VER=$DISTRIB_RELEASE
+    # иначе если файл /etc/debian_version существует
+    elif [ -f /etc/debian_version ]; then
+        OS=Debian
+        VER=$(cat /etc/debian_version)
+    # или просто вот так
+    else
+        OS=$(uname -s)
+        VER=$(uname -r)
+    fi
+    # Вывод OS и Version
+    echo &quot;Detected OS $OS $VER&quot;
+    curl -V
+    python -V
+}
+
+# Функция загрузки Docker в зависимости от ОС
+download_docker() {
+    case $OS in
+    Debian*)
+        DOCKER_FILE_NAME=docker-debian-stretch.tgz
+        ;;
+    Ubuntu)
+        DOCKER_FILE_NAME=docker-ubuntu-bionic.tgz
+        ;;
+    CentOS*)
+        DOCKER_FILE_NAME=docker-centos-7.tgz
+        ;;
+    *)
+        echo &quot;Unsupported host OS: $OS&quot;
+        exit 1
+        ;;
+    esac
+
+    if [ ! -f &quot;$DOCKER_FILE_NAME&quot; ] ; then
+        echo &quot;Download docker $BASE_URL/terraform/$DOCKER_FILE_NAME&quot;
+        curl --fail -k &quot;$BASE_URL/terraform/$DOCKER_FILE_NAME&quot; -o &quot;$DOCKER_FILE_NAME&quot;
+    else
+        echo &quot;File $DOCKER_FILE_NAME present&quot;
+    fi
+}
+
+# Функция загрузки Weave
+download_weave() {
+    # Если файл не существует, то подгрузим с помощью curl
+    if [ ! -f &quot;$WEAVE_FILE_NAME&quot; ] ; then
+        echo &quot;Download weave $BASE_URL/terraform/$WEAVE_FILE_NAME&quot;
+        curl --fail -k &quot;$BASE_URL/terraform/$WEAVE_FILE_NAME&quot; -o &quot;$WEAVE_FILE_NAME&quot;
+    # иначе сообщим о наличие
+    else
+        echo &quot;File $WEAVE_FILE_NAME present&quot;
+    fi
+}
+
+# Функция загрузки сайта
+download_site() {
+    if [ ! -f &quot;$SITE_FILE_NAME&quot; ] ; then
+        echo &quot;Download domain $BASE_URL/sites/$SITE_FILE_NAME&quot;
+        curl --fail -k &quot;$BASE_URL/sites/$SITE_FILE_NAME&quot; -o &quot;$SITE_FILE_NAME&quot;
+    else
+        echo &quot;File $SITE_FILE_NAME present&quot;
+    fi
+}
+
+# Функция установки Docker
+install_docker() {
+
+    echo &quot;Install docker&quot;
+    TEMP_DIR=/tmp/ekatra/docker
+    mkdir -p &quot;$TEMP_DIR&quot;
+    # ранее был загружен файл DOCKER_FILE_NAME см. download_docker()
+    tar -x --directory=&quot;$TEMP_DIR&quot; -zf &quot;$DOCKER_FILE_NAME&quot;
+
+
+    # Установка сертификатов, если они присутствуют
+    if ls $TEMP_DIR/*.crt 1&gt; /dev/null 2&gt;&amp;1;  then
+        echo &quot;Install certificat&quot;
+        case $OS in
+        Debian*|Ubuntu)
+            sudo cp $TEMP_DIR/*.crt /usr/local/share/ca-certificates/
+            sudo update-ca-certificates
+            ;;
+        CentOS*)
+            sudo update-ca-trust enable
+            sudo cp $TEMP_DIR/*.crt /etc/pki/ca-trust/source/anchors/
+            sudo update-ca-trust extract
+            ;;
+        *)
+            echo &quot;Unsupported host OS: $OS&quot;
+            exit 1
+            ;;
+        esac
+    fi
+
+    # Включаем live restore для Docker
+    sudo mkdir -p &quot;/etc/docker&quot;
+    bash -c &#x27;echo -e &quot;{\n\&quot;live-restore\&quot;: true\n}&quot; | sudo tee /etc/docker/daemon.json &gt; /dev/null&#x27;
+
+    # Устанавливаем Docker в зависимости от ОС
+    case $OS in
+    Debian*|Ubuntu)
+        sudo dpkg -i $TEMP_DIR/*.deb
+        ;;
+    CentOS*)
+        sudo yum localinstall -y --nogpgcheck $TEMP_DIR/*.rpm
+        ;;
+    *)
+        echo &quot;Unsupported host OS: $OS&quot;
+        exit 1
+        ;;
+    esac
+
+    # Устанавливаем docker-volume-local-persist, если он присутствует
+    if [ -f &quot;$TEMP_DIR/docker-volume-local-persist&quot; ] &amp;&amp;
+       [ ! -f &quot;/usr/bin/docker-volume-local-persist&quot; ] ; then
+        sudo cp &quot;$TEMP_DIR/docker-volume-local-persist&quot; &quot;/usr/bin/&quot;
+        sudo cp &quot;$TEMP_DIR/docker-volume-local-persist.service&quot; &quot;/etc/systemd/system/&quot;
+        sudo chmod +x /usr/bin/docker-volume-local-persist
+        sudo systemctl daemon-reload
+        sudo systemctl enable docker-volume-local-persist
+        sudo systemctl start docker-volume-local-persist
+    fi
+
+    rm -r &quot;$TEMP_DIR&quot;
+}
+
+# Функция установки Weave
+install_weave() {
+    echo &quot;Install weave&quot;
+    sudo docker load -i $WEAVE_FILE_NAME
+    sudo tar -x --directory=/usr/local/bin -zf &quot;$WEAVE_FILE_NAME&quot; weave
+    sudo chmod +x /usr/local/bin/weave
+}
+
+# Функция установки сертификатов
+install_crt() {
+    CERT_DIR=&quot;$INSTALL_DIR/.certs&quot;
+    if [ -f &quot;$CERT_FILE_NAME&quot; ] ; then
+        echo &quot;File $CERT_FILE_NAME present&quot;
+        echo &quot;Install Domain certificates from $CERT_FILE_NAME&quot;
+        sudo mkdir -p &quot;$CERT_DIR&quot;
+        sudo tar -x --directory=&quot;$CERT_DIR&quot; -zf &quot;$CERT_FILE_NAME&quot;
+
+        # Переименовываем файлы .cer в .crt, если они есть
+        sudo find &quot;$CERT_DIR&quot; -depth -name &quot;*.cer&quot; -exec sh -c &#x27;mv &quot;$1&quot; &quot;${1%.cer}.crt&quot;&#x27; _ {} \;
+
+        # Устанавливаем сертификаты в зависимости от ОС
+        if ls $CERT_DIR/*CA*.crt 1&gt; /dev/null 2&gt;&amp;1;  then
+            case $OS in
+            Debian*|Ubuntu)
+                sudo cp $CERT_DIR/*CA*.crt /usr/local/share/ca-certificates/
+                sudo update-ca-certificates
+                ;;
+            CentOS*)
+                sudo update-ca-trust enable
+                sudo cp $CERT_DIR/*CA*.crt /etc/pki/ca-trust/source/anchors/
+                sudo update-ca-trust extract
+                ;;
+            *)
+                echo &quot;Unsupported host OS: $OS&quot;
+                exit 1
+                ;;
+            esac
+        fi
+    else
+        echo &quot;Domain certificates $CERT_FILE_NAME not present.&quot;
+    fi
+}
+
+# Функция установки сайта
+install_site() {
+
+    # Проверяем, что каталог установки пустой
+    if [ -d &quot;$INSTALL_DIR&quot; ] &amp;&amp; [ &quot;$(ls -A $INSTALL_DIR | grep -v .certs)&quot; ]; then
+        echo &quot;Installation aborted. $INSTALL_DIR is not Empty&quot;
+        exit 1
+    fi
+
+    # Устанавливаем сайт,
+
+
+
+    # Устанавливаем сайт, если архив существует
+    if [ -f &quot;$SITE_FILE_NAME&quot; ] ; then
+        sudo mkdir -p &quot;$INSTALL_DIR&quot;
+        sudo tar -x --directory=&quot;$INSTALL_DIR&quot; -zf &quot;$SITE_FILE_NAME&quot;
+    else
+        echo &quot;File not found $SITE_FILE_NAME&quot;
+        exit 1
+    fi
+
+    # Запускаем скрипт настройки, если он существует
+    if [ -f &quot;$INSTALL_DIR/.install/setup.sh&quot; ] ; then
+        cd &quot;$INSTALL_DIR/.install/&quot;
+        sudo &quot;./setup.sh&quot;
+    fi
+}
+
+# Функция обновления сайта
+upgrade_site() {
+    TEMP_INSTALL_DIR=/tmp/ekatra/upgrade
+
+    # Распаковываем архив с обновлением, если он существует
+    if [ -f &quot;$SITE_FILE_NAME&quot; ] ; then
+        sudo mkdir -p &quot;$TEMP_INSTALL_DIR&quot;
+        sudo tar -x --directory=&quot;$TEMP_INSTALL_DIR&quot; -zf &quot;$SITE_FILE_NAME&quot;
+    else
+        echo &quot;File not found $SITE_FILE_NAME&quot;
+        exit 1
+    fi
+
+    # Запускаем скрипт обновления, если он существует
+    if [ -f &quot;$TEMP_INSTALL_DIR/.install/upgrade.sh&quot; ] ; then
+        cd &quot;$TEMP_INSTALL_DIR/.install/&quot;
+        sudo &quot;./upgrade.sh&quot;
+    fi
+}
+
+# Функция вывода изменений
+changelog() {
+    if [ -f &quot;$SITE_FILE_NAME&quot; ] ; then
+        tar -xOzf $SITE_FILE_NAME --to-stdout --wildcards &#x27;./**/CHANGELOG*.md&#x27; | more
+    fi
+}
+
+######################################################################
+# Основное тело скрипта
+######################################################################
+
+# Обработка спец команд $1, которые выполняются локально на клиенте
+case &quot;$1&quot; in
+    help|--help)
+        usage
+        exit 0
+        ;;
+    version|--version)
+        echo &quot;$SCRIPT_VERSION&quot;
+        exit 0
+        ;;
+    changelog)
+        download_site
+        changelog
+        exit 0
+        ;;
+    setup)
+        gather_facts
+        download_docker
+        download_weave
+        download_site
+        install_docker
+        install_weave
+        install_crt
+        install_site
+        ;;
+    upgrade)
+        gather_facts
+        download_site
+        install_crt
+        upgrade_site
+        ;;
+    download)
+        gather_facts
+        download_docker
+        download_weave
+        download_site
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+esac
+</pre>
+</body>
+</html>

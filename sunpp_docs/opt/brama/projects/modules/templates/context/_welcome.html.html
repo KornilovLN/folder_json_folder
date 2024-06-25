@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_welcome.html</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_welcome.html</h1>
+    <pre>&lt;!--
+Описание применения:
+
+Этот модуль mainview.py содержит функции и маршруты для отображения главной страницы
+приложения BRAMA.
+
+Он определяет Blueprint comps для регистрации маршрутов и представлений.
+Основной маршрут /show/ обрабатывается функцией show_default_component().
+Эта функция рендерит HTML-шаблон welcome.html и отображает его в главном контенте
+страницы.
+
+Она также получает количество пользователей, активных пользователей, мнемосхем и метрик,
+используя вспомогательные функции get_users_count(), get_acting_users_count(),
+get_screens_count() и get_metrics_count().
+
+Функции get_metrics_count() и get_screens_count() выполняют SPARQL-запросы
+для подсчета количества метрик и мнемосхем соответственно.
+Результаты этих функций кэшируются с помощью декоратора lru_cache для повышения
+производительности.
+Если приложение имеет объект mqtt, эти функции также подписываются
+на событие обновления пространства имен для очистки кэша при необходимости.
+
+Функция query() используется для выполнения SPARQL-запросов,
+получая URL-адрес SPARQL-конечной точки из модуля sparql_query.
+
+Этот модуль также импортирует необходимые модули и классы из других частей
+приложения BRAMA, таких как ekatra.brama.components, ekatra.brama.auth
+и ekatra.brama.sparql_query.
+--&gt;
+
+&lt;div class=&quot;main_content x_panel&quot; style=&quot;overflow:auto&quot;&gt;
+
+    &lt;div class=&quot;row scope&quot;&gt;
+        &lt;div class=&quot;col-lg-3 col-md-6 col-sm-6 col-xs-12&quot;&gt;
+            &lt;div class=&quot;widget&quot;&gt;
+                &lt;div class=&quot;widget-body&quot; ng-class=&quot;classes&quot;&gt;
+                    &lt;div class=&quot;widget-content&quot;&gt;
+                        &lt;div class=&quot;widget-icon pull-left&quot;&gt;
+                            &lt;i class=&quot;fa fa-users&quot;&gt;&lt;/i&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;title&quot;&gt;{{ total_users | default(0) }}&lt;/div&gt;
+                        &lt;div class=&quot;comment&quot;&gt;{{ total_acting_users }} Active users&lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;col-lg-3 col-md-6 col-sm-6 col-xs-12&quot;&gt;
+            &lt;div class=&quot;widget&quot;&gt;
+                &lt;div class=&quot;widget-body&quot; ng-class=&quot;classes&quot;&gt;
+                    &lt;div class=&quot;widget-content&quot;&gt;
+                        &lt;div class=&quot;widget-icon pull-left&quot;&gt;
+                            &lt;i class=&quot;fa fa-tasks&quot;&gt;&lt;/i&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;title&quot;&gt;{{ total_host | default(1) }}&lt;/div&gt;
+                        &lt;div class=&quot;comment&quot;&gt;Servers&lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;col-lg-3 col-md-6 col-sm-6 col-xs-12&quot;&gt;
+            &lt;div class=&quot;widget&quot;&gt;
+                &lt;div class=&quot;widget-body&quot; ng-class=&quot;classes&quot;&gt;
+                    &lt;div class=&quot;widget-content&quot;&gt;
+                        &lt;div class=&quot;widget-icon pull-left&quot;&gt;
+                            &lt;i class=&quot;fa fa-sitemap&quot;&gt;&lt;/i&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;title&quot;&gt;{{ total_screens | default(0) }}&lt;/div&gt;
+                        &lt;div class=&quot;comment&quot;&gt;Screens&lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;col-lg-3 col-md-6 col-sm-6 col-xs-12&quot;&gt;
+            &lt;div class=&quot;widget&quot;&gt;
+                &lt;div class=&quot;widget-body&quot; ng-class=&quot;classes&quot;&gt;
+                    &lt;div class=&quot;widget-content&quot;&gt;
+                        &lt;div class=&quot;widget-icon pull-left&quot;&gt;
+                            &lt;i class=&quot;fa fa-tachometer&quot;&gt;&lt;/i&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;title&quot;&gt;{{ total_metrics | default(0) }}&lt;/div&gt;
+                        &lt;div class=&quot;comment&quot;&gt;Metrics&lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+{% for item in widgets %}
+&lt;div class=&quot;row&quot;&gt;
+
+    &lt;div class=&quot;col-lg-12 col-md-12 col-xs-12&quot;&gt;
+        &lt;div class=&quot;widget&quot;&gt;
+            &lt;div class=&quot;widget-body large no-padding&quot;&gt;
+                &lt;div class=&quot;widget-content&quot; style=&quot;width:100%;height:100%&quot;&gt;
+                {% if item.type == &#x27;iframe&#x27; %}
+                    &lt;iframe style=&quot;border: none;display: inherit;width:100%;height:100%&quot; src=&quot;{{ item.src }}&quot;&gt;&lt;/iframe&gt;
+                {% endif %}
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+&lt;/div&gt;
+{% endfor %}
+
+
+{#
+ &lt;!--&lt;div id=&quot;main_content_chart&quot; style=&quot;width: 500px;height: 300px&quot;&gt;--&gt;
+    &lt;!--&lt;script type=text/javascript&gt;--&gt;
+        &lt;!--var request = {&#x27;query&#x27;:&#x27;monitor/api/v1/query?query=alertmanager_silences_query_duration_seconds_count[15m]&#x27;}--&gt;
+        &lt;!--$(&#x27;#main_content_chart&#x27;).brama_chart(request);--&gt;
+    &lt;!--&lt;/script&gt;--&gt;
+&lt;!--&lt;/div&gt; --&gt;
+
+&lt;!-- &lt;div class=&quot;row panel&quot;&gt;
+&lt;div class=&quot;col-md-6 col-sm-12 col-xs-12&quot;&gt;
+&lt;div brama-bind=&quot;brama_rickshaw({url_get:&#x27;monitor/api/v1/query?query=go_goroutines[5m]&#x27;, filter_name:&#x27;job&#x27;})&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;col-md-6 col-sm-12 col-xs-12&quot;&gt;
+&lt;div brama-bind=&quot;brama_rickshaw({url_get:&#x27;monitor/api/v1/query?query=container_memory_usage_bytes{id=\&#x27;/docker\&#x27;}[12h]&#x27;, filter_name:&#x27;job&#x27;})&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+&lt;div class=&quot;row panel&quot;&gt;
+&lt;div class=&quot;col-md-6 col-sm-12 col-xs-12&quot;&gt;
+&lt;div brama-bind=&quot;brama_rickshaw({url_get:&#x27;monitor/api/v1/query?query=opentsdb_rpc_received[12h]&#x27;, filter_name:&#x27;type&#x27;})&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;col-md-6 col-sm-12 col-xs-12&quot;&gt;
+&lt;div brama-bind=&quot;brama_rickshaw({url_get:&#x27;monitor/api/v1/query?query=opentsdb_rpc_errors[12h]&#x27;, filter_name:&#x27;type&#x27;})&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt; --&gt;
+
+
+
+
+
+&lt;!--&lt;div class=&quot;row tile_count&quot;&gt;--&gt;
+  &lt;!--&lt;div class=&quot;col-md-2 col-sm-4 col-xs-6 tile_stats_count&quot;&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_top&quot;&gt;&lt;i class=&quot;fa fa-user&quot;&gt;&lt;/i&gt; Total Users&lt;/span&gt;--&gt;
+    &lt;!--&lt;div class=&quot;count&quot;&gt;{{ total_users }}&lt;/div&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_bottom&quot;&gt;&lt;i class=&quot;green&quot;&gt;{{ total_acting_users }}&lt;/i&gt; Including acting&lt;/span&gt;--&gt;
+  &lt;!--&lt;/div&gt;--&gt;
+  &lt;!--&lt;div class=&quot;col-md-2 col-sm-4 col-xs-6 tile_stats_count&quot;&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_top&quot;&gt;&lt;i class=&quot;fa fa-home&quot;&gt;&lt;/i&gt; Total projects&lt;/span&gt;--&gt;
+    &lt;!--&lt;div class=&quot;count&quot;&gt;{{ total_prj|default(0) }}&lt;/div&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_bottom&quot;&gt;&lt;i class=&quot;green&quot;&gt;{{ total_prj_accessible }} &lt;/i&gt; Accessible&lt;/span&gt;--&gt;
+  &lt;!--&lt;/div&gt;--&gt;
+  &lt;!--&lt;div class=&quot;col-md-2 col-sm-4 col-xs-6 tile_stats_count&quot;&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_top&quot;&gt;&lt;i class=&quot;fa fa-user&quot;&gt;&lt;/i&gt; Total Males&lt;/span&gt;--&gt;
+    &lt;!--&lt;div class=&quot;count green&quot;&gt;2,500&lt;/div&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_bottom&quot;&gt;&lt;i class=&quot;green&quot;&gt;&lt;i class=&quot;fa fa-sort-asc&quot;&gt;&lt;/i&gt;34% &lt;/i&gt; From last Week&lt;/span&gt;--&gt;
+  &lt;!--&lt;/div&gt;--&gt;
+  &lt;!--&lt;div class=&quot;col-md-2 col-sm-4 col-xs-6 tile_stats_count&quot;&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_top&quot;&gt;&lt;i class=&quot;fa fa-user&quot;&gt;&lt;/i&gt; Total Females&lt;/span&gt;--&gt;
+    &lt;!--&lt;div class=&quot;count&quot;&gt;4,567&lt;/div&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_bottom&quot;&gt;&lt;i class=&quot;red&quot;&gt;&lt;i class=&quot;fa fa-sort-desc&quot;&gt;&lt;/i&gt;12% &lt;/i&gt; From last Week&lt;/span&gt;--&gt;
+  &lt;!--&lt;/div&gt;--&gt;
+  &lt;!--&lt;div class=&quot;col-md-2 col-sm-4 col-xs-6 tile_stats_count&quot;&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_top&quot;&gt;&lt;i class=&quot;fa fa-user&quot;&gt;&lt;/i&gt; Total Collections&lt;/span&gt;--&gt;
+    &lt;!--&lt;div class=&quot;count&quot;&gt;2,315&lt;/div&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_bottom&quot;&gt;&lt;i class=&quot;green&quot;&gt;&lt;i class=&quot;fa fa-sort-asc&quot;&gt;&lt;/i&gt;34% &lt;/i&gt; From last Week&lt;/span&gt;--&gt;
+  &lt;!--&lt;/div&gt;--&gt;
+  &lt;!--&lt;div class=&quot;col-md-2 col-sm-4 col-xs-6 tile_stats_count&quot;&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_top&quot;&gt;&lt;i class=&quot;fa fa-user&quot;&gt;&lt;/i&gt; Total Connections&lt;/span&gt;--&gt;
+    &lt;!--&lt;div class=&quot;count&quot;&gt;7,325&lt;/div&gt;--&gt;
+    &lt;!--&lt;span class=&quot;count_bottom&quot;&gt;&lt;i class=&quot;green&quot;&gt;&lt;i class=&quot;fa fa-sort-asc&quot;&gt;&lt;/i&gt;34% &lt;/i&gt; From last Week&lt;/span&gt;--&gt;
+  &lt;!--&lt;/div&gt;--&gt;
+&lt;!--&lt;/div&gt;--&gt;
+#}
+&lt;/div&gt;
+</pre>
+</body>
+</html>

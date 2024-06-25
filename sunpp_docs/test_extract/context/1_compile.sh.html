@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>1_compile.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>1_compile.sh</h1>
+    <pre>
+docker run -it --rm \
+    -w /build \
+    -v &quot;$(pwd):/build&quot; \
+    -v &quot;/home/max/gitlab_2/ekatra/tools/ekatra/tools:/usr/local/lib/python3.7/site-packages/ekatra/tools&quot; \
+    -v &quot;/home/max/gitlab_2/ekatra/compile/compiler/ekatra/compiler:/usr/local/lib/python3.7/site-packages/ekatra/compiler&quot; \
+    -v &quot;/home/max/gitlab_2/ekatra/compile/semantic/semantic/ekatra/semantic:/usr/local/lib/python3.7/site-packages/ekatra/semantic&quot; \
+    -v &quot;/home/max/gitlab_2/ekatra/compile/semantic/R2RML/ekatra/r2rml:/usr/local/lib/python3.7/site-packages/ekatra/r2rml&quot; \
+    -v &quot;/home/max/gitlab_2/ekatra/compile/semantic/R2RML/ekatra/virtdb:/usr/local/lib/python3.7/site-packages/ekatra/virtdb&quot; \
+    -e PYTHONIOENCODING=utf_8 \
+    -e PYTHONUNBUFFERED=true \
+    -e LC_ALL=en_US.UTF-8 \
+    registry.master.cns/compiler:latest \
+    compile_project -a meta:db2rdf
+
+
+
+
+
+</pre>
+</body>
+</html>

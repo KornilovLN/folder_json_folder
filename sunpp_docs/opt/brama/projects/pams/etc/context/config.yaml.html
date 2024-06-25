@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>config.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>config.yaml</h1>
+    <pre>meta:
+  namespace: http://sunpp.cns.atom/pams/
+  output: /var/ekatra/spd/meta/upams/graph.ttl
+  meta_url: &#x27;http://www/spd/meta/upams/&#x27;
+  info: ./rtdb/info.yaml
+
+  db_sources:
+    - &#x27;rtdb/*.*&#x27;
+  db:
+    - id: etc
+      url: &#x27;dir://rtdb&#x27;
+    - id: csv
+      url: &#x27;dir://rtdb&#x27;
+      options:
+        driver: csv
+        debug: True
+        encoding: utf-8
+        delimiter: &#x27;;&#x27;
+        quotechar: &#x27;&quot;&#x27;
+        doublequote: False
+        skipinitialspace: False
+        lineterminator: &#x27;\r\n&#x27;
+    - id: db
+      url: &#x27;xlsx://rtdb&#x27;
+      options:
+        data_only: True
+        addcolumns: worksheet
+
+  mu: /ekatra/etc/meta/mu.yaml
+  r2rdf: etc/schema.ttl
+  imports: /ekatra/etc/meta/sqlfunctions.py
+  parameters:
+    prefix: &#x27;upams&#x27;
+  prefixes:
+    mof: &quot;http://spd.ivl.cns/cim/rtdbmof#&quot;
+    mmi: &quot;http://spd.ivl.cns/cim/mmi#&quot;
+    sh: &quot;http://sunpp.cns.atom/cim/hika#&quot;
+
+# mnemos:
+#   results_backend:
+#     - &#x27;mongodb://mongo/ekatra/mnemo_su&#x27;
+#     - &#x27;mqtt://mq:1883/brama/prj/U/mnemos&#x27;
+#   libpath:
+#     - /ekatra/etc/mnemo
+#   targetpath: /var/ekatra/spd/su
+#   publicgroup_targetpath: /var/ekatra/hub
+#   mnemos: &#x27;mnemos/*.mnemo&#x27;
+#   external_deps:
+#     &#x27;&#x27;: &#x27;mnemos/img&#x27;
+
+bridge:
+  type: hika
+  address: &#x27;228.7.0.7:9090&#x27;
+
+arrays:
+  targetpath: /var/ekatra/spd/upams/arr
+  publicgroup_targetpath: /var/ekatra/hub/upams
+
+
+tasks:
+  - basename: rtdb
+    name: collect_oldrtdb_dump
+    doc: Generate MSQL DUMP for oldrtdb
+    task_dep: [&quot;meta:upload_rdf&quot;]
+    uptodate: [true]
+    targets:
+      - /var/ekatra/spd/meta/upams/msql.dump
+    actions:
+     - python: ekatra.semantic.rdf2msql:main
+       kwargs:
+         array:
+          - http://sunpp.cns.atom/pams/arrREGU3A
+          - http://sunpp.cns.atom/pams/arrREGU3B
+          - http://sunpp.cns.atom/pams/arrREGU3D
+
+
+logging:
+  level: INFO
+
+doit_config:
+    backend: sqlite3
+    dep_file: /var/ekatra/tmp/pams/.doit.db
+    verbosity: 2
+
+</pre>
+</body>
+</html>

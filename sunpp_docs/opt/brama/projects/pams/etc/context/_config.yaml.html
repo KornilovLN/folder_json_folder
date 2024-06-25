@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_config.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_config.yaml</h1>
+    <pre># Этот YAML-файл содержит различные настройки для проекта PAMS (ПАМС).
+
+# Раздел meta содержит настройки, связанные с метаданными:
+
+# Пространство имен, URL и пути для загрузки и сохранения метаданных.
+# Определения баз данных, включая источники данных, драйверы и опции.
+# Файлы с определениями модулей, правилами преобразования данных в RDF и импортируемыми функциями.
+# Параметры и префиксы пространств имен для генерации метаданных.
+
+# Раздел mnemos закомментирован, но, вероятно, содержит настройки для работы с мнемосхемами.
+
+# Раздел bridge определяет настройки для моста типа hika с указанным адресом.
+
+# Раздел arrays содержит пути для сохранения массивов.
+
+# Раздел tasks определяет задачу collect_oldrtdb_dump для генерации дампа базы данных oldrtdb. Задача зависит
+# от задачи meta:upload_rdf и выполняет действие ekatra.semantic.rdf2msql:main с указанными массивами.
+
+# Раздел logging определяет уровень логирования INFO.
+
+# Раздел doit_config содержит настройки для утилиты doit, используемой для автоматизации задач,
+#включая бэкенд, файл зависимостей и уровень детализации.
+
+# Этот файл конфигурации используется для настройки различных аспектов проекта PAMS,
+# таких как обработка метаданных, работа с мнемосхемами, настройки моста и массивов,
+# а также автоматизация задач.
+
+# Раздел с метаданными
+meta:
+  # Пространство имен для метаданных
+  namespace: http://sunpp.cns.atom/pams/
+  
+  # Путь для сохранения сгенерированного RDF-графа
+  output: /var/ekatra/spd/meta/upams/graph.ttl
+  
+  # URL для загрузки метаданных
+  meta_url: &#x27;http://www/spd/meta/upams/&#x27;
+  
+  # Файл с информацией о базах данных
+  info: ./rtdb/info.yaml
+
+  # Список источников данных для баз данных
+  db_sources:
+    - &#x27;rtdb/*.*&#x27;
+  
+  # Список определений баз данных
+  db:
+    # Определение базы данных &quot;etc&quot;
+    - id: etc
+      url: &#x27;dir://rtdb&#x27;
+    
+    # Определение базы данных &quot;csv&quot;
+    - id: csv
+      url: &#x27;dir://rtdb&#x27;
+      options:
+        driver: csv
+        debug: True
+        encoding: utf-8
+        delimiter: &#x27;;&#x27;
+        quotechar: &#x27;&quot;&#x27;
+        doublequote: False
+        skipinitialspace: False
+        lineterminator: &#x27;\r\n&#x27;
+    
+    # Определение базы данных &quot;db&quot;
+    - id: db
+      url: &#x27;xlsx://rtdb&#x27;
+      options:
+        data_only: True
+        addcolumns: worksheet
+
+  # Файл с определениями модулей
+  mu: /ekatra/etc/meta/mu.yaml
+  
+  # Файл с правилами преобразования данных в RDF
+  r2rdf: etc/schema.ttl
+  
+  # Файл с импортируемыми функциями
+  imports: /ekatra/etc/meta/sqlfunctions.py
+  
+  # Параметры для генерации метаданных
+  parameters:
+    prefix: &#x27;upams&#x27;
+  
+  # Префиксы пространств имен
+  prefixes:
+    mof: &quot;http://spd.ivl.cns/cim/rtdbmof#&quot;
+    mmi: &quot;http://spd.ivl.cns/cim/mmi#&quot;
+    sh: &quot;http://sunpp.cns.atom/cim/hika#&quot;
+
+# Настройки для мнемосхем (закомментированы)
+#mnemos:
+#  results_backend:
+#    - &#x27;mongodb://mongo/ekatra/mnemo_su&#x27;
+#    - &#x27;mqtt://mq:1883/brama/prj/U/mnemos&#x27;
+#  libpath:
+#    - /ekatra/etc/mnemo
+#  targetpath: /var/ekatra/spd/su
+#  publicgroup_targetpath: /var/ekatra/hub
+#  mnemos: &#x27;mnemos/*.mnemo&#x27;
+#  external_deps:
+#    &#x27;&#x27;: &#x27;mnemos/img&#x27;
+
+# Настройки для моста
+bridge:
+  type: hika
+  address: &#x27;228.7.0.7:9090&#x27;
+
+# Настройки для массивов
+arrays:
+  targetpath: /var/ekatra/spd/upams/arr
+  publicgroup_targetpath: /var/ekatra/hub/upams
+
+# Список задач
+tasks:
+  - basename: rtdb
+    name: collect_oldrtdb_dump
+    doc: Generate MSQL DUMP for oldrtdb
+    task_dep: [&quot;meta:upload_rdf&quot;]
+    uptodate: [true]
+    targets:
+      - /var/ekatra/spd/meta/upams/msql.dump
+    actions:
+     - python: ekatra.semantic.rdf2msql:main
+       kwargs:
+         array:
+          - http://sunpp.cns.atom/pams/arrREGU3A
+          - http://sunpp.cns.atom/pams/arrREGU3B
+          - http://sunpp.cns.atom/pams/arrREGU3D
+
+# Настройки логирования
+logging:
+  level: INFO
+
+# Настройки для doit (утилиты для автоматизации задач)
+doit_config:
+    backend: sqlite3
+    dep_file: /var/ekatra/tmp/pams/.doit.db
+    verbosity: 2
+</pre>
+</body>
+</html>

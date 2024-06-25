@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>hikapakextract.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>hikapakextract.py</h1>
+    <pre>#!/usr/bin/env python
+import os
+from gzip import GzipFile
+from io import BytesIO
+import hashlib
+import tarfile
+
+&quot;&quot;&quot;
+HIKA PAK SPEC
+
+    &lt;                    - start filename block
+    filename               mixed encoding koi8r windows-1251 ...
+    &gt;                    - end filename block
+    some unknown bytes     struct(&quot;&lt;6I&quot;) or struct(&quot;&lt;5I&quot;)
+                           0I - original file size
+                           1I - gz-block size
+                           2I - global offset on start gz-block
+                           3I
+                           4I
+                           5I - ???
+
+    \x1f\x8b             - start gz-block
+    \00                  - end gz-block
+    \x0A                 - end block
+
+    ...
+
+&quot;&quot;&quot;
+
+version = &quot;0.1.2&quot;
+
+START_NAME = b&quot;&lt;&quot;
+END_NAME = b&quot;&gt;&quot;
+END_BLOCK = b&quot;\x0A&quot;
+GZIP_MAG = b&quot;\x1f\x8b&quot;
+
+
+
+class MemberInfo(object):
+    name = None
+    data = None
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+class HikaPack(object):
+    fileobj = None
+
+    def __init__(self, filename, verbose=False, encoding=None, hash=False):
+        self.verbose = verbose
+        self.encoding = encoding or &#x27;koi8-r&#x27;
+        self.hash = hash
+        self.members = []
+        self.open(filename)
+
+    def decode_name(self, basename):
+        name = basename.decode(self.encoding).encode(&#x27;utf-8&#x27;)
+        if name.startswith(START_NAME) and name.endswith(END_NAME):
+            name = name[1:-1]
+
+        if self.hash:
+            filename, part, ext = name.partition(b&#x27;.&#x27;)
+            dname_hash = hashlib.md5(filename).hexdigest().encode(&quot;utf-8&quot;)
+            dname = (dname_hash + part + ext)
+        else:
+            dname = name
+#             if self.verbose:
+#                 print(&#x27;hash:&#x27;, basename, &#x27;&gt;&#x27;, dname)
+
+        return dname.decode(&quot;utf-8&quot;)
+
+    def open(self, filename):
+        self.close()
+        self.fileobj = open(filename, &quot;rb&quot;)
+        self.members = [member for member in self.next()]
+        return self
+
+    def close(self):
+        if self.fileobj:
+            self.fileobj.close()
+
+    def _extract_member(self, member, targetpath):
+        targetpath = targetpath.rstrip(&quot;/&quot;)
+        targetpath = targetpath.replace(&quot;/&quot;, os.sep)
+        upperdirs = os.path.dirname(targetpath)
+        if upperdirs and not os.path.exists(upperdirs):
+            os.makedirs(upperdirs)
+        data = self.extractfile(member)
+        with open(targetpath, &quot;wb&quot;) as f:
+            f.write(data)
+        if self.verbose:
+            print(targetpath)
+
+    def extractfile(self, member):
+        body = member.data
+        gz_offset = body.find(GZIP_MAG)
+        chunk = body[gz_offset:-1]
+        with GzipFile(fileobj=BytesIO(chunk)) as f:
+            return f.read()
+
+    def next(self):
+        self.fileobj.seek(0)
+        name, body = b&quot;&quot;, BytesIO()
+
+        flag_header = True
+        maybe_end = False
+        byte_s = None
+
+        while True:
+            prev_byte = byte_s
+            byte_s = self.fileobj.read(1)
+
+            if maybe_end:
+                maybe_end = False
+                if not byte_s or byte_s == START_NAME:
+                    member = MemberInfo(
+                        name=self.decode_name(name),
+                        data=body.getvalue()
+                    )
+                    name, body = b&quot;&quot;, BytesIO()
+                    flag_header = True
+                    yield member
+
+            if not byte_s:
+                break
+
+            if flag_header:
+                name += byte_s
+                if byte_s == END_NAME:
+                    flag_header = False
+            else:
+                body.write(byte_s)
+                maybe_end = byte_s == END_BLOCK and prev_byte == b&quot;\x00&quot;
+
+    def extractall(self, path=&quot;&quot;):
+        for member in self.members:
+            self._extract_member(member, os.path.join(path, member.name))
+
+
+
+def dump_index(filename, items):
+    with open(filename, &quot;wb&quot;) as f:
+        f.write(b&#x27;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;\n&#x27;)
+        f.write(b&#x27;&lt;files&gt;\n&#x27;)
+        for item in items:
+            f.write(b&#x27;\t&lt;file name=&quot;%s&quot; /&gt;\n&#x27; % item.name.encode(&#x27;utf-8&#x27;))
+        f.write(b&#x27;&lt;/files&gt;\n&#x27;)
+
+
+if __name__ == &quot;__main__&quot;:
+    import argparse
+    parser = argparse.ArgumentParser(prog=&#x27;hikapakextract&#x27;, usage=&#x27;%(prog)s [options] archive&#x27;)
+    parser.add_argument(&#x27;--output&#x27;, &#x27;-o&#x27;, dest=&#x27;path&#x27;, type=str, default=&quot;.&quot;, help=&quot;save to a given directory&quot;)
+    parser.add_argument(&#x27;--verbose&#x27;, &#x27;-v&#x27;, dest=&#x27;verbose&#x27;, help=&quot;verbose output&quot;, action=&#x27;store_true&#x27;)
+    parser.add_argument(&#x27;--encoding&#x27;, &#x27;-e&#x27;, dest=&#x27;encoding&#x27;, type=str, default=&quot;koi8-r&quot;, help=&quot;encoding filename&quot;)
+    parser.add_argument(&#x27;--hash&#x27;, dest=&#x27;hash&#x27;, help=&quot;md5 hash the output filename&quot;, action=&#x27;store_true&#x27;)
+    parser.add_argument(&#x27;archive&#x27;, type=str, metavar=&#x27;archive&#x27;)
+    args = parser.parse_args()
+
+    pak = HikaPack(
+        args.archive, verbose=args.verbose, encoding=args.encoding,
+        hash=args.hash
+    )
+
+    pak.extractall(path=args.path)
+
+    dump_index(os.path.join(args.path, &#x27;index.xml&#x27;), pak.members)
+</pre>
+</body>
+</html>

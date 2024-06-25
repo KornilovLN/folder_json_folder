@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>classes.ttl</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>classes.ttl</h1>
+    <pre>@prefix rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;.
+@prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;.
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt;.
+@prefix mof: &lt;http://spd.ivl.cns/cim/rtdbmof#&gt;.
+@prefix : &lt;http://spd.ivl.cns/cim/hika#&gt;.
+
+
+:parD a :ParClass ;
+    rdfs:label &quot;Измеряемые дискретные&quot;@ru .
+
+:parA a :ParClass ;
+    rdfs:label &quot;Измеряемые аналоговые&quot;@ru .
+
+:parA a :ParClass ;
+    rdfs:label &quot;Измеряемые аналоговые&quot;@ru .
+
+:parF a :ParClass ;
+    rdfs:label &quot;Формируемые дискретные&quot;@ru .
+
+:parR a :ParClass ;
+    rdfs:label &quot;Расчетные аналоговые и аналоговые от МСКУ4&quot;@ru .
+
+:parB a :ParClass ;
+    rdfs:label &quot;Выходные дискретные (команды)&quot;@ru .
+
+:obrN a :ObrClass ;
+    rdfs:label &quot;2-й контакт механизма&quot;@ru .
+
+:obrS a :ObrClass ;
+    rdfs:label &quot;1-й контакт задв. прямое подключение&quot;@ru .
+
+:obrT a :ObrClass ;
+    rdfs:label &quot;1-й конт. задв. обратное. подключение&quot;@ru .
+
+:obrP a :ObrClass ;
+    rdfs:label &quot;2-й конт. задв. прямое и обр. подключ.&quot;@ru .
+
+:obrM a :ObrClass ;
+    rdfs:label &quot;1-й контакт механизма&quot;@ru .
+
+:obrB a :ObrClass ;
+    rdfs:label &quot;Быстрые сигналы&quot;@ru .
+
+:obrD a :ObrClass ;
+    rdfs:label &quot;Одиночные дискретные&quot;@ru .
+
+:obrI a :ObrClass ;
+    rdfs:label &quot;Инверсный сигнал&quot;@ru .
+
+:obrK a :ObrClass ;
+    rdfs:label &quot;Ключи упр.механизмами и задв&quot;@ru .
+
+:objD a :ObjClass ;
+    mof:kind &quot;B&quot;;
+    rdfs:label &quot;Одиночный дискрет&quot;@ru .
+
+:objS a :ObjClass ;
+    rdfs:label &quot;Задвижка запорная&quot;@ru .
+
+:objM a :ObjClass ;
+    mof:kind &quot;B2&quot;;
+    rdfs:label &quot;Механизм&quot;@ru .
+
+:objC a :ObjClass ;
+    mof:kind &quot;B&quot;;
+    rdfs:label &quot;Сигнал диагностики ИВС&quot;@ru .
+
+:objF a :ObjClass ;
+    mof:kind &quot;B&quot;;
+    rdfs:label &quot;Формируемый диск.сигнал&quot;@ru .
+
+:objG a :ObjClass ;
+    mof:kind &quot;B&quot;;
+    rdfs:label &quot;ГС, обобщенные по диагн.ИВС&quot;@ru .
+
+:objY a :ObjClass ;
+    mof:kind &quot;B&quot;;
+    rdfs:label &quot;Усл.выполнения команд&quot;@ru .
+
+:objX a :ObjClass ;
+    mof:kind &quot;B&quot;;
+    rdfs:label &quot;Команда КЗБ&quot;@ru .
+
+:obja a :ObjClass ;
+    mof:kind &quot;A&quot;;
+    rdfs:label &quot;Аналоговые парам.структуры АМ&quot;@ru .
+
+:objr a :ObjClass ;
+    mof:kind &quot;A&quot;;
+    rdfs:label &quot;Аналоговые парам.структуры РВ&quot;@ru .
+
+:objg a :ObjClass ;
+    mof:kind &quot;B&quot;;
+    rdfs:label &quot;ГС по категориям&quot;@ru .
+
+</pre>
+</body>
+</html>

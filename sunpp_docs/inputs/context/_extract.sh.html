@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_extract.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_extract.sh</h1>
+    <pre>
+# Полный комментарий скрипта
+# 1 docker run        запуска нового контейнера Docker
+# 2 -e LANG=C.UTF8    задает перем. окруж. в контейнере с utf-8
+# 3 -it               -i  конт. с (interactive mode)
+#                     -t  присоед. терминал к контейнеру
+# 4 --rm              конт. будет авто. удален после завершения работы
+# 5 -v &quot;$(pwd):/build&quot;  Флаг -v монтирует директ. с хоста в контейнер.
+#      &quot;$(pwd):/build&quot; монтирует текущую рабочую директорию
+#                     (вызывается $(pwd),
+#                     что возвращает путь к текущей директории)
+#                     в контейнере в директорию /build.
+#                     Это позволяет контейнеру получить доступ к
+#                     файлам из текущей директории хоста.
+# 6 -v &quot;$(pwd)/fix/gdb2txt_cli.py:/usr/local/lib/python2.7/dist-packages/ekatra/virtdb/gdb2txt_cli.py&quot;
+#   Этот флаг монтирует файл gdb2txt_cli.py 
+#   из подкаталога fix текущей рабочей директории хоста 
+#   в контейнер по пути
+#   /usr/local/lib/python2.7/dist-packages/ekatra/virtdb/gdb2txt_cli.py
+#   И позволяет использ. модиф. версию файла gdb2txt_cli.py в контейнере
+# 7 registry.master.cns/compiler:4.5.14
+#   Docker-образ, будет использоваться для создания контейнера.
+#   registry.master.cns/compiler указывает на образ из приватного
+#   реестра Docker registry.master.cns с тегом compiler.
+#   :4.5.14 означает, будет использована версия 4.5.14 этого образа.
+# 8 bash -c /build/do_extract.sh
+#   bash указывает, внутри конт. будет запущен интерпретатор Bash.
+#   -c /build/do_extract.sh   передает Bash команду для выполнения 
+#                             запускает скрипт do_extract.sh,
+#                             находящийся в директории /build.
+
+
+docker run -e LANG=C.UTF8 -it --rm \
+    -v &quot;$(pwd):/build&quot; \
+    -v &quot;$(pwd)/fix/gdb2txt_cli.py:/usr/local/lib/python2.7/dist-packages/ekatra/virtdb/gdb2txt_cli.py&quot; \
+    registry.master.cns/compiler:4.5.14 \
+    bash -c /build/do_extract.sh
+
+
+
+</pre>
+</body>
+</html>

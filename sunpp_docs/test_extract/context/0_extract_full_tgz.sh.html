@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>0_extract_full_tgz.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>0_extract_full_tgz.sh</h1>
+    <pre>
+rm -r -f ./inputs_full
+
+docker run -u 1000:1000 -e LANG=C.UTF8 -it --rm \
+    -v &quot;$(pwd):/build&quot; \
+    -v &quot;/home/max/gitlab_2/ekatra/tools/ekatra/tools:/usr/local/lib/python3.7/dist-packages/ekatra/tools&quot; \
+    registry.master.cns/compiler:latest \
+    deepextract -e &#x27;koi8-r&#x27; -u -o /build/inputs_full /build/IO-7.3-76.tar.gz
+
+
+</pre>
+</body>
+</html>

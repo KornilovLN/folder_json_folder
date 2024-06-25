@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>deploy2production.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>deploy2production.yaml</h1>
+    <pre>- name: Start Ekatra Production
+  hosts: localhost
+  connection: local
+  vars:
+    ekatra_mode: prod
+
+  pre_tasks:
+
+    - mqtt:
+        topic: &#x27;brama-noty&#x27;
+        payload: &#x27;{&quot;text&quot;:&quot;Deployment Started&quot;, &quot;user_role&quot;: &quot;supervisor&quot;, &quot;type&quot;: &quot;info&quot;}&#x27;
+        server: mq
+      delegate_to: localhost
+
+    - name: Check that the /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak exists
+      stat:
+        path: /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak
+      register: stat_back_compose
+
+    - name: Check that the /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml exists
+      stat:
+        path: /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml
+      register: stat_compose
+
+    - name: make backup /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml
+      copy: 
+        src: /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml
+        dest: /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak
+        backup: yes
+      when: stat_back_compose.stat.exists|bool == False and stat_compose.stat.exists|bool == True
+      register: make_back_compose
+      ignore_errors: yes
+
+    - name: make backup images
+      include_role:
+        name: production/backup
+        tasks_from: backup_images
+      with_items:
+        - backend
+        - frontend
+        - rtdb
+        - meta
+
+  roles:
+    - common_vars
+    - production/meta
+    - production/rtdb
+    - production/frontend
+    - production/backend
+    - production/farm
+
+
+  tasks:
+    ################################################################################################
+  - name: SYSTEM UPDATE
+    block:
+
+      - name: down ekatra compose
+        shell: &#x27;docker-compose -f {{ ekatra_domain }}{{ ekatra_mode }}.yaml -p {{ ekatra_domain }}{{ ekatra_mode }} down -v --remove-orphans&#x27;
+        args:
+          chdir: /var/ekatra/compose
+
+      - name: run ekatra compose
+        shell: &#x27;docker-compose -f {{ ekatra_domain }}{{ ekatra_mode }}.yaml -p {{ ekatra_domain }}{{ ekatra_mode }} up -d --remove-orphans&#x27;
+        args:
+          chdir: /var/ekatra/compose
+
+      - name: remove {{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak compose
+        file:
+          path: &quot;/var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak&quot;
+          state: absent
+
+      - mqtt:
+          topic: &#x27;brama-noty&#x27;
+          payload: &#x27;{&quot;text&quot;:&quot;Deployment Completed&quot;, &quot;user_role&quot;: &quot;supervisor&quot;, &quot;type&quot;: &quot;success&quot;}&#x27;
+          server: mq
+        delegate_to: localhost
+
+    ################################################################################################
+    rescue:
+
+     - name: UPS
+       when: make_back_compose.failed|default(False)|bool == False
+       block:
+
+         - name: restore images from backup
+           docker_image:
+             name: &#x27;{{ images_domain }}/{{ ekatra_domain }}/{{ item }}:backup&#x27;
+             repository: &#x27;{{ images_domain }}/{{ ekatra_domain }}/{{ item }}:latest&#x27;
+             pull: no
+             push: no
+             state: present
+           ignore_errors: yes
+           with_items:
+             - backend
+             - frontend
+             - rtdb
+             - meta
+         - name: Check that the /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak exists
+           stat:
+             path: /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak
+           register: stat_back_compose2
+
+         - name: restore from backup /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak
+           copy: 
+             src: &quot;/var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml.bak&quot;
+             dest: &quot;/var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml&quot;
+           when: stat_back_compose2.stat.exists|bool == True
+   
+         - name: run ekatra compose
+           shell: &#x27;docker-compose -f {{ ekatra_domain }}{{ ekatra_mode }}.yaml -p {{ ekatra_domain }}{{ ekatra_mode }} up -d --remove-orphans&#x27;
+           args:
+             chdir: /var/ekatra/compose
+
+         - name: Clean artifact path &quot;/var/ekatra/tmp/prod/{{ item }}/&quot;
+           file:
+             state: absent
+             path: &quot;/var/ekatra/tmp/prod/{{ item }}/&quot;
+           with_items:
+             - backend
+             - frontend
+             - rtdb
+             - meta
+     - mqtt:
+         topic: &#x27;brama-noty&#x27;
+         payload: &#x27;{&quot;text&quot;:&quot;Deployment Failed.\nThe previous state is restored.&quot;, &quot;user_role&quot;: &quot;supervisor&quot;, &quot;type&quot;: &quot;error&quot;}&#x27;
+         server: mq
+       delegate_to: localhost
+
+     - fail:
+         msg: &quot;Deployment Failed. The previous state is restored.&quot;
+
+    ################################################################################################
+    always:
+      - name: remove backup images
+        docker_image:
+          name: &#x27;{{ images_domain }}/{{ ekatra_domain }}/{{ item }}:backup&#x27;
+          pull: no
+          push: no
+          state: absent
+        with_items:
+          - backend
+          - frontend
+          - rtdb
+          - meta
+</pre>
+</body>
+</html>

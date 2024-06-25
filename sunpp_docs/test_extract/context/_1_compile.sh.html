@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_1_compile.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_1_compile.sh</h1>
+    <pre># Запускает контейнер Docker в интерактивном режиме с псевдотерминалом
+# и удаляет его после завершения работы
+docker run -it --rm \
+
+    # Устанавливает рабочую директорию внутри контейнера на /build
+    -w /build \
+
+    # Монт тек дир-ю ($(pwd)) на хосте в дир-ю /build внутри контейнера
+    -v &quot;$(pwd):/build&quot; \
+
+    # Монтирует локальную директорию с инструментами в контейнер
+    -v &quot;/home/max/gitlab_2/ekatra/tools/ekatra/tools:/usr/local/lib/python3.7/site-packages/ekatra/tools&quot; \
+
+    # Монтирует локальную директорию с компилятором в контейнер
+    -v &quot;/home/max/gitlab_2/ekatra/compile/compiler/ekatra/compiler:/usr/local/lib/python3.7/site-packages/ekatra/compiler&quot; \
+
+    # Монт лок-ю директорию с семантическим анализатором в контейнер
+    -v &quot;/home/max/gitlab_2/ekatra/compile/semantic/semantic/ekatra/semantic:/usr/local/lib/python3.7/site-packages/ekatra/semantic&quot; \
+
+    # Монтирует локальную директорию с R2RML в контейнер
+    -v &quot;/home/max/gitlab_2/ekatra/compile/semantic/R2RML/ekatra/r2rml:/usr/local/lib/python3.7/site-packages/ekatra/r2rml&quot; \
+
+    # Монт лок-ю директорию с виртуальной базой данных в контейнер
+    -v &quot;/home/max/gitlab_2/ekatra/compile/semantic/R2RML/ekatra/virtdb:/usr/local/lib/python3.7/site-packages/ekatra/virtdb&quot; \
+
+    # Уст-ет перем-ю окруж-я PYTHONIOENCODING на utf_8
+    -e PYTHONIOENCODING=utf_8 \
+
+    # Уст-ет перем-ю окруж-я PYTHONUNBUFFERED для немедл вывода Python
+    -e PYTHONUNBUFFERED=true \
+
+    # Уст-ет перем-ю окружения LC_ALL на en_US.UTF-8 для локализации
+    -e LC_ALL=en_US.UTF-8 \
+
+    # Указывает образ Docker для запуска
+    registry.master.cns/compiler:latest \
+
+    # Команда для выполнения внутри контейнера
+    compile_project -a meta:db2rdf
+
+
+
+</pre>
+</body>
+</html>

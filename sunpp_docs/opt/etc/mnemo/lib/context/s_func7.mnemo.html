@@ -1,0 +1,582 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>s_func7.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>s_func7.mnemo</h1>
+    <pre>def _wide(oldsize, newsize)
+{
+  if(oldsize != newsize){
+    scale(@, newsize/oldsize);
+  }else{
+    @;
+  }
+}
+
+def _dyn(x, y, w, h, xMin, xMax, yMin, yMax){
+    b := bounds(@);
+    new_x := mappin(b.x, xMin, xMax, x, x+w);
+    new_y := mappin(b.y, yMin, yMax, y, y+h);
+    new_x1 := mappin(b.x+b.width, xMin, xMax, x, x+w);
+    new_y1 := mappin(b.y+b.height, yMin, yMax, y, y+h);
+    if (b.width != 0){
+        sx := (new_x1-new_x) / float(b.width);
+    }else{
+        sx := 1;
+    }
+    if (b.height != 0){
+        sy := (new_y1-new_y) / float(b.height);
+    }else{
+        sy := 1;
+    }
+    o1 := scale(@, Point(sx, -sy));
+    b1 := bounds(o1);
+    new_y := (y+h) - (new_y-y) - b1.height;
+    translate(o1, Point(new_x-b1.x, new_y-b1.y));
+}
+
+def _dyntext(obj, zone){
+    w1 := (zone[2] - zone[0]) / float(zone[5] - zone[4]) / 3.;
+    h1 := (zone[3] - zone[1]) / float(zone[7] - zone[6]) / 3.;
+    x := obj.p.x;
+    y := obj.p.y;
+    newX := mappin(x, zone[4], zone[5], zone[0], zone[0]+zone[2]);
+    newY := mappin(y, zone[6], zone[7], zone[1], zone[1]+zone[3]);
+    a := axis(Point(0, zone[1]+zone[3]/2), 0);
+    p := a.mirror_point(Point(newX, newY));
+    txt := text(obj.text, p, attributes=obj.attributes);
+    scale (txt, Point(w1, h1), p);
+}
+
+def PT_Diagr_1(p, w=5320, h=13120, title=None){
+    style := (stroke_width=(w+h)/2000., stroke=&#x27;#fff&#x27;);
+    darkgreen :=&#x27;#006400&#x27;;
+    darkseagreen4 := &#x27;#698b69&#x27;;
+    indianred4 := &#x27;#8b3a3a&#x27;;
+    brown := &#x27;#a52a2a&#x27;;
+    red4 := &#x27;#8b0000&#x27;;
+    //color
+    z4_2 = darkseagreen4;
+    z3 = brown;
+    z2 = red4;
+    z1 = indianred4;
+    _dyn(p.x, p.y, w, h, 0, 170, 0, 200){
+        //c1 := curve(class=&#x27;lwl&#x27;, style = (stroke_width=(w+h)/2000.,stroke=&#x27;#fff&#x27;, fill=&#x27;none&#x27;), points=(Point(100, 20), Point(110, 170)));
+        //zone 1
+        let f1 = rect(0, 0, 118, 200, style=style, fill=z1);
+//        let f1 = path(style=style, fill=z1){
+//          .M(60, 20);
+//          .l(40, 0, c1);
+//          .H(40);
+//          .z();
+//        }
+        //zone 2
+        let f2 = path(style=style, fill=z2){
+            .M(98, 0);
+            .L(115, 183);
+            .L(118, 195);
+            .V(0);
+            .z();
+        }
+        //zone 3
+        let f3 = rect(118, 0, 20, 200, style=style, fill=z3);
+        //zone 4_2
+        let f4 = rect(138, 0, 32, 200, style=style, fill=z4_2);
+        let f5 = polyline(points=(Point(0, 183), Point(115, 183), Point(115, 0)), class=&quot;pc347 dash&quot;);
+        +f1;
+        +f2;
+        +f3;
+        +f4;
+        +f5;
+    }
+}
+
+def PT_Diagr_2(p, w=6080, h=13120, title=None){
+    //x=1404, y=15088, w=6080, h=13120 //source values
+    style := (stroke_width=(w+h)/2000., stroke=&#x27;#fff&#x27;);
+    darkgreen :=&#x27;#006400&#x27;;
+    darkseagreen4 := &#x27;#698b69&#x27;;
+    indianred4 := &#x27;#8b3a3a&#x27;;
+    brown := &#x27;#a52a2a&#x27;;
+    red4 := &#x27;#8b0000&#x27;;
+    //colors
+    z1_1 := indianred4;
+    z2 := red4;
+    z4 := darkseagreen4;
+    _dyn(p.x, p.y, w, h, 0, 170, 0, 200){
+        /*polygon(class=&#x27;lwl&#x27;,stroke_width=(w+h)/2000., points=(Point(70, 20),Point(70, 35),Point(135, 35),Point(135, 180),Point(150, 180),Point(150, 20)), stroke=&quot;#698b69&quot;, fill=&quot;#698b69&quot;);
+        polygon(class=&#x27;lwl&#x27;,stroke_width=(w+h)/2000., points=(Point(128, 35), Point(128, 180), Point(135, 180), Point(135, 35)), stroke=&#x27;#8b0000&#x27;, fill=&#x27;#8b0000&#x27;);
+        polygon(class=&#x27;lwl&#x27;,stroke_width=(w+h)/2000., points=(Point(70, 35), Point(70, 180), Point(128, 180), Point(128, 35)), stroke=&#x27;#8b3a3a&#x27;, fill=&#x27;#8b3a3a&#x27;);
+        polyline(stroke=&#x27;#fff&#x27;,stroke_width=(w+h)/2000., class=&#x27;lwl&#x27;, points=(Point(135,35), Point(135, 180)));
+        polyline(stroke=&#x27;#fff&#x27;,stroke_width=(w+h)/2000., class=&#x27;lwl&#x27;, points=(Point(128,35), Point(128, 180)));
+        polyline(stroke=&#x27;#fff&#x27;,stroke_width=(w+h)/2000., class=&#x27;lwl&#x27;, points=(Point(70,35), Point(135 ,35)));*/
+
+        //zone 1_1
+        f1 = rect(0, 35, 125, 165, style=style, fill=z1_1);
+        //zone 2
+        f2 = rect(125, 35, 15, 165, style=style, fill=z2);
+        //zone 4
+        f3 = polygon(style=style, fill=z4, points=(Point(0, 0),Point(0, 35),Point(140, 35),Point(140, 200),Point(170, 200),Point(170, 0)));
+    }
+}
+
+def PT_Diagr_3(p, w=14040, h=12464, title=None){
+    //x=1170, y=14432, w=14040, h=12464 // source values
+    style := (stroke_width=(w+h)/2000., stroke=&#x27;#fff&#x27;);
+    line_style := (stroke_width=(w+h)/2000., stroke=&#x27;#fff&#x27;, fill=&#x27;none&#x27;);
+    font_style := (font_size=&#x27;12px&#x27;, fill=&#x27;#fff&#x27;, font_family=&#x27;Arial&#x27;);
+    darkgreen :=&#x27;#006400&#x27;;
+    darkseagreen4 := &#x27;#698b69&#x27;;
+    indianred4 := &#x27;#8b3a3a&#x27;;
+    brown := &#x27;#a52a2a&#x27;;
+    red4 := &#x27;#8b0000&#x27;;
+    //colors
+    z25  = red4;
+    z27 = brown;
+    z26 = indianred4;
+    z18 = darkgreen;
+    z40 = indianred4;
+    z24 = brown;
+    z23 = brown;
+    z22 = brown;
+    z21 = indianred4;
+    z20 = darkseagreen4;
+    _dyn(p.x, p.y, w, h, 60, 360, 0, 190){
+        let c1 = curve(points=(Point(60 ,0.2),Point(65 ,0.3),Point(70 ,0.318142),Point(75 ,0.393496),Point(80 ,0.483350),Point(85 ,0.589830),Point(90 ,0.715264),Point(95 ,0.862193),Point(100, 1.033377),Point(105, 1.231798),Point(110, 1.460667),Point(115, 1.723424),Point(120, 2.023748),Point(125, 2.365552),Point(130, 2.752985),Point(135, 3.190437),Point(140, 3.682536),Point(145, 4.234146),Point(150, 4.850368),Point(155, 5.536538),Point(160, 6.298223),Point(165, 7.141220),Point(170, 8.071552),Point(175, 9.095467),Point(180, 10.219430),Point(185, 11.450130),Point(190, 12.794460),Point(195, 14.259540),Point(200, 15.852670),Point(210, 19.453390),Point(220, 23.659170),Point(230, 28.535709),Point(240, 34.151791),Point(250, 40.579201),Point(260, 47.892792),Point(270, 56.170441),Point(280, 65.493111),Point(290, 75.944962),Point(300, 87.613411),Point(310, 100.589302),Point(320, 114.967003),Point(330, 130.844894),Point(340, 148.325195),Point(356, 180.8)));
+        let c2 = curve(points=(Point(60, 0.3),Point(65, 0.393496),Point(70, 0.483350),Point(75, 0.589830),Point(80, 0.715264),Point(85, 0.862193),Point(90, 1.033377),Point(95, 1.231798),Point(100, 1.460667),Point(105, 1.723424),Point(110, 2.023748),Point(115, 2.365552),Point(120, 2.752985),Point(125, 3.190437),Point(130, 3.682536),Point(135, 4.234146),Point(140, 4.850368),Point(145, 5.536538),Point(150, 6.298223),Point(155, 7.141220),Point(160, 8.071552),Point(165, 9.095467),Point(170, 10.219430),Point(175, 11.450130),Point(180, 12.794460),Point(185, 14.259540),Point(190, 15.852670),Point(200, 19.453390),Point(210, 23.659170),Point(220, 28.535709),Point(230, 34.151791),Point(240, 40.579201),Point(250, 47.892792),Point(260, 56.170441),Point(270, 65.493111),Point(280, 75.944962),Point(290, 87.613411),Point(300, 100.589302),Point(310, 114.967003),Point(320, 130.844894),Point(330, 148.325195),Point(340, 167.514404),Point(345, 177.7845), Point(346, 180.8)));
+        let c3 = curve(points=(Point(95 ,15),Point(115, 15.600000),Point(150, 18.600000),Point(200, 28.799999),Point(250, 51),Point(288, 85.5)));
+        //zone 25
+        let f1 = path(style=style, fill=z25){
+            .M(60, 0);
+            .l(Point(0, 0), c1);
+            .l(-10, 0, c2, True);
+            .z();
+
+        }
+        //zone 26
+        let f2 = path(style=style, fill=z26){
+            .M(360, 180);
+            .l(0, -180);
+            .l(-300, 0);
+            .l(0, 0, c1);
+            .z();
+        }
+        //zone 27
+        let f3 = combinePath(style=style, fill=z27){
+            path(){
+                .M(288, 85.5);
+                .l(0, 0, c3, True);
+                .H(60);
+                .V(0);
+                .H(288);
+                .z();
+            }
+            -f1;
+            -f2;
+        }
+        //zone 18
+        let f4 = combinePath(style=style, fill=z18){
+            rect(150, 15, 30, 10);
+            -f3;
+        }
+        //zone 40
+        let f5 = rect(60, 180, 300, 10, style=style, fill=z40);
+        //zone 24
+        let f6 = combinePath(style=style, fill=z24){
+            polygon(points=(Point(322, 180) ,Point(322, 148) ,Point(314.5, 148),Point(314.5, 140) ,Point(288, 140) ,Point(288, 85) ,Point(290, 87.613411),Point(300, 100.589302),Point(310, 114.967003),Point(320, 130.844894),Point(330, 148.325195),Point(340, 167.514404),Point(347.5, 180)));
+            -f1;
+        }
+        //zone 23
+        let f7 = rect(260, 165, 62, 15, style=style, fill=z23);
+        //zone 22
+        let f8 = polygon(fill=z22, style=style, points=(Point(200, 180),Point(260, 180),Point(260, 139.378204),Point(255, 130.8449),Point(250, 122.7122),Point(245, 114.967),Point(240, 107.5969),Point(235, 100.5893),Point(230, 93.9321),Point(225, 87.61341 ),Point(220, 81.62151 ),Point(215, 75.94496 ),Point(210, 70.57251 ),Point(205, 65.49311 ),Point(200, 60.695961)));
+        //zone 21
+        let f9 = rect(60, 35, 68, 145, style=style, fill=z21);
+        //zone 20
+        let f10 = combinePath(style=style, fill=z20){
+                rect(60, 15, 270, 165);
+                -f1;
+                -f2;
+                -f3;
+                -f4;
+                -f6;
+                -f7;
+                -f8;
+                -f9;
+        }
+        +f1;
+        +f2;
+        +f3;
+        +f4;
+        +f5;
+        +f6;
+        +f7;
+        +f8;
+        +f9;
+        +f10;
+        polyline(style=line_style, points=(Point(317, 158) ,Point(317, 162) ,Point(284, 162) ,Point(284, 158) ,Point(317, 158)));
+        polyline(style=line_style, points=(Point(198, 15 ),Point(360 ,15)));
+        polyline(style=line_style, points=(Point(241.5, 35 ),Point(360 ,35)));
+        polyline(style=line_style, points=(Point(256.5, 45 ),Point(360 ,45)));
+        polyline(style=line_style, points=(Point(263, 50 ),Point(360 ,50)));
+        polyline(style=line_style, points=(Point(265, 52 ),Point(360 ,52)));
+        polyline(style=line_style, points=(Point(283, 68 ),Point(360 ,68)));
+        polyline(style=line_style, points=(Point(289, 75 ),Point(360 ,75)));
+        polyline(style=line_style, points=(Point(294, 80 ),Point(360 ,80)));
+        polyline(style=line_style, points=(Point(297, 84 ),Point(360 ,84)));
+        polyline(style=line_style, points=(Point(317, 110),Point( 360, 110)));
+        polyline(style=line_style, points=(Point(336, 140),Point( 360, 140)));
+        polyline(style=line_style, points=(Point(341, 150),Point( 360, 150)));
+        polyline(style=line_style, points=(Point(348.5, 165),Point( 360, 165)));
+        polyline(style=line_style, points=(Point(353.5, 175),Point( 360, 175)));
+    }
+    zone := (p.x, p.y, w, h, 60, 360, 0, 190);
+    _dyntext(text(&#x27;Раз=15ати&#x27;, 305, 15.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=35ати&#x27;, 305, 35.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=45ати&#x27;, 305, 41.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=50ати&#x27;, 305, 46.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=52ати&#x27;, 305, 52.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=68ати&#x27;, 305, 68.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=75ати&#x27;, 305, 75.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=80ати&#x27;, 305, 80.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=84ати&#x27;, 305, 84.5, style=font_style), zone);
+    _dyntext(text(&#x27;Раз=110ати&#x27;, 330, 110.5, style=font_style), zone);
+}
+
+def PT_Diagr_4(p, w=14742, h=13284, title=None){
+    //x=936, y=15744 w=14742 h=13284 //source zone values
+    style := (stroke_width=(w+h)/2000., stroke=&#x27;#fff&#x27;);
+    line_style := (stroke_width=(w+h)/2000., fill=&#x27;none&#x27;);
+    darkgreen :=&#x27;#006400&#x27;;
+    darkseagreen4 := &#x27;#698b69&#x27;;
+    indianred4 := &#x27;#8b3a3a&#x27;;
+    brown := &#x27;#a52a2a&#x27;;
+    red4 := &#x27;#8b0000&#x27;;
+    //colors
+    z40=indianred4;
+    z22=brown;
+    z23=brown;
+    z24=brown;
+    z25=red4;
+    z26=indianred4;
+    z20=darkseagreen4;
+    z19 = darkgreen;
+    _dyn(p.x, p.y, w, h, 250, 340, 100, 190){
+        let c1 = curve(style=(fill=&#x27;none&#x27;, stroke=&#x27;#fff&#x27;,stroke_width=(w+h)/2000.), points=(Point(250, 122.5) ,Point(255, 130.5),Point(260, 139.5)));
+        //zone 40
+        f1 = rect(250, 180, 90, 10, style=style, fill=z40);
+        //zone 22
+        f2 = path(style=style, fill=z22){
+            .M(250, 180);
+            .L(250, 122.5, c1);
+            .V(180);
+            .z();
+        }
+        //zone 23
+        f3 = rect(260, 165, 62, 15, style=style, fill=z23);
+        //zone 24
+        f4 = polygon(style=style, fill=z24, points=(Point(322, 180) ,Point(322, 150) ,Point(314.500000, 150) ,Point(314.500000, 140) ,Point(288, 140) ,Point(288, 100) ,Point(299.5, 100) ,Point(300, 100.589302) ,Point(305, 107.569) ,Point(310, 114.967003) ,Point(315, 122.7122) ,Point(320, 130.844894),Point(325, 139.3782) ,Point(330, 148.325195) ,Point(335, 157.6994) ,Point(340, 167.514404),Point(340, 180)));
+        //zone 25
+        f5 = polygon(style=style, fill=z25, points=(Point(299.5, 100),Point(309.50, 100),Point(310, 100.589302),Point(315, 107.5969),Point(320, 114.967003),Point(325, 122.7122),Point(330, 130.844894),Point(335, 139.3782),Point(340, 148.325195),Point(340, 167.514404),Point(335, 157.6994),Point(330, 148.325195),Point(325, 139.3782),Point(320, 130.844894),Point(315, 122.7122),Point(310, 114.967003),Point(305, 107.5969),Point(300, 100.589302),Point(299.5, 100)));
+        //zone 26
+        f6 = polygon(style=style, fill=z26, points=(Point(340, 100),Point(309.50, 100),Point(310, 100.589302),Point(315, 107.5969),Point(320, 114.967),Point(325, 122.7122),Point(330, 130.844894),Point(335, 139.3782),Point(340, 148.325195),Point(340, 100)));
+        //zone 20
+        f7 = combinePath(style=style, fill=z20){
+            rect(250, 100, 90, 80);
+            -f2;
+            -f3;
+            -f4;
+            -f5;
+            -f6;
+        }
+        //line 19
+        f8 = polyline(style=line_style, stroke=z19, points=(Point(317, 158),Point(317, 162),Point(284, 162),Point(284, 158),Point(317, 158)));
+    }
+}
+
+def PT_Diagr_5(p, w, h, title=None){
+    group(transform=Translate(p)){
+    _wide(337., w){
+        style_poly := (fill=&quot;none&quot;, stroke=&quot;#C5C2C5&quot;, stroke_width=&quot;3&quot;, stroke_miterlimit=&quot;10&quot;);
+        style_rule := (fill=&quot;none&quot;, stroke=&quot;#FFFFFF&quot;, stroke_miterlimit=&quot;10&quot;);
+        style_background := (fill=&quot;#52615A&quot;);
+        txt_style2 := (fill=&quot;#C5C2C5&quot;);
+        txt_style1 := (fill=&quot;#FFFFFF&quot;);
+        style_text_labels := (fill=&quot;#C5C2C5&quot;, font_size=&#x27;21px&#x27;);
+        style_text_labels_vert := (fill=&quot;#C5C2C5&quot;, font_size=&#x27;21px&#x27;, writing_mode=&quot;tb&quot;, glyph_orientation_vertical=0);
+        style_text_numbers := (fill=&quot;#FFFFFF&quot;, font_size=&#x27;32px&#x27;);
+        style_ruler_numbers := (fill=&quot;#C5C2C5&quot;, font_size=&#x27;12px&#x27;, text_anchor=&#x27;middle&#x27;);
+        style_g := (fill=&quot;#FFFFFF&quot;,font_size=&quot;21px&quot;);
+        style_kt := (fill=&quot;#C5C2C5&quot;, font_size=&#x27;11px&#x27;);
+
+        let rule1 = ruler(range=(-2., 2.)){
+            rule = line(Point(9, 165), Point(331, 165), style=style_rule);
+            line(Point(0,0), Point(0, -4.5  ), style=style_rule, _rulestep=&#x27;0.05&#x27;);
+        }
+        let rule2 = ruler(range=(-2., 2.)){
+            rule = line(Point(169.5, 4), Point(169.5, 326), style=style_rule);
+            line(Point(0,0), Point(-4.5, 0), style=style_rule, _rulestep=&#x27;0.05&#x27;);
+        }
+        rect(topcenter=rule2.calculate(-2)-Point(0, 10), leftcenter=rule1.calculate(-2)-Point(10, 0), style=style_background);
+        iter(i=(0.5, 1., 1.5, 2.)){
+            p1 := rule1.calculate(-i);
+            p2 := rule1.calculate(i);
+            p3 := rule2.calculate(-i);
+            p4 := rule2.calculate(i);
+            w := (p2-p1);
+            r = rect(leftcenter=p1, width=w.x, height=w.x, style=style_poly);
+            if (i == 2){
+                line(r.topleft, r.bottomright, style=style_poly);
+                line(r.bottomleft, r.topright, style=style_poly);
+                text(r.bottomleft.x+10, r.bottomleft.y-10, &#x27;1&#x27;, style=style_text_numbers);
+                text(r.topleft.x+10, r.topleft.y+25, &#x27;2&#x27;, style=style_text_numbers);
+                text(r.topright.x-20, r.topright.y+25, &#x27;3&#x27;, style=style_text_numbers);
+                text(r.bottomright.x-20, r.bottomright.y-10, &#x27;4&#x27;, style=style_text_numbers);
+                text(p1.x, p1.y-10, &#x27;G&#x27;, style=style_g);
+                text(p3.x-25, p3.y+20, &#x27;G&#x27;, style=style_g);
+                text(p4.x-25, p4.y-5, &#x27;G&#x27;, style=style_g);
+                text(p1.x+5, p1.y+10, &#x27;кт/ч&#x27;, style=style_kt);
+                text(p2.x-25, p2.y+10, &#x27;кт/ч&#x27;, style=style_kt);
+                text(p3.x+5, p3.y+20, &#x27;кт/ч&#x27;, style=style_kt);
+                text(p1.x+15, p1.y-10, &#x27;зад&#x27;, style=style_kt);
+                pere = text(p3.x-90, p3.y+30, &#x27;ПЕРЕ&#x27;, style=style_text_labels);
+                pitka1 = text(p3.x+40, p3.y+30, &#x27;ПИТКА&#x27;, style=style_text_labels);
+                translate(pere, Point(0, 274));
+                translate(pitka1, Point(0, 274));
+                nedo=text(p1.x+25, p1.y-120, &quot;НЕДО&quot;, style=style_text_labels_vert);
+                pitka2=text(p1.x+25, p1.y+10, &quot;ПИТКА&quot;, style=style_text_labels_vert);
+                translate(nedo, Point(282, 0));
+                translate(pitka2, Point(282, 0));
+            }else{
+                text(p1.x, p1.y-5, str(i), style=style_ruler_numbers);
+                text(p3.x-15, p3.y-2, str(i), style=style_ruler_numbers);
+                text(p4.x-15, p4.y-2, str(i), style=style_ruler_numbers);
+            }
+            text(p2.x, p2.y-5, str(i), style=style_ruler_numbers);
+        }
+        p0 := rule1.calculate(0);
+        text(p0.x+4, p0.y-5, &#x27;0&#x27;, style=style_ruler_numbers);
+        +rule1;
+        +rule2;
+    }
+    }
+}
+
+def triangle(p, angl=0, style=None){
+    // for PT_Diagr_6
+    rotate(polygon(points=(p, p-Point(8, 4), p-Point(8, -4)), style=style), angl, p);
+}
+
+def PT_Diagr_6(p, w, h, title=None){
+    stroke_w := (w+h)/500.;
+    if (stroke_w &lt; 1){
+        stroke_w := 1;
+    }
+    group(transform=Translate(p)){
+        _wide(373., w){
+            style_line1 := (fill=&quot;none&quot;, stroke=&quot;#FFFFFF&quot;, stroke_width=stroke_w);
+            style_line2 := (fill=&quot;none&quot;, stroke=&quot;#B3B3B3&quot;, stroke_miterlimit=10, stroke_width=stroke_w);
+            style_rule := (fill=&quot;none&quot;, stroke=&quot;#FFFFFF&quot;, stroke_miterlimit=10, stroke_width=stroke_w);
+            style_rect1 := (fill=&quot;none&quot;, stroke=&quot;#B3B3B3&quot;, stroke_miterlimit=10, stroke_width=stroke_w);
+            style_text_label :=(fill=&quot;#B3B3B3&quot;);
+            style_rect_text :=(fill=&quot;#B3B3B3&quot;, stroke=&#x27;none&#x27;, text_anchor=&#x27;middle&#x27;, font_size=&#x27;10px&#x27;);
+            style_triangle := (fill=&#x27;#FFFFFF&#x27;, stroke=&#x27;none&#x27;);
+            style_background := (fill=&quot;#525D5A&quot;, stroke=&#x27;none&#x27;);
+            let rule1 = ruler(range=(153, 168)){
+                rule = line(Point(21, 200.5), Point(334, 200.5), style=style_rule);
+                line(Point(0,0), Point(0, 0), style=style_rule, _rulestep=&#x27;0.05&#x27;);
+            }
+            rect(width=373, height=346, style=style_background);
+            iter(i=range(153, 162)){
+                p := rule1.calculate(i);
+                line(p, p-Point(0,-5), style=style_line1);
+                text(p+Point(-7, 14), str(i), style=(fill=&quot;#B3B3B3&quot;, font_size=&#x27;8px&#x27;));
+            }
+            iter(i=range(162, 169)){
+                p := rule1.calculate(i);
+                line(p, p-Point(0,5), style=style_line1);
+                text(p+Point(-7, -7), str(i), style=(fill=&quot;#B3B3B3&quot;, font_size=&#x27;8px&#x27;));
+            }
+            line(Point(21, 200.5), Point(348, 200.5), style=style_rule);
+            line(Point(250.5, 200), Point(250.5, 226), style=style_line1, stroke_dasharray=stroke_w*3);
+            polyline(style=style_line2, points=(Point(193.5,203.668),Point(250.5,226.5),Point(291.5,226.5),Point(291.5,251.5),Point(229.5,251.5),Point(229.5,222)));
+            line(Point(188.5, 153), Point(188.5, 197), style=style_line2);
+
+            iter(x=(63.5,22.5,105.5,136.5,271.5), y=(102.5,77.5,127.5,152.5,251.5), w=(61,81,55,52,62),
+                 txt=(&#x27;YP10W03&#x27;, &#x27;YP10W04&#x27;, &#x27;YP10W02&#x27;, &#x27;YP10W01&#x27;, &#x27;YP12S02&#x27;)){
+                r = rect(x, y, w, 25, style=style_rect1);
+                text(txt, r.center.x, r.center.y, style=style_rect_text);
+            }
+            iter(p=(Point(22.5, 77.5),Point(63.5, 102.5), Point(105.5,128),Point(136.5,153),Point(103.5,102),Point(124.5,127),Point(160.5,152),Point(188.5,201),Point(333.5,277),Point(356,200.5),Point(229.5,218.5),Point(188.5,201),Point(271.5,251.5),Point(250,227),Point(291.5,251)),
+            a=(-90,-90,-90,-90,90,90,90,90,90,0,-90,-155,-90,25,90)){
+                triangle(p, a, style_triangle);
+            }
+            text(&#x27;YP11S02&#x27;, 260.5, 240, style=style_rect_text);
+            text(&#x27;YP11S02&#x27;, 275.5, 215, style=style_rect_text);
+            text(&quot;Диаграмма давления в КД&quot;, 76, 29, style=style_text_label, font_size=&#x27;18px&#x27;);
+            text(&quot;Нагреватели КД&quot;, 20, 56.5, style=style_text_label, font_size=&#x27;18px&#x27;);
+            text(&quot;Впрыск в КД&quot;, 224.5, 56.5, style=style_text_label, font_size=&#x27;18px&#x27;);
+            text(&quot;Ркд.кг/см&quot;, 312.5, 220, style=style_text_label, font_size=&#x27;10px&#x27;);
+            text(&#x27;2&#x27;, 354.834, 218.6709, style=style_text_label, font_size=&#x27;6px&#x27;);
+        }
+    }
+}
+
+def Diagr_Scale_Zone(p, w, h, title=None){
+    //x=16048, y=15395, w=6503, h=14126 //source values
+    stroke_w := (w+h)/500.;
+    if (stroke_w &lt; 1){
+        stroke_w := 1;
+    }
+    _dyn(p.x, p.y, w, h, 0, w, 278, 327){
+        iter(y=(278, 290, 323),
+         h=(12, 33, 4),
+         clr=(&#x27;#8fbc8f&#x27;, &#x27;#cdcd00&#x27;, &#x27;#ffd700&#x27;)){
+            rect(0, y, w, h, style=(fill=clr, stroke=&#x27;none&#x27;));
+        }
+    }
+}
+
+def Diagr_Scale_Diap(p, w, h, title=None){
+    //x=16048, y=15395, w=235, h=14126 //source values
+    stroke_w := (w+h)/500.;
+    if (stroke_w &lt; 1){
+        stroke_w := 1;
+    }
+    _dyn(p.x, p.y, w, h, 0, w, 50, 400){
+        iter(y=(50, 70, 100, 150, 200, 260, 278, 290,  323, 327, 350),
+         h=(20, 30, 50, 50, 60, 18, 12, 33, 4, 23, 50),
+         clr=(&#x27;#000&#x27;, &#x27;#104eb8&#x27;, &#x27;#00e&#x27;, &#x27;#1e90ff&#x27;, &#x27;#87ceeb&#x27;, &#x27;#40e0d0&#x27;, &#x27;#8fbc8f&#x27;, &#x27;#cdcd00&#x27;, &#x27;#ffd700&#x27;, &#x27;#ffa500&#x27;, &#x27;#fa8072&#x27;)){
+            rect(0, y, w, h, style=(fill=clr, stroke=&#x27;none&#x27;));
+        }
+    }
+}
+
+def Diagr_Scale_DT(p, w, h, title=None){
+    //x=16048, y=15395, w=335, h=14146 //source values
+    stroke_w := (w+h)/500.;
+    if (stroke_w &lt; 1){
+        stroke_w := 1;
+    }
+    _dyn(p.x, p.y, w, h, 0, w, 0, 60){
+        iter(y=(0, 3, 12, 15, 21, 24, 27, 30, 33, 35, 39),
+         h=(3, 9, 3, 6, 3, 3, 3, 3, 2, 4, 21),
+         clr=(&#x27;#000&#x27;, &#x27;#104eb8&#x27;, &#x27;#00e&#x27;, &#x27;#1e90ff&#x27;, &#x27;#87ceeb&#x27;, &#x27;#40e0d0&#x27;, &#x27;#8fbc8f&#x27;, &#x27;#cdcd00&#x27;, &#x27;#ffd700&#x27;, &#x27;#ffa500&#x27;, &#x27;#fa8072&#x27;)){
+            rect(0, y, w, h, style=(fill=clr, stroke=&#x27;none&#x27;));
+        }
+    }
+}
+
+def PT_Diagr_Shapiro(p, w, h, title=None){
+    //polygon(points=(Point(p.x+w/2., p.y), Point(p.x+w, p.y+h), Point(p.x, p.y+h)));
+    let rule_left = ruler(range=(0, 100)){
+        rule = line((p.x, p.y+h), (p.x+w/2., p.y), style=(stroke_width=3));
+        //text(-15, 0, &#x27;%d&#x27;, _rulestep=10);
+    }
+    let rule_right = ruler(range=(0, 100)){
+        rule = line((p.x+w/2., p.y), (p.x+w, p.y+h), style=(stroke_width=3));
+        //text(15, 0, &#x27;%d&#x27;, _rulestep=10);
+    }
+    let rule_bottom = ruler(range=(0, 100)){
+        rule = line((p.x+w, p.y+h), (p.x, p.y+h), style=(stroke_width=3));
+        //text(0, 15, &#x27;%d&#x27;, _rulestep=10);
+    }
+    iter(i=range(10, 100, 10)){
+        left_p := rule_left.calculate(i);
+        right_p := rule_right.calculate(i);
+        bottom_p := rule_bottom.calculate(100-i);
+        line(left_p, bottom_p, style=(stroke_width=1));
+        line(right_p, bottom_p, style=(stroke_width=1));
+        line(left_p, rule_right.calculate(100-i), style=(stroke_width=1));
+        text(Point(left_p.x-15, left_p.y), str(i), class=&#x27;alignC&#x27;);
+        text(Point(right_p.x+15, right_p.y), str(i), class=&#x27;alignC&#x27;);
+        text(Point(bottom_p.x, bottom_p.y+20), str(100-i), class=&#x27;alignC&#x27;);
+    }
+    /*iter(i=(20, 40, 50, 60, 70, 80, 90)){
+        line(rule_left.calculate(i), rule_right.calculate(100-i), style=(stroke_width=1));
+    }*/
+
+    // RED LINE
+    // hydrogen, air
+    table := ((12,88), (16,51), (18,46), (21.5, 42.3), (25,40.7), (30,40), (65,35));
+    points := list();
+    iter(i=table){
+      // Rosebom Method.
+      hydrogen := i[0];
+      air := i[1];
+      steam := 100 - (air + hydrogen);
+      bottom_p := rule_bottom.calculate(100 / (air+steam+hydrogen) * hydrogen);
+      bottom_p2 := rule_bottom.calculate(100 / (air+steam+hydrogen) * (air + hydrogen));
+
+      p0 := Point(-w/2.0, p.y) + (bottom_p.x, 0);
+      p1 := Point(0, p.y+h) + (bottom_p.x, 0);
+      l1 := line(p0, p1);
+      //polyline(style=(fill=&#x27;none&#x27;, stroke=&#x27;blue&#x27;), points=(p0, p1));
+
+      p2 := Point(w/2.0, p.y) + (bottom_p2.x, 0);
+      p3 := Point(0, p.y+h) + (bottom_p2.x, 0);
+      l2 := line(p2, p3);
+      //polyline(style=(fill=&#x27;none&#x27;, stroke=&#x27;green&#x27;), points=(p2, p3));
+
+      cp := l1.intersect(l2);
+      tmp := points.append(cp);
+    }
+    polyline(style=(fill=&#x27;none&#x27;, stroke=&#x27;red&#x27;), points=points);
+
+    // YELLOW LINE
+    // hydrogen, air
+    table := ((4,96), (4,55), (6,47), (10,40), (16,35), (20,33), (30, 30), (75,25));
+    points := list();
+    iter(i=table){
+      // Rosebom Method.
+      hydrogen := i[0];
+      air := i[1];
+      steam := 100 - (air + hydrogen);
+      bottom_p := rule_bottom.calculate(100 / (air+steam+hydrogen) * hydrogen);
+      bottom_p2 := rule_bottom.calculate(100 / (air+steam+hydrogen) * (air + hydrogen));
+
+      p0 := Point(-w/2.0, p.y) + (bottom_p.x, 0);
+      p1 := Point(0, p.y+h) + (bottom_p.x, 0);
+      l1 := line(p0, p1);
+      //polyline(style=(fill=&#x27;none&#x27;, stroke=&#x27;blue&#x27;), points=(p0, p1));
+
+      p2 := Point(w/2.0, p.y) + (bottom_p2.x, 0);
+      p3 := Point(0, p.y+h) + (bottom_p2.x, 0);
+      l2 := line(p2, p3);
+      //polyline(style=(fill=&#x27;none&#x27;, stroke=&#x27;green&#x27;), points=(p2, p3));
+
+      cp := l1.intersect(l2);
+      tmp := points.append(cp);
+    }
+    polyline(style=(fill=&#x27;none&#x27;, stroke=&#x27;yellow&#x27;), points=points);
+
+    +rule_left;
+    +rule_right;
+    +rule_bottom;
+
+};
+</pre>
+</body>
+</html>

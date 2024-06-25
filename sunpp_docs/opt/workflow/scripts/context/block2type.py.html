@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>block2type.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>block2type.py</h1>
+    <pre>#! /usr/bin/env python
+import sys
+import yaml
+import json
+
+
+def commit(massive, idx, ttypes,blocks):
+    t = list(ttypes)
+    if len(t) == 1:
+        t = t[0]
+    b = list(blocks)
+    if len(b) == 1:
+        b = b[0]
+    print json.dumps(dict(MAS=massive, NOM=idx, TYPE=t, BLOCK=b), ensure_ascii=False)
+
+
+def main():
+    inputs = yaml.load(open(sys.argv[1]))
+    blocks = {}
+    for k,v in inputs.iteritems():
+        for b in v:
+            blocks[b] = k
+    massive, idx = None, None
+    ttypes = set()
+    bs = set()
+    for line in sys.stdin:
+        line = line[:-1].split(&#x27;;&#x27;)
+        if len(line) == 3:
+            m = line[0]
+            i = int(line[1])
+            block = line[2]
+            if m != massive or i != idx:
+                if massive is not None:
+                    commit(massive, idx, ttypes, bs)
+                    ttypes = set()
+                    bs = set()
+                massive = m
+                idx = i
+                bs.add(block)
+                ttypes.add(blocks.get(block, &#x27;DiscreteX&#x27;))
+            else:
+                bs.add(block)
+                ttypes.add(blocks.get(block, &#x27;DiscreteX&#x27;))
+    if massive is not None:
+        commit(massive, idx, ttypes, bs)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</pre>
+</body>
+</html>

@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ttrr.txt</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>ttrr.txt</h1>
+    <pre>.
+├── CHANGELOG.md
+├── inputs
+│   ├── _deepextract.sh
+│   ├── deepextract.sh
+│   ├── _do_extract.sh
+│   ├── do_extract.sh
+│   ├── _extract.sh
+│   ├── extract.sh
+│   ├── fix
+│   │   ├── _gdb2txt_cli.py
+│   │   └── gdb2txt_cli.py
+│   ├── _hika7.yaml
+│   └── hika7.yaml
+├── install
+│   ├── _net-install.sh
+│   ├── net-install.sh
+│   ├── _Vagranfile
+│   └── Vagrantfile
+├── _Makefile
+├── Makefile
+├── opt
+│   ├── brama
+│   │   ├── _brama.yaml
+│   │   ├── brama.yaml
+│   │   ├── _db_append.py
+│   │   ├── db_append.py
+│   │   ├── _db_dump.py
+│   │   ├── db_dump.py
+│   │   └── projects
+│   │       ├── ekatra
+│   │       │   ├── etc
+│   │       │   │   ├── _clean.yaml
+│   │       │   │   ├── clean.yaml
+│   │       │   │   ├── _nav_arrays.yaml
+│   │       │   │   ├── nav_arrays.yaml
+│   │       │   │   ├── _nav_groups.yaml
+│   │       │   │   ├── nav_groups.yaml
+│   │       │   │   ├── _nav_mnemos.yaml
+│   │       │   │   ├── nav_mnemos.yaml
+│   │       │   │   ├── _nav.yaml
+│   │       │   │   ├── nav.yaml
+│   │       │   │   ├── _semantic.yaml
+│   │       │   │   └── semantic.yaml
+│   │       │   ├── __prj_commented.yaml
+│   │       │   └── __prj.yaml
+│   │       ├── __init__.py
+│   │       ├── modules
+│   │       │   ├── __init__.py
+│   │       │   ├── _mainview.py
+│   │       │   ├── mainview.py
+│   │       │   └── templates
+│   │       │       ├── _welcome.html
+│   │       │       └── welcome.html
+│   │       ├── pams
+│   │       │   ├── etc
+│   │       │   │   ├── _config.yaml
+│   │       │   │   ├── config.yaml
+│   │       │   │   ├── _schema.ttl
+│   │       │   │   └── schema.ttl
+│   │       │   ├── __prj_commented.yaml
+│   │       │   ├── __prj.yaml
+│   │       │   └── rtdb
+│   │       │       ├── arrays.csv
+│   │       │       ├── info.yaml
+│   │       │       └── reglament.xlsx
+│   │       ├── __projects_my.yaml
+│   │       ├── __projects.yaml
+│   │       ├── reglament
+│   │       │   ├── etc
+│   │       │   │   ├── config.yaml
+│   │       │   │   ├── __init__.py
+│   │       │   │   └── nav.yaml
+│   │       │   ├── mnemos
+│   │       │   │   ├── fParBGSVX_3.mnemo
+│   │       │   │   ├── fParBGSVX_3.yaml
+│   │       │   │   ├── fVSYAU2_T3.yaml
+│   │       │   │   ├── fVSYAU2_T.mnemo
+│   │       │   │   ├── fVSYAU_T3.mnemo
+│   │       │   │   ├── fVSYAU_T3.yaml
+│   │       │   │   ├── fYAPPY3.yaml
+│   │       │   │   └── fYAPPY.mnemo
+│   │       │   ├── __prj_commented.yaml
+│   │       │   └── __prj.yaml
+│   │       └── u3
+│   │           ├── etc
+│   │           │   ├── config.yaml
+│   │           │   └── nav.yaml
+│   │           └── __prj.yaml
+│   ├── etc
+│   │   ├── meta
+│   │   │   ├── cim
+│   │   │   │   ├── hika
+│   │   │   │   │   ├── atypes.yaml
+│   │   │   │   │   ├── classes.ttl
+│   │   │   │   │   ├── dtypes.yaml
+│   │   │   │   │   ├── hika.ttl
+│   │   │   │   │   └── meta.ttl
+│   │   │   │   └── sunpp_hika
+│   │   │   │       ├── atypes.yaml
+│   │   │   │       ├── dtypes.yaml
+│   │   │   │       ├── meta.ttl
+│   │   │   │       └── types.yaml
+│   │   │   ├── dbf2rdf_commented.ttl
+│   │   │   ├── dbf2rdf.ttl
+│   │   │   ├── _gdb2rdf7_commented.ttl
+│   │   │   ├── gdb2rdf7.ttl
+│   │   │   ├── _gdb2rdf_commented.ttl
+│   │   │   ├── gdb2rdf.ttl
+│   │   │   ├── _hika3.yaml
+│   │   │   ├── hika3.yaml
+│   │   │   ├── _hika5.yaml
+│   │   │   ├── hika5.yaml
+│   │   │   ├── _hika7.yaml
+│   │   │   ├── hika7.yaml
+│   │   │   ├── _mu.yaml
+│   │   │   ├── mu.yaml
+│   │   │   ├── _sqlfunctions3.py
+│   │   │   ├── sqlfunctions3.py
+│   │   │   ├── _sqlfunctions5.py
+│   │   │   ├── sqlfunctions5.py
+│   │   │   ├── _sqlfunctions7.py
+│   │   │   ├── sqlfunctions7.py
+│   │   │   ├── _sqlfunctions.py
+│   │   │   └── sqlfunctions.py
+│   │   ├── mnemo
+│   │   │   ├── _block2type_commented.yaml
+│   │   │   ├── block2type.yaml
+│   │   │   ├── _color2alpha.py
+│   │   │   ├── color2alpha.py
+│   │   │   ├── _colorhika.py
+│   │   │   ├── colorhika.py
+│   │   │   ├── _grset_data.xsl
+│   │   │   ├── grset_data.xsl
+│   │   │   ├── _hika2mnemo7.xsl
+│   │   │   ├── hika2mnemo7.xsl
+│   │   │   ├── _hikalib2mnemo7.xsl
+│   │   │   ├── hikalib2mnemo7.xsl
+│   │   │   ├── hikapakextract.py
+│   │   │   ├── lib
+│   │   │   │   ├── adigital.mnemo
+│   │   │   │   ├── dtext.mnemo
+│   │   │   │   ├── hikabinder7.py
+│   │   │   │   ├── hikalib7.mnemo
+│   │   │   │   ├── lampuse.mnemo
+│   │   │   │   ├── naec.mnemo
+│   │   │   │   ├── panel.mnemo
+│   │   │   │   ├── s_func7.mnemo
+│   │   │   │   ├── spir.mnemo
+│   │   │   │   └── termometr.mnemo
+│   │   │   ├── _palette_hika.yaml
+│   │   │   ├── pallete_hika.yaml
+│   │   │   ├── _testmnemolib.py
+│   │   │   └── testmnemolib.py
+│   │   ├── _rtdb_hub_conf.yaml
+│   │   ├── rtdb_hub_conf.yaml
+│   │   ├── st2_keys_defaults.commented_json
+│   │   ├── st2_keys_defaults.json
+│   │   └── vars
+│   │       ├── _docker.yaml
+│   │       ├── docker.yaml
+│   │       ├── _frontend.yaml
+│   │       ├── frontend.yaml
+│   │       ├── vars.yaml
+│   │       └── _yars.yaml
+│   └── workflow
+│       ├── ansible
+│       │   ├── bridge_hika2rtdb_from_service_confs.yaml
+│       │   ├── bridge_hika2rtdb.yaml
+│       │   ├── bridge_simulator.yaml
+│       │   ├── collect_rtdb2oldrtdb.yaml
+│       │   ├── collect_rtdb2tsdb.yaml
+│       │   ├── deploy2production.yaml
+│       │   ├── roles
+│       │   │   ├── bootstrap
+│       │   │   │   └── meta
+│       │   │   │       └── main.yaml
+│       │   │   └── production
+│       │   │       ├── backend
+│       │   │       │   ├── meta
+│       │   │       │   │   └── main.yaml
+│       │   │       │   ├── tasks
+│       │   │       │   │   └── main.yaml
+│       │   │       │   └── templates
+│       │   │       │       └── make.yaml.j2
+│       │   │       ├── backup
+│       │   │       │   └── tasks
+│       │   │       │       └── backup_images.yaml
+│       │   │       ├── farm
+│       │   │       │   ├── meta
+│       │   │       │   │   └── main.yaml
+│       │   │       │   ├── tasks
+│       │   │       │   │   └── main.yaml
+│       │   │       │   └── templates
+│       │   │       │       └── prod-compose.yaml
+│       │   │       ├── frontend
+│       │   │       │   ├── defaults
+│       │   │       │   │   └── main.yaml
+│       │   │       │   ├── meta
+│       │   │       │   │   └── main.yaml
+│       │   │       │   ├── tasks
+│       │   │       │   │   └── main.yaml
+│       │   │       │   └── templates
+│       │   │       │       ├── make.yaml.j2
+│       │   │       │       └── nginx.conf.j2
+│       │   │       ├── meta
+│       │   │       │   ├── meta
+│       │   │       │   │   └── main.yaml
+│       │   │       │   ├── tasks
+│       │   │       │   │   └── main.yaml
+│       │   │       │   └── templates
+│       │   │       │       └── make.yaml.j2
+│       │   │       └── rtdb
+│       │   │           ├── meta
+│       │   │           │   └── main.yaml
+│       │   │           ├── tasks
+│       │   │           │   └── main.yaml
+│       │   │           └── templates
+│       │   │               └── make.yaml.j2
+│       │   ├── stage.yaml
+│       │   ├── stop_production.yaml
+│       │   └── templates
+│       │       └── nginx-spd.j2
+│       ├── __init__.py
+│       ├── ivs_call.py
+│       ├── packs
+│       │   ├── default
+│       │   │   ├── actions
+│       │   │   │   ├── README.md
+│       │   │   │   └── workflows
+│       │   │   │       └── README.md
+│       │   │   ├── icon.png
+│       │   │   ├── pack.yaml
+│       │   │   ├── rules
+│       │   │   │   └── README.md
+│       │   │   └── sensors
+│       │   │       └── README.md
+│       │   └── sunpp
+│       │       ├── actions
+│       │       │   ├── chains
+│       │       │   │   ├── compile_ivs.yaml
+│       │       │   │   ├── mnemoc.yaml
+│       │       │   │   ├── process_io.yaml
+│       │       │   │   └── process_iso.yaml
+│       │       │   ├── clean_app.yaml
+│       │       │   ├── compile_app_silent.yaml
+│       │       │   ├── compile_app.yaml
+│       │       │   ├── compile_ivs_silent.yaml
+│       │       │   ├── compile_ivs.yaml
+│       │       │   ├── deploy2production.yaml
+│       │       │   ├── getconfig.yaml
+│       │       │   ├── mnemoc.yaml
+│       │       │   ├── prepare_extract_io.yaml
+│       │       │   ├── prepare_extract_iso.yaml
+│       │       │   ├── process_io.yaml
+│       │       │   ├── process_iso.yaml
+│       │       │   ├── prometheus_alarm.yaml
+│       │       │   ├── scripts
+│       │       │   │   ├── getconfig.py
+│       │       │   │   ├── prepare_extract_io.py
+│       │       │   │   ├── prepare_extract_iso.py
+│       │       │   │   └── prometheus_alarm.py
+│       │       │   └── stop_production.yaml
+│       │       ├── icon.png
+│       │       ├── pack.yaml
+│       │       ├── policies
+│       │       │   ├── compile_ekatra_project.yaml
+│       │       │   ├── deploy2production.yaml
+│       │       │   ├── process_io.yaml
+│       │       │   ├── process_iso.yaml
+│       │       │   └── up_common_metadata.yaml
+│       │       ├── rules
+│       │       │   ├── bridge_hika2rtdb.yaml
+│       │       │   ├── collect_rtdb2oldrtdb.yaml
+│       │       │   ├── collect_rtdb2tsdb.yaml
+│       │       │   ├── dropcaches_backend.yaml
+│       │       │   ├── meta_up.yaml
+│       │       │   ├── process_io_on_upload.yaml
+│       │       │   ├── process_iso_on_upload.yaml
+│       │       │   ├── README.md
+│       │       │   └── sample.yaml
+│       │       └── sensors
+│       │           └── README.md
+│       ├── scripts
+│       │   ├── block2type.py
+│       │   ├── blocks-from-fragments.sh
+│       │   ├── collect_algor_img3.py
+│       │   ├── collect_algor_img.py
+│       │   ├── meta-from-fragments3.sh
+│       │   ├── meta-from-fragments.sh
+│       │   ├── showon3.py
+│       │   ├── showon-fragments.sh
+│       │   └── showon.py
+│       └── test.py
+├── README.md
+├── _REPORT_ALGOR.md
+├── REPORT_ALGOR.md
+├── _site.yaml
+├── site.yaml
+├── sunpp_tree.txt
+├── test_extract
+│   ├── _0_extract_full_tgz.sh
+│   ├── 0_extract_full_tgz.sh
+│   ├── _0_extract.sh
+│   ├── 0_extract.sh
+│   ├── _1_compile.sh
+│   ├── 1_compile.sh
+│   ├── _2_gdb2txt.sh
+│   ├── 2_gdb2txt.sh
+│   ├── _hika7.yaml
+│   ├── hika7.yaml
+│   └── README.md
+└── ttrr.txt
+
+71 directories, 241 files
+</pre>
+</body>
+</html>

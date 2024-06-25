@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>lampuse.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>lampuse.mnemo</h1>
+    <pre>def _lamp_shadow(){
+    radialGradient(cy=0.5, cx=0.5, r=0.5){
+        .stop(0%, &#x27;transparent&#x27;);
+        .stop(70%, &#x27;transparent&#x27;);
+        .stop(85%, &#x27;black&#x27;, opacity=0.3);
+        .stop(100%, &#x27;black&#x27;, opacity=0.8);
+    }
+}
+def _lamp_g2(){
+    linearGradient(x1=0.5, y1=0.5, x2=1, y2=1){
+        .stop(0, &#x27;black&#x27;, 0.3);
+        .stop(100, &#x27;black&#x27;, 0.7);
+    }
+}
+def _lamp_g1(){
+    linearGradient(x1=0, y1=0, x2=0, y2=1){
+        .stop(0, &#x27;black&#x27;, 0.5);
+        .stop(100, &#x27;black&#x27;, 0.1);
+    }
+}
+def _lamp_border(r, light){
+    group(class=&quot;mnemo-meter-bg&quot;){
+        circle(Origin, style=(stroke=&#x27;none&#x27;, fill=light), r=r);
+        circle(Origin, style=(stroke=&#x27;none&#x27;, fill=#_lamp_g1()), r=r);
+        circle(Origin, style=(stroke=&#x27;none&#x27;, fill=#_lamp_g2()), r=r*0.85);
+    }
+}
+
+def _lamp_hotspot(){
+    radialGradient(cx=0.5, cy=0.4, r=0.8, fx=0.3, fy=0.05){
+        .stop(0%, &#x27;white&#x27;, opacity=0.7);
+        .stop(30%, &#x27;white&#x27;, opacity=0.35);
+        .stop(80%, opacity=0.);
+    }
+}
+
+def _lamp_pattern(){
+ pattern(width=0.1, height=0.1, patternContentUnits=&#x27;objectBoundingBox&#x27;)
+ {
+    path(style=(fill_opacity=0.2, fill=&#x27;#333&#x27;, stroke=&#x27;none&#x27;)){
+    .M(0, 0);
+    .L(0.08, 0.1);
+    .L(0, 0.1);
+    .z();
+    }
+ }
+}
+
+def _lamp_glass(r){
+    circle(Origin, style=(fill=#_lamp_shadow(), stroke=&#x27;none&#x27;), r=r*0.73);
+    circle(Origin, style=(fill=#_lamp_hotspot(), stroke=&#x27;none&#x27;), r=r*0.64);
+    circle(Origin, style=(fill=#_lamp_pattern(), stroke=&#x27;none&#x27;), r=r*0.71);
+}
+
+def _light_halo(size)
+{
+  filter(x=-0.5, y=-0.5, width=2, height=2)
+  {
+    //fl = .flood(&#x27;red&#x27;, 0.9);
+    //c1 = .composite(&#x27;in&#x27;, fl, &#x27;SourceGraphic&#x27;);
+    c1 = .blur(&#x27;SourceGraphic&#x27;, size);
+    .composite(&quot;over&quot;, &quot;SourceGraphic&quot;, c1);
+  }
+}
+
+
+def lamp(p, r, bind, class=&#x27;&#x27;, attributes=None)
+{
+  if(bind.kind==&#x27;B&#x27;){
+    cls := &#x27;lampB0 boolG1&#x27;;
+    bindtype := &#x27;boolrts&#x27;;
+    acl := &#x27;ppt btag&#x27;;
+  }elif(bind.kind==&#x27;B2&#x27;){
+    cls := &#x27;pairGX1 pairR1X&#x27;;
+    bindtype := &#x27;boolPair&#x27;;
+    acl := &#x27;ppt b2tag&#x27;;
+  }else{
+    log.error(&#x27;lamp used with process point {} of kind {}&#x27;, bind.href, bind.kind);
+    bindtype := &#x27;?&#x27;;
+    acl := None;
+  }
+  if(class==&#x27;&#x27;){
+    class := cls;
+  }
+    group(bindtype=bindtype, bind=bind.bind_idx, attributes=attributes, class=acl)
+    {
+        //rect(topleft=p-r, bottomright=p+r, class=&#x27;_SKIP&#x27;);
+        use(p, href=#_lamp_border(r, light=&#x27;#444455&#x27;));
+        circle(p, class=class, style=&#x27;fill:CurrentColor; stroke:none&#x27;, r=r*0.71, filter=#_light_halo(int(r/3)));
+        use(p, href=#_lamp_glass(r));
+    }
+}
+
+/*
+def _lamp_g1(x1=0.3, x2=0.8, y2=1){
+  linearGradient(){
+    .stop(0%, &#x27;white&#x27;);
+    .stop(100%, &#x27;#333&#x27;);
+  }
+}
+def _lamp_g2(){
+    linearGradient(rotate=(180, 0.5, 0.5)){
+      .stop(0%, &#x27;white&#x27;);
+      .stop(100%, &#x27;#333&#x27;);
+  }
+}
+def _lamp_g3(){
+  radialGradient(cx=0.5, cy=0.4, r=0.8, fx=0.4, fy=0.05){
+    .stop(0%, &#x27;white&#x27;, opacity=0.9);
+    .stop(20%, &#x27;white&#x27;, opacity=0.65);
+    .stop(80%, opacity=0.);
+  }
+}
+
+def lamp1(c)
+{
+  circle(c, fill=#_lamp_g1(), r=28);
+  circle(c, fill=#_lamp_g2(), r=24);
+  circle(c, r=20, fill=&#x27;red&#x27;);
+  circle(c, fill=#_lamp_g3(), r=20);
+}
+
+*/</pre>
+</body>
+</html>

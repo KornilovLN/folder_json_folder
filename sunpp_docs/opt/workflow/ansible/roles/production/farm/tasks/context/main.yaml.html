@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>main.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>main.yaml</h1>
+    <pre>
+- name: get bridge services items
+  find:
+    paths: /var/ekatra/tmp/service/bridge
+    patterns: &#x27;*.yaml&#x27;
+  register: bridge_services
+
+- name: get collect services items
+  find:
+    paths: /var/ekatra/tmp/service/collect
+    patterns: &#x27;*.yaml&#x27;
+  register: collect_services
+
+- name: Ensure local dirs
+  file: path=/var/ekatra/compose/ state=directory mode=0777
+
+- name: make compose config for system services
+  template:
+    src: &#x27;{{ ekatra_mode }}-compose.yaml&#x27;
+    dest: &quot;/var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml&quot;
+</pre>
+</body>
+</html>

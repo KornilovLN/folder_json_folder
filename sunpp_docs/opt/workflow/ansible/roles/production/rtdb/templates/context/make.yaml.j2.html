@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>make.yaml.j2</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>make.yaml.j2</h1>
+    <pre># {{ ansible_managed }}
+
+image:
+- name: rtdb
+  description: rtdb image for domain *.{{ ekatra_full_domain }}
+  from: &#x27;{{ images.rtdb }}&#x27;
+  target: &#x27;{{ images_domain }}/{{ ekatra_domain }}/rtdb&#x27;
+  author: ekatra
+  build:
+    - tasks:
+        - file:
+            path: &#x27;{{ dest_dir }}/hub/&#x27;
+            state: directory
+            mode: 0777
+        - file:
+            path: &#x27;{{ dest_dir }}/rtdb/&#x27;
+            state: directory
+            mode: 0777
+        - copy:
+            src: &#x27;/ekatra/etc/rtdb_hub_conf.yaml&#x27;
+            dest: &#x27;{{ dest_dir }}/rtdb_hub_conf.yaml&#x27;
+    - copy:
+        src: &#x27;{{ src_dir }}/hub/&#x27;
+        dest: &#x27;{{ dest_dir }}/hub/&#x27;
+    - copy:
+        src: &#x27;{{ src_dir }}/rtdb/&#x27;
+        dest: &#x27;{{ dest_dir }}/rtdb/&#x27;
+
+
+  configuration:
+    environment:
+      RTDB_HUB_CONFIG: &quot;{{ dest_dir }}/rtdb_hub_conf.yaml&quot;
+    command: [&quot;/usr/sbin/uwsgi&quot;, &quot;--yaml&quot;, &quot;/etc/uwsgi/services/hub.yaml&quot;]
+</pre>
+</body>
+</html>

@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>schema.ttl</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>schema.ttl</h1>
+    <pre>@prefix rr: &lt;http://www.w3.org/ns/r2rml#&gt; .
+@prefix rr2: &lt;http://spd.ivl.cns/ns/r2rmp-ext#&gt; .
+
+@prefix rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .
+@prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
+
+@prefix mof: &lt;http://spd.ivl.cns/cim/rtdbmof#&gt; .
+@prefix m: &lt;http://spd.ivl.cns/cim/mmi#&gt; .
+@prefix sh: &lt;http://sunpp.cns.atom/cim/hika#&gt; .
+
+
+&lt;arrays&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+          m._1 as EXCHANGE_LIST,
+          cast(m._2 as integer) as TICK,
+          m._3 as TITLE,
+          m._4 as MASID
+          from csv.arrays.csv as m
+       &quot;&quot;&quot;
+    ];
+    rr:subjectMap
+    [
+      a rr:TermMap;
+      rr:template &quot;arr{MASID}&quot;;
+      rr:class mof:Array
+    ] ;
+
+    rr:predicateObjectMap
+      [   rr:predicate mof:exchangeList ;
+          rr:objectMap [ rr:column &quot;EXCHANGE_LIST&quot; ]
+      ],
+      [   rr:predicate mof:tick ;
+          rr:objectMap [ rr:column &quot;TICK&quot; ]
+      ],
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;TITLE&quot;;  rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{MASID}&quot;; rr:termType rr:Literal ]
+      ]
+.
+
+
+&lt;reglament_analog&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+            index AS INDEX,
+            cast(A as integer) AS DOCNUM,
+            LOWER(SUBSTRING(worksheet, 5, 1)) as UNIT,
+            choose_id(B, E, worksheet||cast(INDEX as char), &#x27;a&#x27; || UPPER(UNIT)) as MASTERID,
+            C AS DEPRTMENT,
+            D AS CIPHER,
+            E AS PLAINID,
+            F AS TITLE,
+            ekatra.semantic.fixmu.mu(G) AS MU,
+            cast(fix_rufloatstr(H) as float) AS LIR,
+            cast(fix_rufloatstr(I) as float) AS HIR,
+            cast(fix_rufloatstr(J) as float) AS LL,
+            cast(fix_rufloatstr(K) as float) AS HL,
+            cast(fix_rufloatstr(L) as float) AS LLL,
+            cast(fix_rufloatstr(M) as float) AS HHL,
+            check_scale(MASTERID, LIR, LLL, LL, HL, HHL, HIR) as WRONG_SCALE,
+            calcFormatByRange(LIR, HIR) as FORMAT,
+            worksheet
+
+        from &quot;db.reglament.REGU?A|REG_ACKPO{&#x27;min_row&#x27;: 3, &#x27;max_col&#x27;: 14, &#x27;addcolumns&#x27;: &#x27;worksheet,index&#x27;}&quot;
+       &quot;&quot;&quot;
+    ];
+    rr:subjectMap
+    [
+      a rr:TermMap;
+      rr:template &quot;{MASTERID}&quot;;
+      rr:class sh:Analog
+    ] ;
+    rr:predicateObjectMap
+      [   rr:predicate mof:PlainID;
+          rr:objectMap [ rr:template &quot;{CIPHER}:{PLAINID}&quot;; rr:termType rr:Literal ]
+      ] ,
+      [   rr:predicate mof:DocNum;
+          rr:objectMap [ rr:column &quot;DOCNUM&quot; ]
+      ] ,
+
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{prefix}}:{PLAINID}&quot;; rr:language &quot;ru&quot; ]
+      ] ,
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;TITLE&quot;;  rr:language &quot;ru&quot; ]
+      ] ,
+      [   rr:predicate mof:array ;
+          rr:objectMap [ rr:template &quot;arr{worksheet}&quot;; rr:termType rr:IRI ]
+      ] ,
+      [   rr:predicate mof:arr_index ;
+          rr:objectMap [ rr:column &quot;INDEX&quot; ]
+      ] ,
+      [   rr:predicate mof:id  ;
+          rr:objectMap  [ rr:template &quot;{{ prefix }}.{MASTERID}&quot;; rr:termType rr:Literal ]
+      ] ,
+      [ rr:predicate mof:WRONG_SCALE ; rr:objectMap [ rr:column &quot;WRONG_SCALE&quot; ]] ,
+      [ rr:predicate mof:mu ;  rr:objectMap  [ rr:column &quot;MU&quot;   ]] ,
+      [ rr:predicate mof:LLL ; rr:objectMap  [ rr:column &quot;LLL&quot;  ]] ,
+      [ rr:predicate mof:LL  ; rr:objectMap  [ rr:column &quot;LL&quot;   ]] ,
+      [ rr:predicate mof:HL  ; rr:objectMap  [ rr:column &quot;HL&quot;   ]] ,
+      [ rr:predicate mof:HHL ; rr:objectMap  [ rr:column &quot;HHL&quot;  ]] ,
+      [ rr:predicate mof:LIR ; rr:objectMap  [ rr:column &quot;LIR&quot;  ]] ,
+      [ rr:predicate mof:HIR ; rr:objectMap  [ rr:column &quot;HIR&quot;  ]] ,
+      [ rr:predicate mof:format; rr:objectMap [ rr:column &quot;FORMAT&quot;]]
+.
+
+
+
+&lt;reglament_digit&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+            LOWER(SUBSTRING(worksheet, 5, 1)) as UNIT,
+            index AS INDEX,
+            cast(A as integer) AS DOCNUM,
+            choose_id(B, E, worksheet||cast(INDEX as char), &#x27;b&#x27; || UPPER(UNIT)) as MASTERID,
+            C AS DEPRTMENT,
+            D AS CIPHER,
+            E AS PLAINID,
+            F AS TITLE,
+            UPPER(cast(G as char)) AS SEMANTIC_TYPE,
+            coalesce(
+              case SEMANTIC_TYPE
+                when &#x27;A&#x27; then &#x27;http://sunpp.cns.atom/cim/hika#Bool&#x27;
+                when &#x27;А&#x27; then &#x27;http://sunpp.cns.atom/cim/hika#Bool&#x27;
+                when &#x27;M&#x27; then &#x27;http://sunpp.cns.atom/cim/hika#MechanizmBool&#x27;
+                when &#x27;М&#x27; then &#x27;http://sunpp.cns.atom/cim/hika#MechanizmBool&#x27;
+                when &#x27;S&#x27; then &#x27;http://sunpp.cns.atom/cim/hika#Valve&#x27;
+              end
+              , &#x27;http://spd.ivl.cns/cim/rtdbmof#Discrete&#x27;) as TYPE,
+            worksheet
+
+        from &quot;db.reglament.REGU?D|REGU?B{&#x27;min_row&#x27;: 3, &#x27;max_col&#x27;: 7, &#x27;addcolumns&#x27;: &#x27;worksheet,index&#x27;}&quot;
+       &quot;&quot;&quot;
+    ];
+    rr:subjectMap
+    [
+      a rr:TermMap;
+      rr:template &quot;{MASTERID}&quot;
+    ] ;
+    rr:predicateObjectMap
+
+      [   rr:predicate rdf:type;
+          rr:objectMap [ rr:template &quot;{TYPE}&quot;; rr:termType rr:class ]
+      ] ,
+
+      [   rr:predicate mof:PlainID;
+          rr:objectMap [ rr:template &quot;{CIPHER}:{PLAINID}&quot;; rr:termType rr:Literal ]
+      ] ,
+      [   rr:predicate mof:DocNum;
+          rr:objectMap [ rr:column &quot;DOCNUM&quot; ]
+      ] ,
+
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{prefix}}:{PLAINID}&quot;; rr:language &quot;ru&quot; ]
+      ] ,
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;TITLE&quot;;  rr:language &quot;ru&quot; ]
+      ] ,
+      [   rr:predicate mof:array ;
+          rr:objectMap [ rr:template &quot;arr{worksheet}&quot;; rr:termType rr:IRI ]
+      ] ,
+      [   rr:predicate mof:arr_index ;
+          rr:objectMap [ rr:column &quot;INDEX&quot; ]
+      ] ,
+      [   rr:predicate mof:id  ;
+          rr:objectMap  [ rr:template &quot;{{ prefix }}.{MASTERID}&quot;; rr:termType rr:Literal ]
+      ]
+.
+
+
+
+
+&lt;triggers&gt;
+  rr2:preProcess &quot;init_idset&quot; ;
+  rr2:postProcess &quot;test_uniq&quot; .
+</pre>
+</body>
+</html>

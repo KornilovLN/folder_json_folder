@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>db_append.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>db_append.py</h1>
+    <pre>#!/usr/bin/env python
+
+from ekatra.brama import db
+import yaml
+
+from ekatra.brama.auth.models import User, Role
+
+from gevent import monkey
+monkey.patch_all()
+
+
+def append(db, conf):
+    users_dict = {}
+
+    for u in conf.get(&#x27;users&#x27;, []):
+
+        user = User.query.filter_by(username=u[&#x27;username&#x27;]).first()
+
+        if not user:
+
+            ctx = dict(
+                username=u[&#x27;username&#x27;],
+                password=u.get(&#x27;password&#x27;, &#x27;&#x27;),
+                email=u.get(&#x27;email&#x27;),
+                active=u.get(&#x27;active&#x27;, False),
+                full_name=u.get(&#x27;full_name&#x27;),
+            )
+
+            user = User(**ctx)
+            if &#x27;pwdhash&#x27; in u:
+                user.pwdhash = u[&#x27;pwdhash&#x27;]
+            for role in u.get(&#x27;roles&#x27;, []):
+                user.add_role(role)
+
+            db.session.add(user)
+            users_dict[u[&#x27;username&#x27;]] = user
+            print(&#x27;User added : {}.&#x27;.format(user.username))
+
+        else:
+            print(&#x27;User exists: {}, skipped.&#x27;.format(user.username))
+
+#    for r in conf.get(&#x27;roles&#x27;, []):
+#        users = filter(bool, [users_dict.get(u) for u in r.get(&#x27;users&#x27;, [])])
+#        r[&#x27;users&#x27;] = users
+#        role = Role(**r)
+#        db.session.add(role)
+
+    db.session.commit()
+
+
+if __name__ == &quot;__main__&quot;:
+    with open(&quot;db.yaml&quot;, &#x27;r&#x27;) as f:
+        conf = yaml.load(f)
+        append(db, conf)
+</pre>
+</body>
+</html>

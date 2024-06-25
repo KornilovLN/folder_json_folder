@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>stop_production.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>stop_production.yaml</h1>
+    <pre>- name: Stop Ekatra Production
+  hosts: localhost
+  connection: local
+  vars:
+    ekatra_mode: prod
+
+  roles:
+    - common_vars
+
+  pre_tasks:
+
+    - name: Check that the /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml exists
+      stat:
+        path: /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml
+      register: stat_compose
+
+  tasks:
+  - name: stop production
+    when: stat_compose.stat.exists|bool == True
+    block:
+
+      - name: down {{ ekatra_domain }}{{ ekatra_mode }} compose
+        shell: &#x27;docker-compose -f {{ ekatra_domain }}{{ ekatra_mode }}.yaml -p {{ ekatra_domain }}{{ ekatra_mode }} down -v --remove-orphans&#x27;
+        args:
+          chdir: /var/ekatra/compose
+
+      - name: Clean artifact path &quot;/var/ekatra/tmp/prod/{{ item }}/&quot;
+        file:
+          state: absent
+          path: &quot;/var/ekatra/tmp/prod/{{ item }}/&quot;
+        with_items:
+          - backend
+          - frontend
+          - rtdb
+          - meta
+
+      - name: Remove compose file /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml
+        file:
+          state: absent
+          path: /var/ekatra/compose/{{ ekatra_domain }}{{ ekatra_mode }}.yaml
+
+      - name: remove image &#x27;{{ images_domain }}/{{ ekatra_domain }}/{{ item }}&#x27;
+        docker_image:
+          name: &#x27;{{ images_domain }}/{{ ekatra_domain }}/{{ item }}&#x27;
+          pull: no
+          push: no
+          state: absent
+        with_items:
+          - backend
+          - frontend
+          - rtdb
+          - meta
+
+      - mqtt:
+          topic: &#x27;brama-noty&#x27;
+          payload: &#x27;{&quot;text&quot;:&quot;Production stopped&quot;, &quot;user_role&quot;: &quot;supervisor&quot;, &quot;type&quot;: &quot;success&quot;}&#x27;
+          server: mq
+        delegate_to: localhost
+</pre>
+</body>
+</html>

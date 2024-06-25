@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>README.md</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>README.md</h1>
+    <pre># SUNPP
+
+# Contacts
+
+```
+- name: Олег Павлович Сергеев
+  tel: +38(067)512-92-37
+
+- name: Олег Яковлев
+  description: списки памс. вопросы по структурам и экранам.
+  tel: +38(073)025-65-66
+```
+
+
+## Getting Started
+
+### Prerequisites
+
+- make
+- docker
+- python&gt;=3.6
+- docker-compose
+- coolie
+
+### Install docker-local-persist-volume-plugin
+```
+curl -fsSL https://raw.githubusercontent.com/CWSpear/local-persist/master/scripts/install.sh | sudo bash
+```
+
+### Install docker plugin weave
+
+https://www.weave.works/docs/net/latest/install/installing-weave/
+
+```
+sudo curl -L git.io/weave -o /usr/local/bin/weave
+sudo chmod a+x /usr/local/bin/weave
+
+weave launch
+```
+
+## How to setup for develop
+
+```bash
+mkdir project_sunpp
+cd project_sunpp
+git clone -b feature/lmzmq git@gitlab.office.ivl.ua:ekatra/ekatra.git ekatra_lmzmq
+git clone -b develop git@gitlab.office.ivl.ua:ekatra/ekatra.git ekatra
+git clone -b develop git@gitlab.office.ivl.ua:ekatra/tatra.git tatra
+git clone -b develop git@gitlab.office.ivl.ua:ekatra/sunpp.git sunpp
+
+echo &quot;127.0.0.1 brama.sunpp.cns.atom&quot; &gt; /etc/hosts
+echo &quot;127.0.0.1 www.sunpp.cns.atom&quot; &gt; /etc/hosts
+```
+
+## How to start for develop
+
+    cd project_sunpp/sunpp
+    make begin
+
+## Open Browser
+
+    http://brama.sunpp.cns.atom/ for brama 
+    http://brama.sunpp.cns.atom/ekatra/ for stage
+    http://www.sunpp.cns.atom/ for prod
+
+## Setup brama
+
+Configure supper user God
+```
+docker exec -it brama bramaman addgod -p &lt;password&gt;
+```
+Learn more 
+```
+docker exec -it brama bramaman --help
+```
+
+## Project structure
+
+    - opt/brama/projects
+    - opt/etc
+    - opt/workflow
+
+
+## Contributing
+
+### Without using git-flow extensions:
+
+- Get last develop branch (`git checkout develop`)
+- Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+- Commit your Changes (`git commit -m &#x27;Add some AmazingFeature&#x27;`)
+- Pull develop branch to your Feature Branch (`git pull origin develop`)
+- Publish a Feature Branch to a remote (`git push origin feature/AmazingFeature`)
+- Open a Merge Request
+
+### Using git-flow extensions:
+
+
+- Init git-flow extensions (only for the first time)
+```sh
+$ git flow init
+Initialized empty Git repository in ~/project/.git/
+No branches exist yet. Base branches must be created now.
+Branch name for production releases: [master]
+Branch name for &quot;next release&quot; development: [develop]
+
+How to name your supporting branch prefixes?
+Feature branches? [feature/]
+Release branches? [release/]
+Hotfix branches? [hotfix/]
+Support branches? [support/]
+Version tag prefix? []
+
+```
+
+- Create your Feature Branch(`git flow feature start AmazingFeature`)
+- Commit your Changes (`git commit -m &#x27;Add some AmazingFeature&#x27;`)
+- Pull develop branch to your Feature Branch (`git pull origin develop`)
+- Publish a Feature Branch to a remote (`git flow feature publish AmazingFeature`)
+- Open a Merge Request
+
+
+
+## Make release
+
+
+### Setup integration gitlab.office.ivl.ua and brama.master.cns
+
+- Goto link http://gitlab.office.ivl.ua/ekatra/sunpp/settings/integrations
+- Add webhook to URL `https://brama.master.cns/webhooks/release` and Trigger by Tag push events
+
+
+### Using git-flow extensions:
+
+```sh
+cd project_sunpp/sunpp
+git flow release start &quot;$(date +%y.%m.%d)&quot;
+...update install/net-install.sh
+...update site.yaml
+...update CHANGELOG.md
+git commit -am&quot;update&quot;
+git push
+git flow release finish
+```
+
+### Manual execute release_site
+
+Sometimes it is required to execute the release pipeline manually.
+The work is done at http://brama.master.cns/
+
+```
+docker exec -it st2 bash
+
+st2 action execute master.release_site \
+  branch=refs/tags/$(date +%y.%m.%d) \
+  repo=http://gitlab.office.ivl.ua/ekatra/sunpp.git
+```
+</pre>
+</body>
+</html>

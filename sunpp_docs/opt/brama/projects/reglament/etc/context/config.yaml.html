@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>config.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>config.yaml</h1>
+    <pre>meta:
+  namespace: http://sunpp.cns.atom/urt/
+  meta_url: &#x27;http://www/spd/meta/urt/&#x27;
+  parameters:
+    prefix: &#x27;urt&#x27;
+  prefixes:
+    mof: &quot;http://spd.ivl.cns/cim/rtdbmof#&quot;
+    mmi: &quot;http://spd.ivl.cns/cim/mmi#&quot;
+    upams: &quot;http://sunpp.cns.atom/pams/&quot;
+  mnemo2rdf:
+    output: /var/ekatra/spd/meta/urt/mnemo.ttl
+
+mnemos:
+  results_backend:
+    - &#x27;mongodb://mongo/ekatra/mnemo_reglament&#x27;
+    - &#x27;mqtt://mq:1883/brama/prj/reglament/mnemos&#x27;
+  libpath:
+    - /ekatra/etc/mnemo
+  targetpath: /var/ekatra/spd/urt
+  publicgroup_targetpath: /var/ekatra/hub
+  mnemos: &#x27;mnemos/*.mnemo&#x27;
+#   external_deps:
+#     &#x27;&#x27;: &#x27;mnemos/img&#x27;
+
+
+# bridge:
+#   type: hika
+#   address: &#x27;228.7.0.7:9090&#x27;
+#
+# arrays:
+#   targetpath: /var/ekatra/spd/su/arr
+#   publicgroup_targetpath: /var/ekatra/hub/su
+#
+#
+# tasks:
+#   - basename: rtdb
+#     name: collect_oldrtdb_dump
+#     doc: Generate MSQL DUMP for oldrtdb
+#     task_dep: [&quot;meta:upload_rdf&quot;]
+#     uptodate: [true]
+#     targets:
+#       - /var/ekatra/spd/meta/su/msql.dump
+#     actions:
+#      - python: ekatra.semantic.rdf2msql:main
+#        kwargs:
+#          array:
+#           - http://sunpp.cns.atom/reglament/arrREGU3A
+#           - http://sunpp.cns.atom/reglament/arrREGU3B
+#           - http://sunpp.cns.atom/reglament/arrREGU3D
+
+
+logging:
+  level: INFO
+
+doit_config:
+    backend: sqlite3
+    dep_file: /var/ekatra/tmp/reglament/.doit.db
+    verbosity: 2
+
+</pre>
+</body>
+</html>

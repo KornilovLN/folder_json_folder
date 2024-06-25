@@ -1,0 +1,1072 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>hikalib7.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>hikalib7.mnemo</h1>
+    <pre>from ldg import *;
+from hikabinder7 import *;
+import s_func7 as sfunc_imgs;
+import unidecode;
+
+
+
+def _multi_line_text(p, w, h, text_lines, text_clss=&#x27;&#x27;, text_style=&#x27;&#x27;, x_base_line=0, line_spacing=&#x27;1.0em&#x27;) {
+    text_lines_count := len(text_lines);
+    if (text_lines_count == 1) {
+        text(p + (w/2.0, h/2.0), text_lines[0], class=text_clss, style=text_style);
+    }
+    elif (text_lines_count &gt;= 2 ) {
+        text(p + (w/2.0, h/(text_lines_count+1)), class=text_clss, style=text_style){
+            iter i (text_lines=text_lines){
+                tspan(text_lines, x=x_base_line, dy = i==0 ? &quot;0em&quot; : line_spacing);
+            }
+        }
+    }
+}
+
+
+def _btn3d(){
+  filter(y=-0.2, height=1.4)
+  {
+    bl = .blur(&#x27;SourceAlpha&#x27;, 2);
+    //offbl = .offset(Point(2,2));
+    specout = .specularLighting(bl, surfaceScale=2, constant=0.85, exponent=125,
+                  light=PointLight(-5000, -10000, 18000, color=&#x27;#aaa&#x27;));
+    litPaint = .composite(&#x27;arithmetic&#x27;, &#x27;SourceGraphic&#x27;, specout, k1=0, k2=1, k3=1, k4=0);
+    //.merge(offbl, litPaint);
+  }
+}
+
+
+def pattern_diagcross(pc, styler){
+    //atrrs := (pc.startswith(&#x27;#&#x27;)) ? (style=(stroke=color(pc))) : (class=&#x27;pc&#x27;+pc);
+    atrrs := (class=&#x27;pc&#x27;+str(styler.calc_color(pc)));
+    pattern(width=8, height=8, units=&quot;userSpaceOnUse&quot;){
+        path(stroke_width=0.5, attributes=atrrs){ .M(0,8); .L(8,0); }
+        path(stroke_width=0.5, attributes=atrrs){ .M(0,0); .L(8,8); }
+    }
+}
+
+
+def pattern_bdiag(pc, styler){
+    //atrrs := (pc.startswith(&#x27;#&#x27;)) ? (style=(stroke=color(pc))) : (class=&#x27;pc&#x27;+pc);
+    atrrs := (class=&#x27;pc&#x27;+str(styler.calc_color(pc)));
+    pattern(width=8, height=8, units=&quot;userSpaceOnUse&quot;){
+        path(stroke_width=0.5, attributes=atrrs){ .M(0,8); .L(8,0); }
+    }
+}
+
+
+def pattern_fdiag(pc, styler){
+    //atrrs := (pc.startswith(&#x27;#&#x27;)) ? (style=(stroke=color(pc))) : (class=&#x27;pc&#x27;+pc);
+    atrrs := (class=&#x27;pc&#x27;+str(styler.calc_color(pc)));
+    pattern(width=8, height=8, units=&quot;userSpaceOnUse&quot;){
+        path(stroke_width=0.5, attributes=atrrs){ .M(0,0); .L(8,8); }
+    }
+}
+
+
+def pattern_dense5(pc, styler){
+    //atrrs := (pc.startswith(&#x27;#&#x27;)) ? (style=(stroke=color(pc))) : (class=&#x27;pc&#x27;+pc);
+    atrrs := (class=&#x27;pc&#x27;+str(styler.calc_color(pc)));
+    pattern(width=5, height=5, units=&quot;userSpaceOnUse&quot;){
+        path(stroke_width=0.5, attributes=atrrs){ .M(0,0); .L(5,5); .h(-5); .L(5,0); }
+    }
+}
+
+
+def pattern_dense7(pc, styler){
+    //atrrs := (pc.startswith(&#x27;#&#x27;)) ? (style=(stroke=color(pc))) : (class=&#x27;pc&#x27;+pc);
+    atrrs := (class=&#x27;pc&#x27;+str(styler.calc_color(pc)));
+    pattern(width=7, height=7, units=&quot;userSpaceOnUse&quot;){
+        path(stroke_width=0.5, attributes=atrrs){ .M(0,0); .L(7,7); .h(-7); .L(7,0); }
+    }
+}
+
+
+def pattern_custom(pc, styler){
+/*
+    //atrrs := (pc.startswith(&#x27;#&#x27;)) ? (style=(fill=color(pc))) : (class=&#x27;bc&#x27;+pc);
+    atrrs := (class=&#x27;bc&#x27;+str(styler.calc_color(pc)));
+    pattern(width=5, height=5, units=&quot;userSpaceOnUse&quot;){
+      rect(width=5, height=5, attributes=atrrs);
+    }
+    */
+    /*  transparent pattern */
+    atrrs := (class=&#x27;pc&#x27;+str(styler.calc_color(pc)));
+    pattern(width=7, height=7, units=&quot;userSpaceOnUse&quot;){
+
+    }
+}
+
+
+def unknown_tag(p, w, h, tag)
+{
+  console.warning(&quot;unknown tag: %s&quot;, tag);
+
+  a(href=&quot;#&quot;, hint=&quot;unknown_tag: &quot;+tag)
+  {
+    rect(p, w, h, class=&quot;unknown_tag&quot;);
+  }
+}
+
+
+def graph(p, w, h, time_draw=60, scale=1, count_scale=1, type_graf=&#x27;H&#x27;, tzn_frame=0, name=&#x27;graf&#x27;, name_style=&#x27;graf&#x27;, colors=(), series=(), styler=None)
+{
+
+  rulestep := (20, 8);
+  sp := p+(80,8);
+  sw := w-110;
+  sh := h-60;
+  stime_draw := time_draw * 60;
+
+  binds := list();
+
+  /*  background  */
+  margin := 0;
+  rect(p, w, h, stroke_width=0, class=(&#x27;bc&#x27;+str(styler.calc_color(colors[0]))));
+  rect(sp, sw, sh, bind=binds, stroke_width=0, class=(&#x27;bc&#x27;+str(styler.calc_color(colors[1]))));
+
+  /*  SERIES  */
+
+  if(series and  type_graf==&#x27;H&#x27;){
+      group(sp, clip_path=#_clip(Origin, sw, sh, margin), class=&#x27;mnemo-graph&#x27;, transform=Rotate(180, (sw/2.0, sh/2.0))){
+
+          iter (serie = series) {
+              rang := serie[&#x27;rang&#x27;];
+              bind := serie[&#x27;bind&#x27;];
+              rang_0 := rang[0];
+              rang_1 := rang[1];
+              if (rang[0] == None) { rang_0 := bind.defined(&#x27;LIR&#x27;, 0); }
+              if (rang[1] == None) { rang_1 := bind.defined(&#x27;HIR&#x27;, 100); }
+              rmax := max(rang_0, rang_1);
+              rmin := min(rang_0, rang_1);
+
+              scale_y := sh / (1.0 * (rmax - rmin));
+              scale_x := sw / (1.0 * stime_draw);
+              graph_serie_h(Point(0, -1*rmin*scale_y), sw, sh, bind=bind, scales=(scale_x, scale_y), time_draw=stime_draw);
+              tmp := binds.extend((bind.bind_idx, &#x27;;&#x27;));
+          }
+
+          rect(Origin, sw, sh, fill=&#x27;none&#x27;);
+      }
+  }
+
+  /*  GRID  */
+
+  rang := series[0][&#x27;rang&#x27;];
+  bind := series[0][&#x27;bind&#x27;];
+  rang_0 := rang[0]; rang_1 := rang[1];
+  if (rang[0] == None) { rang_0 := bind.defined(&#x27;LIR&#x27;, 0); }
+  if (rang[1] == None) { rang_1 := bind.defined(&#x27;HIR&#x27;, 100); }
+  rang := (int(rang_0), int(rang_1));
+
+
+  let rh = ruler(range=(-1*time_draw, 0), hide_rule=True) {
+      rule = line(sp+(0,sh), sp+(sw,sh));
+  }
+
+  let rv = ruler(range=rang, hide_rule=True) {
+      rule = line(sp+(0,sh), sp);
+  }
+
+  group(class=&#x27;mnemo-static dash&#x27;, style=(color=get_color(colors[2]))){
+      group(class=&#x27;hruler&#x27;) {
+          iter (i = range(0, (time_draw+1), 20)) {
+              if (i &gt; 0 and i &lt; time_draw) {
+                  pp := rh.calculate(-1*i);
+                  line(pp, pp-(0,sh));
+              }
+          }
+      }
+      group(class=&#x27;vruler&#x27;) {
+          iter (idr=range(0, count_scale)) {
+             iter (i=range(0, rang[1]+1, rulestep[idr])){
+                if (i &gt; rang[0] and i &lt; rang[1]) {
+                    pp := rv.calculate(i);
+                    line(pp, pp+(sw,0));
+                }
+             }
+          }
+      }
+  }
+
+  group(class=&#x27;f24&#x27;, style=(color=get_color(colors[3]))){
+      group() {
+        text(p+(40, h-25), &#x27;мин&#x27;, class=&#x27;centertxt&#x27;);
+        iter (i = range(0, -1*(time_draw+1), -20)) {
+          pp := rh.calculate(i);
+            if (i) { text(pp+(0,10), str(i), class=&#x27;centertxt&#x27;); } // NOTE:XXX: centertxt need to be directly for text
+        }
+      }
+      group(class=&#x27;alignR&#x27;) {
+        iter (idr=range(0, count_scale)) {
+          iter (i=range(0, rang[1]+1, rulestep[idr])){
+            if (i &gt;= rang[0]) {
+              pp := rv.calculate(i);
+              text(pp-(10,0), str(i), class=&quot;alignVC&quot;); // NOTE:XXX: alignVC need to be directly for text
+            }
+          }
+        }
+      }
+  }
+
+  console.warning(&quot;Not full implemented block &#x27;graph&#x27;&quot;);
+}
+
+
+def graph_serie_h(p, w, h, bind, scales, time_draw)
+{
+  b := bind(&#x27;a&#x27;);
+  group(p, class=&#x27;mnemo-serie&#x27;, bindtype=&#x27;graph_serie&#x27;, bind=b.bind_idx, scales=join(&#x27;;&#x27;,scales), time_draw=time_draw){
+      path() {
+//          .M(Origin);
+//          .L(w, h);
+      }
+  }
+}
+
+
+def sfunc(p, w, h, func, title=&#x27;&#x27;){
+  sf := sfunc_imgs.__dict__.get(func);
+
+  if(undefined(sf)){
+    console.error(&quot;Undefined sfunc: {}&quot;, repr(func));
+  }else{
+    content := sf(p, w, h);
+    + content;
+  }
+}
+
+
+def shkalaG(x_range, y, direction, v_range, delen, krat, labels_format=None, setpoints=None, styleprops=None, styler=None)
+{
+
+    bigstep := str(delen*krat);
+    stepx := -10;
+    ps := direction == &#x27;L&#x27; ? (Point(x_range[1], y-stepx), Point(x_range[0], y-stepx)) : (Point(x_range[0], y-stepx), Point(x_range[1], y-stepx));
+
+    group(class=&#x27;hruler&#x27;){
+        r = ruler(range=v_range){
+            rule = line(ps[0], ps[1]);
+
+            line(Origin, Point(0, stepx), _rulestep=bigstep);
+            if(krat != 1){
+                line(Origin, Point(0, stepx/2), _rulestep=str(krat)+&#x27;/&#x27;+bigstep);
+            }
+            if(labels_format){
+                text(0, -stepx*0.5, labels_format, _rulestep=bigstep, attributes=styleprops);
+            }
+        }
+        if(setpoints){
+            iter (sp = setpoints){
+                v := setpoints[sp];
+                if(v &gt;= v_range[0] &amp;&amp; v &lt;= v_range[1]){
+                    p := r.calculate(v);
+                    line(p, p+(0, stepx), class=&#x27;sp_&#x27;+sp);
+                }
+            }
+        }
+    }
+}
+
+
+def shkalaV(y_range, x, direction, v_range, delen, krat, labels_format=None, setpoints=None, styleprops=None, styler=None)
+{
+    bigstep := str(delen*krat);
+    stepy := direction == &#x27;L&#x27; ? -10 : 10;
+    group(class=&#x27;vruler&#x27;){
+        r = ruler(range=v_range){
+            rule = line(Point(x-stepy,y_range[1]), Point(x-stepy, y_range[0]));
+
+            line(Origin, Point(stepy, 0), _rulestep=bigstep);
+            if(krat != 1){
+                line(Origin, Point(stepy/2, 0), _rulestep=str(krat)+&#x27;/&#x27;+bigstep);
+            }
+            if(labels_format){
+                text(-stepy*0.5, 0, labels_format, _rulestep=bigstep, attributes=styleprops, class=direction==&#x27;L&#x27; ? &#x27;left&#x27;: &#x27;right&#x27;);
+            }
+        }
+        if(setpoints){
+            iter (sp = setpoints){
+                v := setpoints[sp];
+                if(v &gt;= v_range[0] &amp;&amp; v &lt;= v_range[1]){
+                    p := r.calculate(v);
+                    line(p, p+(stepy, 0), class=&#x27;sp_&#x27;+sp);
+                }
+            }
+        }
+    }
+}
+
+
+
+def symbol(p, value, font_size=18, attributes=None)
+{
+  symmap := (s83 = &quot;Σ&quot;, s73=&quot;𝚰&quot;, s74=&quot;υ&quot;, s229 = &quot;Σ&quot;, s85 = &quot;Υ&quot;, s68 = &quot;Δ&quot;, s106 = &quot;φ&quot;,
+        s116 = &quot;τ&quot;, s163 = &quot;≤&quot;, s173 = &quot;↑&quot;, s175 = &quot;↓&quot;, s176 = &quot;°&quot;,
+        s187 = &quot;≈&quot;, s189 = &quot;¦&quot;, s190 = &quot;□&quot;, s209 = &quot;▽&quot;, s217 = &quot;↑&quot;, s218 =&quot;↓&quot;,
+        s67=&quot;C&quot;, s89 = &quot;Y&quot;, s161=&quot;°&quot;, s183=&quot;Σ&quot;, s197=&quot;≈&quot;, s198 = &quot;∆&quot;);
+
+  s := symmap.get(&#x27;s&#x27;+str(value));
+  if ( not(s) ) {
+     console.warning(&#x27;Unknown symbol {}&#x27;.format(value));
+  }
+  text(p, s or &#x27;$&#x27;, attributes=attributes, font_size=&#x27;{}px&#x27;.format(font_size));
+}
+
+
+//def boolPair(p, bind){
+//    a(p, bindtype=&#x27;boolPair&#x27;, href=bind.href, bind=bind.bind_idx, class=&#x27;ppt b2tag&#x27;)
+//    { @; }
+//
+//}
+//
+//
+//def boolrts(p, bind){
+//    a(p, bindtype=&#x27;boolrts&#x27;, href=bind.href, bind=bind.bind_idx, class=&#x27;ppt btag&#x27;)
+//    { @; }
+//}
+//
+//
+//def astate(p, bind){
+//    a(p, bindtype=&#x27;astate&#x27;, href=bind.href, bind=bind.bind_idx, class=&#x27;ppt atag&#x27;)
+//    { @; }
+//}
+
+
+//def knopka(p, w, h, label, ref, bind=None)
+def knopka(p, w, h, label, ref)
+{
+    // TODO: need to implement the knop.
+    //if(bind){ bind := bind(&#x27;-&#x27;); }
+    href := ref ? ref.url : &#x27;#&#x27;;
+    hint := ref ? ref.title : None;
+
+    a(href=href, class=&#x27;knop&#x27;, hint=hint){
+        r := w&lt;h*1.2 ? 5 : h / 2.;
+        style := (font_size=&#x27;{}px&#x27;.format(1.5*r));
+        b = rect(p.x, p.y, w, h, rx=r, ry=r, filter=#_btn3d());
+        text(b.center.x, b.center.y + 2, label, style=(font_size=&#x27;{}px&#x27;.format(0.6*h)));
+    }
+}
+
+//def knopka(p, w, h, label, ref, algor=None, bind=None, fontid=None, colors=None, styler=None)
+//{
+//    bind_idx := None;
+//    bindtype := None;
+//    if(bind and algor){ 
+//        if (algor==&quot;KNOP_SIGN&quot; or algor==&quot;KNOP_A&quot; or algor==&quot;KNOP_R&quot;) {
+//            bind := bind((&#x27;b&#x27;, &#x27;ad&#x27;));
+//            bind_idx := bind.bind_idx;
+//        } else {
+//            bind := bind(&#x27;b&#x27;);
+//            bind_idx := bind.bind_idx;
+//        }
+//        bindtype := &#x27;algor_{}&#x27;.format(algor);
+//    }
+//    href := ref ? ref.url : &#x27;#&#x27;;
+//    hint := ref ? ref.title : None;
+//
+//    a(href=href, bindtype=bindtype, class=&#x27;knop&#x27;, hint=hint, bind=bind_idx){
+//        r := w&lt;h*1.2 ? 5 : h / 2.;
+//        //style := (fill=styler.get_color(colors.get(&quot;bg&quot;)));
+//        style := ();
+//
+//        b = rect(p.x, p.y, w, h, rx=r, ry=r, filter=#_btn3d(), style=style);
+//
+//        if (label) {
+//           // text(b.center.x, b.center.y + 2, label, class=&#x27;centertxt&#x27;, attributes=styler.text_styling(color=colors.get(&quot;fg&quot;), font=fontid));
+//           text(b.center.x, b.center.y + 2, label, class=&#x27;centertxt&#x27;, attributes=styler.text_styling(font=fontid));
+//        }
+//    }
+//}
+
+
+def _range_alarm_marks(x, y, h){
+  s := h*0.4; s2 := h*0.15;
+  polygon(points=(Point(x, y), Point(x-s2, y+s), , Point(x+s2, y+s)), class=&#x27;stat_region_up&#x27;);
+  polygon(points=(Point(x, y+h), Point(x-s2, y+h-s), , Point(x+s2, y+h-s)), class=&#x27;stat_region_down&#x27;);
+}
+
+
+def dtext(p, w, h, algor, bind, drawframe=0, din=&#x27;fg&#x27;, format=None, format_obj=None, name=&#x27;&#x27;, align=&#x27;l&#x27;, attributes=None)
+{
+
+ if(align==&#x27;l&#x27;){
+    tx := p.x+12;
+    mx := p.x+0.2*h;
+    cls := &#x27;&#x27;;
+ } elif(align==&#x27;c&#x27;){
+   tx := p.x+w/2.0;
+   mx := p.x+w-0.2*h;
+   cls := &#x27;alignC &#x27;;
+ }else{
+    tx := p.x+w-14;
+    mx := p.x+w-0.2*h;
+    cls := &#x27;alignR &#x27;;
+ }
+
+
+ if (algor == &#x27;DTEXT_TABLO&#x27;) {
+     bind := bind(&#x27;ad&#x27;).calc_format(algor, format, format_obj, name);
+     bindtype := &#x27;dtext_tablo&#x27;;
+ } else {
+     bind := bind(&#x27;a&#x27;).calc_format(algor, format, format_obj, name);
+     bindtype := name == &#x27;TIMER&#x27; ? &#x27;dtime&#x27; : name == &#x27;TIME&#x27; ? &#x27;ddt&#x27; : &#x27;dtext_hika&#x27;;
+ }
+
+ if (name == &#x27;TBAXK&#x27; || name == &#x27;TABS&#x27; || name == &#x27;TABS2&#x27;) {
+     a(bindtype=bindtype, class=combine_list(&#x27;ppt&#x27;, attributes.get(&#x27;CLASS&#x27;)), href=bind.href, bind=bind.bind_idx, style=attributes.get(&#x27;style&#x27;))
+     {
+       rect(p, w, h, r=2, class=&#x27;pptbg&#x27;);
+       text(tx, p.y+h-3, &#x27;-&#x27;, class=cls+&#x27; &#x27;+name);
+     }
+ } else {
+     a(bindtype=bindtype, class=combine_list(&#x27;ppt&#x27;, &#x27;atag&#x27;, attributes.get(&#x27;CLASS&#x27;)), href=bind.href, bind=bind.bind_idx, style=attributes.get(&#x27;style&#x27;))
+     {
+       rect(p, w, h, r=2, class=&#x27;pptbg&#x27;);
+       _range_alarm_marks(mx, p.y, h);
+       text(tx, p.y+h-3, &#x27;-&#x27;, class=&#x27;apptxt &#x27;+cls);
+     }
+ }
+
+
+}
+
+
+def _dtext_tablo(p, w, h, algor, bind, drawframe=0, din=&#x27;fg&#x27;, format=None, format_obj=None, name=&#x27;&#x27;, align=&#x27;l&#x27;, attributes=None) {
+    bind := bind(&#x27;ad&#x27;).calc_format(algor, format, format_obj, name);
+    bindtype := &#x27;dtext_tablo&#x27;;
+    a(bindtype=bindtype, class=combine_list(&#x27;ppt&#x27;, attributes.get(&#x27;CLASS&#x27;)), href=bind.href, bind=bind.bind_idx)
+    {
+      rect(p, w, h, r=2, class=&#x27;pptbg&#x27;);
+      text(tx-12, p.y+h-3, &#x27;-&#x27;, class=cls+&#x27; &#x27;+name);
+    }
+}
+
+
+
+def _histarr(s){
+    combinePath(){
+      polygon(points=(Point(-s, s), Origin, Point(s, s)));
+      //path(){ .M(-s,s); .L(0,0); .M(s,s); .z(); }
+      rect(topcenter=Point(0,s-1), width=s, height=s);
+    }
+}
+
+
+def hist(p, thickness, length, v_range, direction, kind, bind, filltype=None, name=&#x27;&#x27;, double_attr=0, colors=None, styler=None)
+{
+  // direction:
+  //   N - down (NIZ),
+  //   V - up (VVERH),
+  //   P - right (PRAVO),
+  //   L - left (LEVO)
+  // filltype:
+  //   S - ??? (normal behavior)
+  //   I - invert (maybe)
+
+
+  bind := bind(&#x27;a&#x27;);
+  th2 := thickness/2;
+  switch(direction){
+    case(&#x27;V&#x27;){ transform := Translate(p.x+th2, p.y+length) * Rotate(180); }
+    case(&#x27;N&#x27;){ transform := Translate(p.x+th2, p.y); }
+    case(&#x27;P&#x27;){ transform := Translate(p.x, p.y+th2) * Rotate(-90); }
+    case(&#x27;L&#x27;){ transform := Translate(p.x+length, p.y+th2) * Rotate(90);  }
+  }
+
+  arr := #_histarr(th2);
+
+
+  //  FIXME: SUNPP: Ranges - what NB means?
+  lir := v_range[0] == &quot;NB&quot; ? bind.defined(&quot;LIR&quot;, 0) : v_range[0];
+  hir := v_range[1] == &quot;NB&quot; ? bind.defined(&quot;HIR&quot;, 100) : v_range[1];
+
+  a(transform=transform, bindtype=&#x27;hist&#x27;, href=bind.href, bind=bind.bind_idx, class=&#x27;ppt&#x27;, range=join(&#x27;;&#x27;, (lir, hir))){
+
+    line_attrs := styler.styling(pc=colors.get(&#x27;contour&#x27;));
+    if (line_attrs){
+        line_class := combine_list(&quot;fill_warn fill_emrg&quot;, line_attrs.get(&#x27;CLASS&#x27;));
+        line_style := line_attrs.get(&#x27;style&#x27;);
+    }else{
+        line_class := &quot;&quot;;
+        line_style := &quot;&quot;;
+    }
+
+    bg_attrs := styler.styling(bc=colors.get(&#x27;fill&#x27;));
+    if (bg_attrs){
+        bg_class := combine_list(&quot;histbg&quot;, bg_attrs.get(&#x27;CLASS&#x27;));
+        bg_style := bg_attrs.get(&#x27;style&#x27;);
+    }else{
+        bg_class := &quot;&quot;;
+        bg_style := &quot;&quot;;
+    }
+    if (filltype == &quot;I&quot;){
+        rect(Point(-th2, 0), thickness, length, class=bg_class, style=bg_style);
+        line(Origin, Point(0, length), stroke_width=thickness, class=&#x27;histF pc20&#x27;);
+        rect(Point(-th2, 0), thickness, length, class=line_class, style=line_style);
+    }
+    else{
+        line(Origin, Point(0, length), stroke_width=thickness, class=combine_list(&quot;histF&quot;, line_class), style=line_style);
+        rect(Point(-th2, 0), thickness, length, class=bg_class, style=bg_style);
+    }
+    use(Origin, href=arr, class=&#x27;histunder&#x27;);
+    use(Origin, href=arr, class=&#x27;histover&#x27;, transform=Translate(0, length)*Rotate(180));
+  }
+}
+
+
+def timerk(p, w, h, v_range, wct=1, bind=None, label=&#x27;&#x27;, fontid=&#x27;&#x27;, colors=None, styler=None)
+{
+    bind := bind.datakind_by_algor(&#x27;a&#x27;);
+    th := h/2;
+    a(p, bindtype=&#x27;timerk&#x27;, href=bind.href, bind=bind.bind_idx, class=&#x27;ppt atag&#x27;, range=join(&#x27;;&#x27;, v_range))
+    {
+        line(Point(0, th), Point(w, th), class=&#x27;hist histF&#x27;, style=(stroke_width=h, color=styler.get_color(colors.get(&#x27;fill&#x27;))));
+        rect(Origin, w, h, stoke_width=wct, class=&quot;Contour&quot;, style=(color=styler.get_color(colors.get(&#x27;fill&#x27;))));
+        if(label){
+          text(w/2., th, label, class=&#x27;centertxt&#x27;, attributes=styler.text_styling(color=colors.get(&quot;fg&quot;), font=fontid));
+        }
+    }
+}
+
+
+def _clip(p, w, h, m){
+    clipPath(){
+        rect(p.x-m, p.y-m, w+2*m, h+2*m);
+    }
+}
+
+
+def par_graf(p, w, h, x_range, napr_x, y_range, napr_y, xbind, ybind, marker)
+{
+  b1 := xbind(&#x27;a&#x27;);
+  b2 := ybind(&#x27;a&#x27;);
+  bot_x := p.x;
+  bot_y := p.y;
+  top_x := p.x + w;
+  top_y := p.y + h;
+  mode_x := 1;
+  mode_y := 1;
+  if (napr_y == &#x27;v&#x27;){
+    bot_y := p.y + h;
+    top_y := p.y;
+    mode_y := -1;
+  }
+  if (napr_x == &#x27;l&#x27;){
+    bot_x := p.x + w;
+    top_x := p.x;
+    mode_x := -1;
+  }
+  margin := 20;
+  zero := Point(mappin(0, x_range[0], x_range[1], bot_x, top_x), mappin(0, y_range[0], y_range[1], bot_y, top_y));
+  x_mod := mode_x * (p.x+w - p.x) / (1.0 * (x_range[1]-x_range[0]));
+  y_mod := mode_y * (p.y+h - p.y) / (1.0 * (y_range[1]-y_range[0]));
+  group(clip_path=#_clip(p, w, h, margin)){
+      group(zero, bind=(b1.bind_idx,&#x27;;&#x27;,b2.bind_idx)){
+          group(Point(0, 0), bindtype=&#x27;graf_x&#x27;, bind=b1.bind_idx, scale=x_mod){
+              group(Point(0, 0), bindtype=&#x27;graf_y&#x27;, bind=b2.bind_idx, scale=y_mod){
+                  use(href=marker);
+              }
+          }
+      }
+  }
+}
+
+
+
+def graph_marker_s(size, color){
+    // child element for par_graf
+    length := 1.414*size;
+    group(){
+        let p = path(style=(fill=color,stroke=&#x27;none&#x27;), class=&#x27;mnemo-graph-marker&#x27;){
+        .M(Origin);
+        .L(length/2.75, length/2);
+        .L(length/8., length/1.75);
+        .L(length/8., length);
+        .L(0, length);
+        .sz();
+        }
+        rotate(p, -45);
+        //polyline(Origin, Point(size, size), style=&#x27;fill:none;stroke:{}&#x27;.format(color));
+        //polygon(Origin, Point(size, 0), Point(0, size), style=&#x27;fill:{};stroke:none&#x27;.format(color));
+    }
+}
+
+
+//child element for par_graf
+def graph_marker_p(size, color){
+    // child element for par_graf
+    circle(Origin, size/2., style=&#x27;fill:{};stroke:none&#x27;.format(color));
+}
+
+
+
+
+def block_diagr(p, w, h, name, figure, algor=&#x27;&#x27;, bind=None)
+{
+  b1 := bind[0](&#x27;a&#x27;);
+  b2 := bind[1](&#x27;a&#x27;);
+  console.warning(&quot;Not implemented block &#x27;block_diagr&#x27;&quot;);
+//  a(href=&quot;#&quot;, hint=&quot;block_diagr&quot;)
+//  {
+//    rect(p, w, h, class=&quot;unknown_tag&quot;);
+//  }
+
+//  points := list();
+//  pts := figure.split(&#x27;;&#x27;);
+//  iter (pp = pts){
+//    temp := points.append(pp.split(&#x27;,&#x27;));
+//  }
+//  p_ := list();
+//  iter (pp = points){
+//    temp := p_.append(Point(int(pp[0]), int(pp[1])));
+//  }
+//  poly := polygon(points=p_);
+//  b := bounds(poly);
+//  sx := w/float(b.width);
+//  sy := h/float(b.height);
+//  p_ := list();
+//  iter (pp = points){
+//    temp := p_.append(Point(int(pp[0])*sx, int(pp[1])*sy));
+//  }
+//  group(Point(p.x, p.y)){
+//    polygon(points=p_);
+//  }
+
+}
+
+
+def knop_diagr(p, w, h) //, name, color_style, num_diagr, din, bind, sost)
+{
+ // b := bind(&#x27;ad&#x27;, &#x27;MultiState&#x27;);
+    console.warning(&quot;Not implemented block &#x27;knop_diagr&#x27;&quot;);
+//    a(href=&quot;#&quot;, title=&quot;knop_diagr&quot;)
+//    {
+//      rect(p, w, h, class=&quot;unknown_tag&quot;);
+//    }
+}
+
+
+def kfb(p, w, h, bind, sost)
+{
+  b := bind(&#x27;ad&#x27;);
+  k := list();
+  iter (item = sost){
+    sss := str(item[&#x27;nom&#x27;])+&#x27;:&#x27;+unidecode.unidecode(item[&#x27;file&#x27;]).replace(&#x27;-&#x27;, &#x27;_&#x27;);
+    temp := k.append(sss);
+  }
+  sst :=&#x27;;&#x27;.join(k);
+  a(bindtype=&#x27;kfb&#x27;, class=&#x27;ppt atag&#x27;, href=b.href, bind=b.bind_idx, sost=sst){
+    //image(x=p.x, y=p.y, width=w, height=h, href=&#x27;&#x27;);
+    group(transform=Translate(p));
+    rect(p, w, h, class=&#x27;mnemo-kfb-bg&#x27;);
+  }
+}
+
+
+def zont(p, w, h, colors, binds, styler=None)
+{
+    datakind := list(&#x27;a&#x27;) * len(binds);
+    b := binds(datakind);
+    rays := len(b.tags);
+    angle_ := int(360 / rays);
+    lower_ = Point(w*0.15, h*0.15);
+    center_ = Point(lower_.x+(w-lower_.x)/2., lower_.y+(h-lower_.y)/2.);
+    let outer_circ = ellipse(Point(p.x+w, p.y+h), w, h);
+    let center_circ = ellipse(Point(p.x+w, p.y+h), center_.x, center_.y);
+    let zero_circ = ellipse(Point(p.x+w, p.y+h), lower_.x, lower_.y);
+    let p1 = path(attributes=styler.styling(pc=colors[&#x27;contour&#x27;], bc=colors[&#x27;stat&#x27;])){
+        .M(outer_circ.point_at_angle(90));
+            iter(angle=range(90, 450, angle_)){
+                .L(outer_circ.point_at_angle(angle));
+            }
+        .z();
+    }
+    let p2 = path(attributes=styler.styling(pc=colors[&#x27;contour&#x27;])){
+        iter(angle=range(90, 450, angle_)){
+            .M(outer_circ.center);
+            .L(outer_circ.point_at_angle(angle));
+        }
+    }
+     let p3 = path(attributes=styler.styling(pc=colors[&#x27;contour&#x27;]), class=&#x27;dot&#x27;){
+        .M(center_circ.point_at_angle(90));
+            iter(angle=range(90, 450, angle_)){
+                .L(center_circ.point_at_angle(angle));
+            }
+        .z();
+    }
+    group(){
+        +p1;
+        +p2;
+        +p3;
+    }
+    group(Point(p.x+w, p.y+h), bindtype=&#x27;zont&#x27;, hbind=b.bind_idx, range=(lower_.x,&#x27;;&#x27;,w), angle=angle_){
+        polygon(class=&#x27;mnemo-zont&#x27;, attributes=styler.styling(bc=colors[&#x27;inside&#x27;]));
+    }
+    iter(bb=b.tags, angle=range(-90, 270, angle_)){
+        p1 := outer_circ.point_at_angle(angle);
+        p2 := zero_circ.point_at_angle(angle);
+        group(bindtype=&#x27;astate&#x27;, class=&#x27;ppt zont-tag&#x27;, bind=bb.bind_idx){
+            rect(center=p1, width=30, height=4, transform=Rotate(angle+90, p1), class=&#x27;zont-over&#x27;);
+            rect(center=p2, width=15, height=4, transform=Rotate(angle+90, p2), class=&#x27;zont-under&#x27;);
+            rect(bottomcenter=p2, width=20, height=w-lower_.x, transform=Rotate(angle+90, p2), class=&#x27;mnemo-zont-ruler&#x27;);
+        }
+    }
+}
+
+
+def tablo(p, w, h, bind, algor, shape, txt, name, din, font, blink, colors, styler)
+{
+
+  map_algor2kind := dict(
+	TABLO_DISKR = &#x27;B&#x27;,
+	TABLO_M = &#x27;B2&#x27;,
+	TABLO_ANALOG = &#x27;A&#x27;
+  );
+
+  bind := bind(map_algor2kind.get(algor, &#x27;-&#x27;));
+
+  algorBind(Origin, bind, name=&quot;tablo&quot;, algor=algor){
+    rect(topleft=p, width=w, height=h, class=&quot;blockbg&quot;);
+    iter i (num=(1, 2), sostname=(&quot;norm&quot;, &quot;nenorm&quot;)){
+
+        group(num=num, class=&#x27;sost&#x27;){
+          attr := styler.styling(bc=colors.get(sostname), pc=colors.get(&#x27;contour&#x27;));
+          cls := num==2 &amp;&amp; blink ? &#x27;blink&#x27; : &#x27;&#x27;;
+
+          if (&#x27;rect&#x27; == shape) {
+              rect(topleft=p, width=w, height=h, class=cls, attributes=attr);
+          }
+          elif (&#x27;romb&#x27; == shape) {
+              polygon(
+                 points=(p+Point(w/2, 0), p+Point(0, h/2), p+Point(w/2, h), p+Point(w, h/2)),
+                 class=cls, attributes=attr
+              );
+          }
+          else {
+              console.warn(&#x27;Unknown shape of tablo `%s`&#x27;, shape);
+              rect(topleft=p, width=w, height=h, class=cls, attributes=attr);
+          }
+
+          if (txt) {
+              text(
+                 p+(w*0.5, h*0.5), txt, class=&#x27;alignC alignVC&#x27;,
+                 attributes=styler.text_styling(color=colors.get(&#x27;stat&#x27;), font=font)
+              );
+          }
+
+       }
+    } // iter
+  }
+}
+
+
+def dtablo(p, w, h, algor, framewidth, din, name, color_style, zkv, colors, font, sost, bind, styler)
+{
+
+    attrs := styler.tablo_style(din, colors);
+    algor := algor or &quot;D&quot;;
+    bind := bind.datakind_by_algor(algor);
+    algorBind(Origin, bind, name=&quot;dtablo&quot;, algor=algor){
+
+        rect(p, w, h, class=&quot;blockbg&quot;);
+
+        iter(item = sost){
+          attributes := styler.text_styling(color=item[&#x27;ctxt&#x27;], font=font);
+          msg := item[&#x27;txt&#x27;];
+          msg := msg.replace(&#x27;/t&#x27;, &#x27;↑&#x27;);
+          msg := msg.replace(&#x27;/b&#x27;, &#x27;↓&#x27;);
+          msg := msg.replace(&#x27;/d&#x27;, &#x27;Δ&#x27;);
+          //msg := msg.replace(&#x27;гр.С&#x27;, &#x27;°С&#x27;);
+
+          text_clss := combine_list(&#x27;centertxt&#x27;, attributes.get(&#x27;CLASS&#x27;));
+          text_style := attributes.get(&#x27;style&#x27;);
+          blink := item.get(&#x27;merc&#x27;);
+          item_attr := styler.tablo_style(din, (stat=item[&#x27;color&#x27;]));
+
+          if (item_attr){
+            body_clss := item_attr.get(&#x27;CLASS&#x27;);
+            body_style := item_attr.get(&#x27;style&#x27;);
+          }else{
+            body_clss := &quot;&quot;;
+            body_style := &quot;&quot;;
+          }
+          group(num=item[&#x27;num&#x27;], class=&#x27;sost&#x27;){
+            rect(
+                p, w, h, style=body_style,
+                class=combine_list(body_clss, (&#x27;Solid&#x27;, blink ? &#x27;blink&#x27; : None ))
+            );
+            if (msg) {
+                text_lines := msg.split(&#x27;/n&#x27;);
+                _multi_line_text(p, w, h, text_lines, text_clss=text_clss, text_style=text_style, x_base_line=p.x+w/2.0);
+            }
+
+          };
+        }
+    }
+}
+
+
+
+def clock(p, w, h, colors, bind, styler=None)
+{
+    bind:=bind.datakind_by_algor(&#x27;a&#x27;);
+    outer_w:= w*0.8;
+    outer_h:= h*0.8;
+
+    lir := bind.defined(&#x27;LIR&#x27;);
+    hir := bind.defined(&#x27;HIR&#x27;);
+
+    if(lir &amp;&amp; hir){
+
+        range_ := (lir, hir);
+        clock_step_p := range_[1] / 12.;
+        clock_step_n := range_[0] / 12.;
+        angle_ := int(360/12);
+        l_circ := circle(0, 0, outer_w/2., style=(fill=&#x27;none&#x27;), class=&#x27;pc&#x27;+str(styler.calc_color(colors[&#x27;ln&#x27;])));
+        let lines = path(class=&#x27;mnemo-clock-grid pc&#x27;+str(styler.calc_color(colors[&#x27;ln&#x27;]))){
+            iter(angle=range(-90, 270, angle_)){
+                .M(l_circ.center);
+                .L(l_circ.point_at_angle(angle));
+            }
+        }
+        let rule_positive = ruler(range=(0, range_[1] - clock_step_p), hide_rule=True){
+            rule = arc(0, 0, outer_w/2., outer_h/2., angles=(270, 270-angle_), _startangle=270);
+            text(0, w/18., &#x27;%d&#x27;, _rulestep=5, class=&#x27;centertxt f21&#x27;, style=(color=styler.get_color(colors[&#x27;fg&#x27;])));
+        }
+        let rule_negative = ruler(range=(0, abs(range_[0] - clock_step_n)), hide_rule=True){
+            rule = arc(0, 0, outer_w/2., outer_h/2., angles=(270, 270-angle_), _startangle=270, _reverse=True);
+            text(0, w/18., &#x27;%-d&#x27;, _rulestep=5, class=&#x27;centertxt f21&#x27;, style=(color=styler.get_color(colors[&#x27;fg&#x27;])));
+        }
+        range_str := format(&#x27;{};{}&#x27;, range_[0], range_[1]);
+        colors_str := format(&#x27;{};{}&#x27;, styler.get_color(colors[&#x27;close&#x27;]), styler.get_color(colors[&#x27;open&#x27;]));
+        group(Point(p.x+w/2., p.y+h/2.), bindtype=&#x27;clock&#x27;, bind=bind.bind_idx, range=range_str, radi=outer_w/2., colors=colors_str, class=&#x27;ppt&#x27;){
+            ellipse(0, 0, w/2., h/2., style=(stroke=&#x27;none&#x27;, fill=styler.get_color(colors[&#x27;bg&#x27;])));
+            path(class=&#x27;mnemo-clock-path&#x27;){
+                .M(0, 0);
+                .l(0, -outer_w/2.);
+                .a(Point(outer_w, outer_w), 0, 0, 0, Point(0, -outer_w/2.));
+                .z();
+            }
+            group(class=&#x27;mnemo-clock-positive&#x27;){
+                +rule_positive;
+            }
+            group(class=&#x27;mnemo-clock-negative&#x27;){
+                +rule_negative;
+            }
+            +lines;
+            +l_circ;
+        }
+    }
+}
+
+
+
+//
+// TVS - The fuel assembly
+///
+
+def _hexgrid_sector(p, r, n) {
+    // make polygon like /\/\/\
+    sr :=  r / 0.86602540378;
+
+    let pp = path(class=&#x27;mnemo-tvs-sector&#x27;) {
+      .M(p.x+r, p.y-sr/2.);
+      iter(i = range(n)){
+          .la(sr, 210);
+          .la(sr, 270);
+      }
+    }
+
+    iter(i = range(0, 360, 60)){
+       group(transform=Rotate(i, p)){
+         +pp;
+       }
+    }
+}
+
+
+def _hexagon(p, r, attr) {
+    // make hexagon inscribed in a circle with radius r
+    // p - center point
+    c := circle(p, r);
+    a := c.point_at_angle;
+    polygon(points=(a(30),a(90),a(150),a(210),a(270),a(330)), attributes=attr);
+}
+
+
+def _hexagon_x(p, r, attr) {
+    // make figure as the symbol X
+    // inscribed in a circle with radius r
+    // p - center point
+
+    c := circle(p, r);
+    a := c.point_at_angle;
+    path(attributes=attr) {
+       .M(a(30));
+       .L(a(210));
+       .M(a(150));
+       .L(a(330));
+    }
+}
+
+
+def _hexgrid(vr, hr, r) {
+    // make hexagon grid 15x26 for TVS
+    // rows - array containing (start col, stop col)
+    rows := (
+        (24,34), (21,37), (20,38), (19,39), (18,40), (17,41), (16,42),
+        (17,41),
+        (16,42), (17,41), (18,40), (19,39), (20,38), (21,37), (24,34)
+    );
+
+    iter(v = enumerate(rows, 1)) {
+
+        row   := v[0];
+        ranges := v[1];
+
+        iter(col=range(ranges[0], ranges[1]+1, 2)) {
+            cp := Point(hr.calculate(col).x, vr.calculate(row).y);
+            _hexagon(cp, r, attr=(class=&#x27;mnemo-tvs-stat&#x27;));
+        }
+
+    }
+}
+
+
+def _kartgrid(vr, hr, r, w, h){
+    // make cartesian grid 15x26 for TVS
+    group(class=&#x27;mnemo-kartgrid&#x27;) {
+        group(class=&#x27;vruler&#x27;) {
+            iter(i=range(1,16)) {
+                p1 := vr.calculate(i);
+                p2 := Point(p1.x+w, p1.y);
+                text(p1, str(i), class=&#x27;alignL&#x27;);
+                text(p2, str(i), class=&#x27;alignR&#x27;);
+                line(p1+(r*0.9, 0), p2-(r*0.9, 0));
+            }
+        }
+        group(class=&#x27;hruler&#x27;) {
+            iter(i=range(16,43)) {
+                p1 := hr.calculate(i);
+                p2 := Point(p1.x, p1.y+h);
+                text(p1, str(i), class=&#x27;alignT&#x27;);
+                text(p2, str(i), class=&#x27;alignB&#x27;);
+                line(p1+(0, r), p2-(0, r));
+            }
+        }
+    }
+}
+
+
+def kart(p, w, h, colors, binds)
+{
+
+    // color properties hardcode to ccs class
+    //
+    //iter(color=colors) {
+    //    pprint.pprint((color, calccolor(colors[color])));
+    //}
+
+
+    let vr = ruler(range=(-0.6, 16.6), hide_rule=True){
+        rule = line(p, (p.x, p.y + h));
+    }
+    let hr = ruler(range=(14,44), hide_rule=True){
+        rule = line(p, (p.x + w, p.y));
+    }
+
+    r  := hr.calculate(1).x - hr.calculate(0).x;
+    pc := Point(hr.calculate(29).x, vr.calculate(8).y);
+
+    group(name=&quot;kart&quot;){
+        _kartgrid(vr, hr, r, w, h);
+        _hexgrid(vr, hr, r / 0.86602540378);
+        _hexgrid_sector(pc, r, 7);
+
+        iter(bb=binds) {
+            i := int(bb.get(&#x27;i&#x27;, 0));
+            j := int(bb.get(&#x27;j&#x27;, 0));
+            se := int(bb.get(&#x27;se&#x27;));
+
+            bind1 := bb.get(&#x27;bind1&#x27;);
+            bind2 := bb.get(&#x27;bind2&#x27;);
+            b1 := bind1.datakind_by_algor(&#x27;a&#x27;);
+            b2 := bind2.datakind_by_algor(&#x27;a&#x27;);
+            b1_idx := b1.bind_idx;
+            b2_idx := b2.bind_idx;
+
+            group(bind=(b1_idx,&#x27;;&#x27;,b2_idx))
+            {
+               // bindtype := (b1.data.HIR &lt;= 100) ? &#x27;tvs_dt&#x27; : &#x27;tvs_t&#x27;;
+                hir := b1.defined(&#x27;HIR&#x27;, 0);
+
+                range := (hir &lt;= 100) ?
+                        &#x27;3;12;15;21;24;27;30;33;35;39;60&#x27; :
+                        &#x27;70;100;150;200;260;278;290;323;327;350;400&#x27;;
+
+                pos := format(&#x27;{};{}&#x27;, j, i);
+
+                group(bindtype=&#x27;tvs&#x27;, range=range, hbind=b1_idx, se=se, pos=pos, class=&#x27;ppt mnemo-tvs&#x27;)
+                {
+                    cp := Point(hr.calculate(i).x, vr.calculate(j).y);
+                    _hexagon(cp, r, attr=(class=&#x27;mnemo-tvs-bg&#x27;));
+                    _hexagon_x(cp, r, attr=(class=&#x27;mnemo-tvs-fg&#x27;));
+                }
+            }
+        }
+    }
+}
+
+
+@title(&#x27;РМОТ УВС&#x27;)
+@size((60, 36))
+def rdp(p, w=60, h=36, bind=None, wk=36, hk=20, name=&#x27;DIAG1&#x27;, algor=&#x27;G&#x27;, styler=None)
+{
+    //console.warning(&quot;Not full implemented block &#x27;rdp&#x27; %s&quot;, name);
+
+    // -РСПО- В идеале желательно чтобы внутренний квадрват всегда был серым цветом при значении 1,2,3.
+
+    algor := algor or &quot;G&quot;;
+    bind := bind.datakind_by_algor(algor);
+    algorBind(p, bind, name=&quot;rdp&quot;, algor=algor){
+        rect(Origin, w, h, class=&quot;blockbg&quot;);
+        group(class=&quot;sost&quot;, num=1){
+            rect(0, 0, w, h, attributes=styler.styling(bc=&quot;red&quot;, pc=&quot;red&quot;));
+            rect((w-wk)/2, (h-hk)/2, wk, hk, attributes=styler.styling(bc=&quot;grey&quot;, pc=&quot;grey&quot;));
+        }
+        group(class=&quot;sost&quot;, num=2){
+            rect(0, 0, w, h,  attributes=styler.styling(bc=&quot;green&quot;, pc=&quot;green&quot;));
+            rect((w-wk)/2, (h-hk)/2, wk, hk, attributes=styler.styling(bc=&quot;grey&quot;, pc=&quot;grey&quot;));
+        }
+    }
+}
+</pre>
+</body>
+</html>

@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>stage.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>stage.yaml</h1>
+    <pre>- name: Start Ekatra Stage
+  hosts: localhost
+  connection: local
+#  pre_tasks:
+#    - name: menu root
+#      copy:
+#        src: /ekatra/brama/projects/ekatra/etc/nav.json
+#        dest: /var/ekatra/spd/nav.json
+#  roles:
+#    - config-meta
+#    - role: ekatra
+#      config_backend: yes
+#      ekatra_mode: stage
+#      tsdb_service: &quot;tsdb:4242&quot;
+#      rtdb_service: rtdb-stage
+#      meta_service: meta-stage
+</pre>
+</body>
+</html>

@@ -1,0 +1,510 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>gdb2rdf7.ttl</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>gdb2rdf7.ttl</h1>
+    <pre>@prefix rr: &lt;http://www.w3.org/ns/r2rml#&gt; .
+@prefix rr2: &lt;http://spd.ivl.cns/ns/r2rmp-ext#&gt; .
+
+@prefix rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .
+@prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .
+@prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
+
+@prefix mof: &lt;http://spd.ivl.cns/cim/rtdbmof#&gt; .
+@prefix h: &lt;http://spd.ivl.cns/cim/hika#&gt; .
+@prefix sh: &lt;http://sunpp.cns.atom/cim/hika#&gt; .
+@prefix m: &lt;http://spd.ivl.cns/cim/mmi#&gt; .
+
+&lt;tablo&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select MAP(NAME by N_TEXT) FILTER ( WHERE NAME &lt;&gt; &#x27;Резерв&#x27; ) as VALS_
+        from db.uso.TABLO
+       &quot;&quot;&quot;
+       ];
+    rr:subjectMap
+    [
+        rr:constant &quot;Tablo&quot;;
+        rr:termType rr:IRI;
+        rr:class rdfs:Class
+    ] ;
+    rr:predicateObjectMap
+      [ rr:predicate rdfs:subClassOf ; rr:object mof:Discrete ] ,
+      [ rr:predicate mof:states ;  rr:objectMap  [ rr:column &quot;VALS_&quot;   ]] ,
+      [ rr:predicate mof:rts ; rr:objectMap [ rr:constant &quot;{\&quot;default\&quot;:\&quot;ok\&quot;}&quot;;  rr:termType rr:Literal ]]
+.
+
+&lt;sensortype&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+        A.TIP_DAT_ID as TIP_DAT_ID, A.TIP_DAT as TIP_DAT, A.COMMENT as COMMENT,
+        fix_name(A.TIP_DAT, &#x27;stp&#x27;) as STYPE,
+        fix_name(B.TIP_DAT, &#x27;stp&#x27;) as PARENT_STYPE
+        from db.uso.TIP_DAT as A left join db.uso.TIP_DAT as B on A.PARENT = B.TIP_DAT_ID
+       &quot;&quot;&quot;
+       ];
+
+    rr:subjectMap
+    [
+      rr:template &quot;{STYPE}&quot;;
+      rr:class h:SensorType
+    ] ;
+
+    rr:predicateObjectMap
+      [ rr:predicate rdfs:label;   rr:objectMap [ rr:column &quot;TIP_DAT&quot;; rr:language &quot;ru&quot; ]] ,
+      [ rr:predicate m:title; rr:objectMap [ rr:column &quot;COMMENT&quot;; rr:language &quot;ru&quot; ]],
+      [ rr:predicate m:stype_group ; rr:objectMap [ rr:template &quot;{PARENT_STYPE}&quot;; rr:termType rr:IRI ]]
+.
+
+
+&lt;vyborka&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+        TIP_VYB, NAME_VYB, TIP_VYB_ID,
+        fix_name_num(TIP_VYB, TIP_VYB_ID, &#x27;pick&#x27;) as VYB
+        from db.uso.VYBORKA
+       &quot;&quot;&quot;
+       ];
+
+    rr:subjectMap
+    [
+      rr:template &quot;{VYB}&quot;;
+      rr:class m:PPGroup
+    ] ;
+
+    rr:predicateObjectMap
+      [   rr:predicate rdfs:label; rr:objectMap [ rr:template &quot;{{ prefix }}:{TIP_VYB}&quot; ;  rr:language &quot;ru&quot; ]] ,
+      [   rr:predicate m:title; rr:objectMap [ rr:column &quot;NAME_VYB&quot;; rr:language &quot;ru&quot; ]]
+.
+
+&lt;system&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+        SYSTEM, NAME_SYSTEM,
+        fix_rueng_name(PARENT, &#x27;sys&#x27;) as P,
+        fix_rueng_name(SYSTEM, &#x27;sys&#x27;) as ID
+        from db.uso.TEX_SYST
+       &quot;&quot;&quot;
+       ];
+
+    rr:subjectMap
+    [
+      a rr:TermMap;
+      rr:template &quot;{ID}&quot;;
+      rr:class m:PPGroup
+    ] ;
+    rr:predicateObjectMap
+      [   rr:predicate rdfs:label; rr:objectMap [ rr:template &quot;{{ prefix }}:{SYSTEM}&quot;; rr:language &quot;ru&quot; ]],
+      [   rr:predicate m:title ;  rr:objectMap [ rr:column &quot;NAME_SYSTEM&quot;; rr:language &quot;ru&quot; ]] ,
+      [   rr:predicate m:category ; rr:objectMap [ rr:template &quot;{P}&quot;; rr:termType rr:IRI ]]
+.
+
+
+&lt;kid&gt;
+    rr:logicalTable [
+    rr:sqlQuery &quot;&quot;&quot;select MAS, NOM,
+       identify_dtype(TIP_OBJ, TIP_PAR, TIP_OBR, NOM_TEXT, NAME, ALGOR, IMG) as SEMTYPE,
+       fix_name(MAS, &#x27;arr&#x27;) as MASID,
+       fix_uniq_id(fix_dname(IDEN, SEMTYPE)) as IDENT,
+       fix_name(IDEN, &#x27;b&#x27;) as FIXED_IDEN,
+       IDEN,
+       NAME,
+       UKTS, TIP_DAT_ID,
+       NOM_TEXT,
+       hika_id(TIP_OBJ, &#x27;obj&#x27;) as TIP_OBJ_,
+       hika_id(TIP_OBR, &#x27;obr&#x27;) as TIP_OBR_,
+       hika_id(TIP_PAR, &#x27;par&#x27;) as TIP_PAR_,
+       exclude_contacts(SEMTYPE, SYSTEM) as SYSTEM_,
+       exclude_contacts(SEMTYPE, TIP_VYB_ID) as VYB
+       from db.uso.KID left join meta.mnemo.json using(MAS,NOM)
+       where NAME is not null and IDENT is  not null
+      &quot;&quot;&quot;
+      ];
+
+    rr:subjectMap
+    [
+      a rr:TermMap;
+      rr:template &quot;{IDENT}&quot;;
+    ] ;
+
+    rr:predicateObjectMap
+      [   rr:predicate rdf:type;
+          rr:objectMap [ rr:column &quot;SEMTYPE&quot;; rr:termType rr:IRI ]
+      ],
+      [   rr:predicate mof:id; rr:objectMap [ rr:template &quot;{{ prefix }}.{IDENT}&quot;; rr:termType rr:Literal ]],
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{IDEN}&quot;; rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;NAME&quot;;  rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate mof:array ;
+          rr:objectMap [ rr:column &quot;MASID&quot;; rr:termType rr:IRI ]
+      ],
+      [   rr:predicate mof:arr_index ;
+          rr:objectMap [ rr:column &quot;NOM&quot; ]
+      ],
+      [   rr:predicate mof:plaincode;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{MAS}:{NOM}&quot;; rr:termType rr:Literal ]
+      ],
+      [   rr:predicate h:sensorType ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;sensortype&gt;;
+            rr:joinCondition [ rr:child &quot;TIP_DAT_ID&quot;; rr:parent &quot;TIP_DAT_ID&quot; ]]
+      ] ,
+      [   rr:predicate m:memberOf ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;vyborka&gt;;
+            rr:joinCondition [ rr:child &quot;VYB&quot;; rr:parent &quot;TIP_VYB_ID&quot; ]]
+      ] ,
+      [   rr:predicate m:memberOf ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;system&gt;;
+            rr:joinCondition [ rr:child &quot;SYSTEM_&quot;; rr:parent &quot;SYSTEM&quot; ]]
+      ] ,
+      [ rr:predicate h:objType ; rr:objectMap [ rr:column &quot;TIP_OBJ_&quot;; rr:termType rr:IRI ]],
+      [ rr:predicate h:handlingType; rr:objectMap  [ rr:column &quot;TIP_OBR_&quot;; rr:termType rr:IRI ]],
+      [ rr:predicate h:paramType; rr:objectMap [ rr:column &quot;TIP_PAR_&quot;; rr:termType rr:IRI  ]],
+      #[ rr:predicate h:SEMTYPE; rr:objectMap  [ rr:column &quot;STYPE&quot; ]],
+      [ rr:predicate h:NOM_TEXT; rr:objectMap  [ rr:column &quot;NOM_TEXT&quot; ]],
+      [ rr:predicate h:ukts  ; rr:objectMap    [ rr:column &quot;UKTS&quot;  ]]
+.
+
+&lt;kna&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select fix_int2name(AO, &#x27;ao&#x27;) as AO_ID,
+        AO, PRED_N_DAT, PRED_V_DAT, SCALE,
+        cast(KN as CHAR) as KN_, PRED_N, PRED_V, TIP_DAT_ID,
+        ekatra.semantic.fixmu.mu(r.RAZM_NAME) as MU,
+        r.COMMENT as MUCOMMENT
+        from db.uso.KNA left join db.uso.RAZMERN as r using(RAZM_ID)
+       &quot;&quot;&quot;
+       ];
+
+    rr:subjectMap
+    [
+      rr:template &quot;{AO_ID}&quot;;
+      rr:class h:Measurement
+    ] ;
+
+    rr:predicateObjectMap
+      [   rr:predicate rdfs:label; rr:objectMap [ rr:column &quot;MUCOMMENT&quot;; rr:language &quot;ru&quot; ]] ,
+      [   rr:predicate h:scale;
+          rr:objectMap [ rr:column &quot;SCALE&quot;; rr:language &quot;ru&quot; ]
+      ],
+      [ rr:predicate mof:mu ;  rr:objectMap  [ rr:column &quot;MU&quot;   ]] ,
+      [   rr:predicate h:sensorType ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;sensortype&gt;;
+            rr:joinCondition [ rr:child &quot;TIP_DAT_ID&quot;; rr:parent &quot;TIP_DAT_ID&quot; ]]
+      ] ,
+      [   rr:predicate h:P_KN ;  rr:objectMap [ rr:column &quot;KN_&quot;;  rr:termType rr:Literal ]] ,
+      [   rr:predicate h:HEIR; rr:objectMap [ rr:column &quot;PRED_V_DAT&quot;;rr:termType rr:Literal; rr:datatype xsd:double ]] ,
+      [   rr:predicate h:LEIR; rr:objectMap [ rr:column &quot;PRED_N_DAT&quot;;rr:termType rr:Literal; rr:datatype xsd:double ]] ,
+      [   rr:predicate mof:HIR; rr:objectMap [ rr:column &quot;PRED_V&quot;;rr:termType rr:Literal; rr:datatype xsd:double ]] ,
+      [   rr:predicate mof:LIR; rr:objectMap [ rr:column &quot;PRED_N&quot;;rr:termType rr:Literal; rr:datatype xsd:double ]]
+.
+
+&lt;kia&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select MAS, NOM,
+          identify_atype(TIP_PAR, RAZM_ID, NAME, ALGOR, IMG) as SEMTYPE,
+          fix_name(MAS, &#x27;arr&#x27;) as MASID,
+          fix_uniq_id(fix_aname(IDEN, SEMTYPE)) as IDENT,
+          fix_name(IDEN, &#x27;a&#x27;) as FIXED_IDEN,
+          IDEN,
+          NAME,
+          PRED_N, PRED_V,
+          NVG, NAG, NRG,
+          VRG, VAG, VVG,
+          identify_format(FORMAT, TIP_PAR, SEMTYPE, RAZM_ID, NAME) as FORMAT_,
+         // identify_atype1(TIP_PAR, ALGOR, IMG) as STYPE,
+          ZV, AO, UKTS, SYSTEM, TIP_DAT_ID,TIP_VYB_ID
+        from db.uso.KIA left join meta.mnemo.json using(MAS,NOM)
+        where NAME is not null
+       &quot;&quot;&quot;
+       ];
+
+    rr:subjectMap
+    [
+      rr:template &quot;{IDENT}&quot;;
+    ] ;
+
+    rr:predicateObjectMap
+      [   rr:predicate rdf:type;
+          rr:objectMap [ rr:column &quot;SEMTYPE&quot;; rr:termType rr:IRI ]
+      ],
+      [   rr:predicate mof:id; 
+          rr:objectMap [ rr:template &quot;{{ prefix }}.{IDENT}&quot;; rr:termType rr:Literal ]
+      ],
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{IDEN}&quot;; rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;NAME&quot;;  rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate mof:array ;
+          rr:objectMap [ rr:column &quot;MASID&quot;; rr:termType rr:IRI ]
+      ],
+      [   rr:predicate mof:arr_index ;
+          rr:objectMap [ rr:column &quot;NOM&quot; ]
+      ],
+      [   rr:predicate mof:plaincode;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{MAS}:{NOM}&quot;; rr:termType rr:Literal ]
+      ],
+      [   rr:predicate h:ao ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;kna&gt;;
+            rr:joinCondition [ rr:child &quot;AO&quot;; rr:parent &quot;AO&quot; ]]
+      ] ,
+      [   rr:predicate h:sensorType ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;sensortype&gt;;
+            rr:joinCondition [ rr:child &quot;TIP_DAT_ID&quot;; rr:parent &quot;TIP_DAT_ID&quot; ]]
+      ] ,
+      [   rr:predicate m:memberOf ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;vyborka&gt;;
+            rr:joinCondition [ rr:child &quot;TIP_VYB_ID&quot;; rr:parent &quot;TIP_VYB_ID&quot; ]]
+      ] ,
+      [   rr:predicate m:memberOf ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;system&gt;;
+            rr:joinCondition [ rr:child &quot;SYSTEM&quot;; rr:parent &quot;SYSTEM&quot; ]]
+      ] ,
+      [ rr:predicate mof:LEU ; rr:objectMap  [ rr:column &quot;NVG&quot;  ]] ,
+      [ rr:predicate mof:HEU ; rr:objectMap  [ rr:column &quot;VVG&quot;  ]] ,
+      [ rr:predicate mof:LLL ; rr:objectMap  [ rr:column &quot;NAG&quot;  ]] ,
+      [ rr:predicate mof:LL  ; rr:objectMap  [ rr:column &quot;NRG&quot;  ]] ,
+      [ rr:predicate mof:HL  ; rr:objectMap  [ rr:column &quot;VRG&quot;  ]] ,
+      [ rr:predicate mof:HHL ; rr:objectMap  [ rr:column &quot;VAG&quot;  ]] ,
+      [ rr:predicate mof:LIR ; rr:objectMap  [ rr:column &quot;PRED_N&quot; ]] ,
+      [ rr:predicate mof:HIR ; rr:objectMap  [ rr:column &quot;PRED_V&quot; ]] ,
+      [ rr:predicate mof:format; rr:objectMap  [ rr:column &quot;FORMAT_&quot; ]] ,
+      [ rr:predicate mof:alert_hysteresis ; rr:objectMap  [ rr:column &quot;ZV&quot; ]] ,
+
+   #   [ rr:predicate h:SEMTYPE; rr:objectMap  [ rr:column &quot;STYPE&quot; ]] ,
+      [ rr:predicate h:ukts  ; rr:objectMap  [ rr:column &quot;UKTS&quot;   ]]
+.
+
+&lt;kiamu&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select MAS,NOM,
+          identify_mu(r.RAZM_NAME, NAME) as MU
+        from db.uso.KIA  left join db.uso.RAZMERN as r using(RAZM_ID)
+        where NAME is not null
+       &quot;&quot;&quot;
+       ];
+
+    rr:subjectMap
+    [
+        rr:parentTriplesMap &lt;kia&gt;;
+        rr:joinCondition [ rr:child &quot;MAS&quot;; rr:parent &quot;MAS&quot; ];
+        rr:joinCondition [ rr:child &quot;NOM&quot;; rr:parent &quot;NOM&quot; ]
+    ] ;
+    rr:predicateObjectMap
+      [ rr:predicate mof:mu ;  rr:objectMap  [ rr:column &quot;MU&quot;   ]]
+.
+
+&lt;videosystem&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+          SYSTEM,
+          NAME_SYSTEM,
+          fix_rueng_name(SYSTEM, &#x27;mmi&#x27;) as ID,
+          fix_rueng_name(PARENT, &#x27;mmi&#x27;) as P
+        from db.uso.MENU_FRAGM
+       &quot;&quot;&quot;
+    ];
+    rr:subjectMap
+    [
+      a rr:TermMap;
+      rr:column &quot;ID&quot;;
+      rr:class m:MnemoCategory
+    ] ;
+
+    rr:predicateObjectMap
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{SYSTEM}&quot;; rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate m:title ;  rr:objectMap [ rr:column &quot;NAME_SYSTEM&quot;; rr:language &quot;ru&quot; ]] ,
+      [   rr:predicate m:category ; rr:objectMap [ rr:column &quot;P&quot;; rr:termType rr:IRI ]]
+.
+
+
+&lt;fragment&gt;
+    rr:logicalTable [
+       rr:sqlQuery &quot;&quot;&quot;select
+          MFR.SYSTEM as SYSTEM,
+          IDEN_FRAG,
+          NAME_FRAG,
+          fix_name(IDEN_FRAG, &#x27;f&#x27;) as ID
+
+        from db.uso.FRAGM
+        inner join db.uso.MENU_FRAGM_REF as MFR using(IDEN_FRAG)
+       &quot;&quot;&quot;
+    ];
+    rr:subjectMap
+    [
+      a rr:TermMap;
+      rr:template &quot;{ID}&quot;;
+      rr:class m:Mnemo
+    ] ;
+
+    rr:predicateObjectMap
+      [   rr:predicate mof:id; rr:objectMap [ rr:template &quot;{{ prefix }}.{ID}&quot;; rr:termType rr:Literal ]],
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{IDEN_FRAG}&quot;; rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate m:title ;  rr:objectMap [ rr:column &quot;NAME_FRAG&quot;; rr:language &quot;ru&quot; ]] ,
+      [   rr:predicate m:category ;
+          rr:objectMap [
+            rr:parentTriplesMap &lt;videosystem&gt;;
+            rr:joinCondition [ rr:child &quot;SYSTEM&quot;; rr:parent &quot;SYSTEM&quot; ]]
+      ]
+.
+
+&lt;showon_a&gt;
+    rr:logicalTable [
+      rr:tableName &quot;meta.showon.json&quot;
+    ];
+
+    rr:subjectMap
+    [
+        rr:parentTriplesMap &lt;kia&gt;;
+        rr:joinCondition [ rr:child &quot;MAS&quot;; rr:parent &quot;MAS&quot; ];
+        rr:joinCondition [ rr:child &quot;NOM&quot;; rr:parent &quot;NOM&quot; ]
+    ] ;
+    rr:predicateObjectMap
+      [ rr:predicate m:showon ;  rr:objectMap  [
+            rr:parentTriplesMap &lt;fragment&gt;;
+            rr:joinCondition [ rr:child &quot;FID&quot;; rr:parent &quot;ID&quot; ]]
+      ]
+.
+
+
+&lt;showon_d&gt;
+    rr:logicalTable [ rr:tableName &quot;meta.showon.json&quot; ];
+
+    rr:subjectMap
+    [
+        rr:parentTriplesMap &lt;kid&gt;;
+        rr:joinCondition [ rr:child &quot;MAS&quot;; rr:parent &quot;MAS&quot; ];
+        rr:joinCondition [ rr:child &quot;NOM&quot;; rr:parent &quot;NOM&quot; ]
+    ] ;
+    rr:predicateObjectMap
+      [ rr:predicate m:showon ;  rr:objectMap  [
+            rr:parentTriplesMap &lt;fragment&gt;;
+            rr:joinCondition [ rr:child &quot;FID&quot;; rr:parent &quot;ID&quot; ]]
+      ]
+.
+
+&lt;arrs&gt;
+    rr:logicalTable [
+
+      rr:sqlQuery &quot;&quot;&quot;select
+         fix_name(MAS, &#x27;arr&#x27;) as MASID,
+         MAS,
+         NAME, KOL_EL, KOD_TIP,
+         cast(RAM as boolean) as RAMBASE
+         from db.uso.MASSIV
+        &quot;&quot;&quot;
+      ];
+
+    rr:subjectMap
+    [
+      a rr:TermMap;
+      rr:template &quot;{MASID}&quot;;
+      rr:class mof:Array
+    ] ;
+
+    rr:predicateObjectMap
+      [   rr:predicate mof:id; rr:objectMap [ rr:template &quot;{{ prefix }}.{MASID}&quot;; rr:termType rr:Literal ]],
+      [   rr:predicate rdfs:label;
+          rr:objectMap [ rr:template &quot;{{ prefix }}:{MAS}&quot;; rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate h:label;
+          rr:objectMap [ rr:column &quot;MAS&quot;; rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate mof:title ;
+          rr:objectMap [ rr:column &quot;NAME&quot;;  rr:language &quot;ru&quot; ]
+      ],
+      [   rr:predicate mof:arr_size ; rr:objectMap [ rr:column &quot;KOL_EL&quot; ]],
+      [   rr:predicate mof:typecode ; rr:objectMap [ rr:column &quot;KOD_TIP&quot; ]],
+      [   rr:predicate h:ramBased ; rr:objectMap [ rr:column &quot;RAMBASE&quot;; rr:termType rr:Literal; rr:datatype xsd:boolean ]]
+.
+
+
+&lt;exlist&gt;
+    rr:logicalTable [
+      rr:sqlQuery &quot;&quot;&quot;select
+         filename as EXNAME,
+         fix_name(_2, &#x27;arr&#x27;) as MASID
+         from &#x27;exlist.S*.000&#x27; where _1=&#x27;RBASE&#x27;
+        &quot;&quot;&quot;
+    ];
+
+    rr:subjectMap
+    [
+        rr:parentTriplesMap &lt;arrs&gt;;
+        rr:joinCondition [ rr:child &quot;MASID&quot;; rr:parent &quot;MASID&quot; ];
+    ] ;
+    rr:predicateObjectMap
+    [   rr:predicate mof:exchangeList ;
+          rr:objectMap [ rr:column &quot;EXNAME&quot;; rr:termType rr:Literal ]
+    ]
+.
+
+
+&lt;arr_tick&gt;
+   rr:logicalTable [
+     rr:sqlQuery &quot;&quot;&quot;select
+        filename as EXNAME,
+        _2 as TIME
+        from &#x27;exlist.S*.000&#x27; where _1=&#x27;TIME&#x27;
+       &quot;&quot;&quot;
+   ];
+
+   rr:subjectMap
+   [
+       rr:parentTriplesMap &lt;exlist&gt;;
+       rr:joinCondition [ rr:child &quot;EXNAME&quot;; rr:parent &quot;EXNAME&quot; ];
+   ] ;
+   rr:predicateObjectMap
+   [   rr:predicate mof:tick ;
+         rr:objectMap [ rr:column &quot;TIME&quot;; rr:termType rr:Literal; rr:datatype xsd:integer]
+   ]
+.
+
+&lt;triggers&gt;
+  rr2:preProcess &quot;init_parameters_vars&quot;;
+  rr2:preProcess &quot;init_idset&quot;;
+  rr2:preProcess &quot;test_uniq&quot;;
+#  rr2:postProcess &quot;create_ephemeral_graph&quot;
+  .
+
+</pre>
+</body>
+</html>

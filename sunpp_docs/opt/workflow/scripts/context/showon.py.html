@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>showon.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>showon.py</h1>
+    <pre>#! /usr/bin/env python
+import sys
+import json
+from pathlib import Path
+from ekatra.compiler import fixnames
+
+
+def main():
+    for line in sys.stdin:
+        try:
+            line = line[:-1].split(&#x27;;&#x27;)
+            if len(line) &gt;= 3:
+                a = line[0]
+                i = int(line[1])
+                try:
+                    iden = line[2]
+                except:
+                    iden = None
+                f = Path(line[3]).stem
+                print(json.dumps(dict(FID=&#x27;f&#x27;+fixnames.fix_name(f), MAS=a, NOM=i, IDEN=iden), ensure_ascii=False))
+        except:
+            continue
+
+
+if __name__ == &#x27;__main__&#x27;:
+    main()
+</pre>
+</body>
+</html>

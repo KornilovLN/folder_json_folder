@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_deepextract.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_deepextract.sh</h1>
+    <pre>#!/bin/bash                 # скрипт должен быть интерпретирован Bash
+
+# Запуск конт. с образом    registry.master.cns/lmzmq/compiler:latest
+# 1 - Запуск контейнера
+# 2 - Уст. права user UID 1000 и group GID 1000
+# 3 - Уст. перем. окруж.   LANG значением C.UTF8
+# 4 - в интерактивном режиме с псевдотерминалом
+# 5 - Автоудаление контейнера после завершения работы
+# 6 - Монтаж раб. дир. хоста $(pwd)   в контейнер в папку   /build
+# 7 - образ последней версии  registry.master.cns/lmzmq/compiler:latest
+# 8 - Запуск утилиты deepextract в контейнере
+
+# Пункт 6 подробно:
+#
+# &quot;$(pwd):/build&quot; монтирует текущую рабочую директорию $(pwd),
+# в контейнере в директорию /build.
+
+# Пункт 7 подробно:
+# registry.master.cns/lmzmq/compiler:latest
+# 
+# Это имя образа для создаваемого контейнера
+# Docker registry.master.cns в пространстве имен lmzmq с тегом compiler
+# :latest    означает, использована самая последняя версия этого образа
+
+# Пункт 8 подробно:
+# deepextract -u -e koi8-r -o /build/.full /build/IO-7.3-76.tar.gz
+#
+# Это команда, которая будет выполняться внутри контейнера.
+# deepextract — имя команды (утилиты), запускаемой внутри контейнера.
+#   -u и -e koi8-r    -u          может означать распаковку (unpack),
+#                     -e koi8-r   задает кодировку (koi8-r).
+#   -o /build/.full   выходная дир. (/build/.full) для распак. данных
+#   /build/IO-7.3-76.tar.gz       путь к архиву распаковываемому.
+#                                 т.к. дир. /build монтируется с хоста,
+#                                 это означ.- файл IO-7.3-76.tar.gz
+#                                 наход. в тек. раб. директории на хосте
+
+docker run \                                                        # 1
+  -u 1000:1000 \                                                    # 2
+  -e LANG=C.UTF8 \                                                  # 3
+  -it \                                                             # 4
+  --rm \                                                            # 5
+  -v &quot;$(pwd):/build&quot; \                                              # 6
+  registry.master.cns/lmzmq/compiler:latest \                       # 7
+  deepextract -u -e koi8-r -o /build/.full /build/IO-7.3-76.tar.gz  # 8
+
+# исходный текст кода без комментариев
+# docker run -u 1000:1000 -e LANG=C.UTF8 -it --rm \
+#     -v &quot;$(pwd):/build&quot; \
+#     registry.master.cns/lmzmq/compiler:latest \
+#     deepextract -u -e koi8-r -o /build/.full /build/IO-7.3-76.tar.gz
+</pre>
+</body>
+</html>

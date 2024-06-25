@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>main.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>main.yaml</h1>
+    <pre>- set_fact:
+    work_dir: &quot;/var/ekatra/tmp/prod/meta/&quot;
+    src_dir: &quot;/var/ekatra/&quot;
+    dest_dir: &quot;/var/ekatra/&quot;
+
+- name: Ensure tmp dirs
+  file: path={{ work_dir }}/coolie state=directory mode=0755
+
+###########################################################
+
+- get_url:
+    url: &#x27;http://meta:8890/sparql?format=json&amp;query={{ &quot;prefix meta: &lt;http://spd.ivl.cns/cim/meta#&gt; select * where { ?g a meta:graph . ?g meta:date ?t . }&quot;|urlencode }}&#x27;
+    dest: /var/ekatra/meta/meta-graphs.json
+  register: meta_graphs
+
+- name: Inspect image
+  docker_image_facts:
+    name: &#x27;{{ images_domain }}/{{ ekatra_domain }}/meta:latest&#x27;
+  register: image_state
+
+###########################################################
+
+- block:
+    - name: make coolie/make.yaml
+      template:
+        src: make.yaml.j2
+        dest: &quot;{{ work_dir }}/coolie/make.yaml&quot;
+
+    - name: Stop meta container
+      shell: &#x27;docker-compose -f {{ ekatra_domain }}.yaml -p {{ ekatra_domain }} stop meta&#x27;
+      args:
+        chdir: /var/ekatra/compose
+
+    - name: Build image {{ images_domain }}/{{ ekatra_domain }}/meta
+      shell: &quot;coolie -l --batch build&quot;
+      args:
+        chdir: &#x27;{{ work_dir }}&#x27;
+
+  always:
+     - name: Start meta container
+       shell: &#x27;docker-compose -f {{ ekatra_domain }}.yaml -p {{ ekatra_domain }} start meta&#x27;
+       args:
+         chdir: /var/ekatra/compose
+
+  when: image_state.images|default([])|length == 0 or meta_graphs.changed|default(true)|bool or build_force|default(false)|bool
+  
+  
+</pre>
+</body>
+</html>

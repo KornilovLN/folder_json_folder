@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_yars.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_yars.yaml</h1>
+    <pre># Назначение файла и описание:
+# Этот файл содержит различные переменные и настройки для проекта.
+# Он определяет домены, сайты, параметры аутентификации и другие конфигурации.
+
+# Домен проекта
+ekatra_domain: sunpp
+ekatra_full_domain: sunpp.cns.atom
+
+# Сайты проекта
+ekatra_sites:
+  prod: www.sunpp.cns.atom
+#  stage: stage.sunpp.cns.atom
+
+# Сайты TTL
+ttl_sites:
+#  - sdn
+  - www
+  - brama
+  - registry
+
+# Бэкенд аутентификации StackStorm
+st2_auth_backend: postgres
+
+# Тема SSL-сертификата
+ssl_subj: /C=UA/ST=MK/L=Yuzhnoukrainsk/O=Energoatom/OU=SUNPP/emailAddress=ivl@ivl.ua
+
+# Сеть Weave
+weave_network:
+  - st2
+
+# Импортируемые модули Brama
+BRAMA_MODULE_IMPORT:
+  - modules.mainview
+
+# Пропускаемые сервисы Brama
+BRAMA_SKIP_SERVICES:
+  - weave
+  - pki
+  - prometheus
+
+# Разрешен ли анонимный доступ
+EKATRA_AUTH_ANONYMOUS_USER_ACCESS: True
+
+# Разрешения для всех авторизованных пользователей
+EKATRA_AUTH_AUTHENTICATED_PERMITS: []
+
+# Разрешения для авторизованных пользователей с ролью
+EKATRA_AUTH_ROLE_PERMITS:
+  supervisor: [&#x27;h-access&#x27;, &#x27;h-save&#x27;, &#x27;h-export&#x27;, &#x27;h-event&#x27;, &#x27;search&#x27;]
+  admin: [&#x27;h-access&#x27;, &#x27;h-save&#x27;, &#x27;h-export&#x27;, &#x27;h-event&#x27;, &#x27;search&#x27;]
+  user: [&#x27;h-access&#x27;, &#x27;h-save&#x27;, &#x27;h-export&#x27;, &#x27;h-event&#x27;, &#x27;search&#x27;]</pre>
+</body>
+</html>

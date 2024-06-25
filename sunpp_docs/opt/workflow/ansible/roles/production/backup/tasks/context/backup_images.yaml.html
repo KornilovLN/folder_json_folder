@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>backup_images.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>backup_images.yaml</h1>
+    <pre>- name: inspect image {{ item }}
+  docker_image_facts:
+    name: &#x27;{{ images_domain }}/{{ ekatra_domain }}/{{ item }}:latest&#x27;
+  register: image_state
+
+- name: make backup image {{ item }}
+  docker_image:
+    name: &#x27;{{ images_domain }}/{{ ekatra_domain }}/{{ item }}:latest&#x27;
+    repository: &#x27;{{ images_domain }}/{{ ekatra_domain }}/{{ item }}:backup&#x27;
+    pull: no
+    push: no
+    force: no
+    state: present
+  when: image_state.images|default([])|length &gt; 0
+</pre>
+</body>
+</html>

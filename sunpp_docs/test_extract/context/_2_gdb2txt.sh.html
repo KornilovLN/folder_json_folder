@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_2_gdb2txt.sh</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_2_gdb2txt.sh</h1>
+    <pre>
+# Закомментированные команды
+# Удаляет директорию ./inputs, если она существует, с принудительным
+# удалением всех вложенных файлов и каталогов
+#rm -r -f ./inputs
+
+# Удаляет директорию ./tmp, если она существует, с принудительным
+# удалением всех вложенных файлов и каталогов
+#rm -r -f ./tmp
+
+# Создает директорию ./tmp, если она не существует
+#mkdir -p ./tmp
+
+# Распаковывает архив IO-7.3-70.tar.gz в директорию ./tmp
+# --strip-components=1 удаляет верх уровень влож-ти каталога из архива
+#tar -v -xzf IO-7.3-70.tar.gz -C ./tmp/ --strip-components=1
+
+# Запускает контейнер Docker с переменной среды LANG=C.UTF8
+# Опция -it запускает контейнер в интеракт-м режиме с псевдотерминалом
+# Опция --rm удаляет контейнер после завершения его работы
+docker run \
+    -e LANG=C.UTF8 -it --rm \
+
+    # Монтирует текущую директорию ($(pwd)) на хосте 
+    # в директорию /build внутри контейнера
+    -v &quot;$(pwd):/build&quot; \
+
+    # Уст-ет рабочую директорию внутри контейнера на /build/inputs/db/
+    -w /build/inputs/db/ \
+
+    # Указывает образ Docker для запуска
+    registry.master.cns/lmzmq/compiler:latest \
+
+    # Команда, которую нужно выполнить внутри контейнера
+    gdb2txt -v -t csv --encoding koi8_r uso.gdb -o uso
+
+
+</pre>
+</body>
+</html>

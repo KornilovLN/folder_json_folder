@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_hika7.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_hika7.yaml</h1>
+    <pre># Указывает кодировку для файлов
+encoding: &#x27;koi8-r&#x27;
+# Задает цели для обработки файлов
+targets:
+  # Определяет шаблон для файлов с именем listinfo.cks в любом каталоге
+  &#x27;(.+/)?listinfo.cks&#x27;: &#x27;
+&#x27;
+  # Определяет шаблон для файлов с именем info.ver в любом каталоге
+  &#x27;(.+/)?info.ver&#x27;: &#x27;&#x27;
+
+  ## database
+  # Определяет шаблон для файлов RPM с именем info_database,
+  # находящихся в любом каталоге
+  &#x27;(.+/)?RPMS/info_database.+\.rpm&#x27;:
+      # Указывает, что файлы с расш .gbk должны быть помещ в каталог db
+      &#x27;.+\.gbk&#x27;: &#x27;db&#x27;
+
+  ## exchange lists
+  # Определяет шаблон для файлов RPM с именем info_rex,
+  # находящихся в любом каталоге
+  &#x27;(.+/)?RPMS/info_rex-.+\.i386.rpm&#x27;:
+      # Указ, что файлы в каталоге GKT с расшир. .000
+      # должны быть помещены в каталог db/ex
+      &#x27;.+/GKT/[^/]+\.000&#x27;: &#x27;db/ex&#x27;
+
+  ## mnemos
+  # Опр. шаблон файлов RPM с именем info_ris, находящ. в любом каталоге
+  &#x27;(.+/)?RPMS/info_ris-.+\.i386.rpm&#x27;:
+      # Указ, файлы с имен. grset в кат. ris долж. помещ. в кат. ris/etc
+      &#x27;.+/ris/grset&#x27;: &#x27;ris/etc&#x27;
+      # Указ, файлы XML в кат. ris должны быть помещены в каталог ris
+      &#x27;.+/ris/[^/]+\.xml&#x27;: &#x27;ris&#x27;
+      # Указ, файлы BMP и PNG в кат. ris должны быть помещены в кат. ris
+      &#x27;.+/ris/[^/]+\.(bmp|png)&#x27;: &#x27;ris&#x27;
+      # Указ, файлы XML в подкат. kfb кат. ris долж. быть в кат. ris/kfb
+      &#x27;.+/ris/kfb/[^/]+\.xml&#x27;: &#x27;ris/kfb&#x27;
+      # Указ,файлы BMP,PNG в подкат. kfb кат. ris долж.быть вкат ris/kfb
+      &#x27;.+/ris/kfb/[^/]+\.(bmp|png)&#x27;: &#x27;ris/kfb&#x27;
+      # Указ, файлы LDG, LDS, LSG или ALGOR в каталоге ris 
+      # должны быть помещены в каталог ris
+      &#x27;.+/ris/LDG$|.+/ris/LDS$|.+/ris/LSG$|.+/ris/ALGOR$&#x27;: &#x27;ris&#x27;
+
+
+#--- возможное применение
+# docker run -it --rm \
+#     -e LANG=C.UTF8 \
+#     -v &quot;$(pwd):/build&quot; \
+#     -v &quot;$(pwd)/config.yaml:/build/config.yaml&quot; \
+#     -w /build/inputs/db/ \
+#     registry.master.cns/lmzmq/compiler:latest \
+#     gdb2txt -v -t csv --encoding koi8_r uso.gdb -o uso -c /build/config.yaml
+
+
+# Пояснение:
+#     docker run -it --rm:
+#         docker run: Команда для запуска нового контейнера.
+#         -it: Запускает контейнер в интерактивном режиме с псевдотерминалом.
+#         --rm: Удаляет контейнер после завершения его работы.
+# 
+#     -e LANG=C.UTF8:
+#         Устанавливает переменную окружения LANG внутри контейнера на C.UTF8.
+# 
+#     -v &quot;$(pwd):/build&quot;:
+#         Монтирует текущую директорию на хосте (возвращаемую командой pwd) в директорию /build внутри контейнера.
+# 
+#     -v &quot;$(pwd)/config.yaml:/build/config.yaml&quot;:
+#         Монтирует файл config.yaml из текущей директории на хосте в директорию /build внутри контейнера.
+# 
+#     -w /build/inputs/db/:
+#         Устанавливает рабочую директорию внутри контейнера на /build/inputs/db/.
+# 
+#     registry.master.cns/lmzmq/compiler
+#     :
+#         Указывает Docker-образ, который будет использоваться для запуска контейнера.
+# 
+#     gdb2txt -v -t csv --encoding koi8_r uso.gdb -o uso -c /build/config.yaml:
+#         gdb2txt: Команда, которую нужно выполнить внутри контейнера.
+#         -v: Включает подробный вывод.
+#         -t csv: Указывает формат вывода, в данном случае CSV.
+#         --encoding koi8_r: Указывает кодировку входного файла, в данном случае koi8_r.
+#         uso.gdb: Входной файл, который нужно обработать.
+#         -o uso: Указывает выходной файл или директорию для результатов выполнения команды.
+#         -c /build/config.yaml: Указывает путь к YAML файлу конфигурации.
+</pre>
+</body>
+</html>

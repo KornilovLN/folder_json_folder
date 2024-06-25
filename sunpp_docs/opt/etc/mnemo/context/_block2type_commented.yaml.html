@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_block2type_commented.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_block2type_commented.yaml</h1>
+    <pre> /*
+ словарь, который сопоставляет типы блоков
+ с соответствующими им категориями или классами.
+ Каждая запись в этом словаре имеет следующую структуру:
+ Категория:
+  - Тип_блока_1
+  - Тип_блока_2
+  - ...
+
+Подробное описание каждой категории и типов блоков:
+
+Analog: Аналоговые блоки
+AKRBK, SPNVK, AKRBL, AKRBTL, AKRBTP
+
+Signal: Блоки сигналов
+AXK_ZR, BPKZ, COZGR, COZK, COZY, COZZ, DPGN, DPRN, DPYN, FBPKZ, FGUK,
+FGUKCZ, FGUKGZ, FGUKZC, FGURF, FGURG, FGUTCZ, FGUTZC, FGUZ, FKLST,
+FZADG, FZADV, OZ
+
+Alarm: Блоки аварийных сигналов
+ASUTL, ASUTN, ASUTP, ASUTV, CDPB, CDPR, CDPY, DIAGN1, DIAGN2, DIAGN3,
+DIAGN4, DIAGNL, DIAGNN, DIAGNP, DIAGNV, DPG, DPY, DPLOSH, DPR,
+DPRM, DSRG, FCOZK, FDPG, FDPR, FDPY, FGUKL, FPLOS, FPLOSH, MCDPB,
+MCDPR, MCDPY, MDIAG3, MDIAGL, MDIAGN, MDIAGP, MDIAGV, MFCOZK, SHPLOS
+
+ShieldC: Блоки защитных сигналов (тип аварийных сигналов)
+SIGK, SIGU
+
+AlarmI: Блоки инверсных аварийных сигналов
+DPG1, DSRGIN, DPR1, FDPG1, FDPR1, FOZRG, MCOZGR, OZGR, OZRG, SHPLS1
+
+ShieldP: Блоки защитных сигналов (тип аварийных сигналов)
+KBL
+
+Клапан для АКРБ: Блоки клапанов для АКРБ 
+                 (Аварийный Клапан Регулирующий Быстродействующий)
+KL
+
+SwitchG0R1: Блоки переключателей с состояниями G0 и R1
+FVKL, FZADG, FZADV
+
+SwitchOpen: Блоки переключателей с состоянием &quot;открыто&quot;
+KLST_O
+
+ValveG0R2: Блоки клапанов с состояниями G0 и R2
+IPKFV, IPKFN, IPKSPN
+
+Этот словарь блоков и их категорий может использоваться для классификации
+и группировки различных типов блоков в системе или приложении,
+связанном с управлением технологическими процессами.
+
+Некоторые типы блоков, такие как:
+KPUP, MKLKOL, MKLKOP, MKLKOV, MKLOTS,
+
+закомментированы в конце файла и могут быть неактивными
+или находиться в разработке.
+*/
+
+Analog:
+  - AKRBK
+  - SPNVK
+  - AKRBL
+  - AKRBTL
+  - AKRBTP
+
+Signal:
+  - AXK_ZR
+  - BPKZ
+  - COZGR
+  - COZK
+  - COZY
+  - COZZ
+  - DPGN
+  - DPRN
+  - DPYN
+  - FBPKZ
+  - FGUK
+  - FGUKCZ
+  - FGUKGZ
+  - FGUKZC
+  - FGURF
+  - FGURG
+  - FGUTCZ
+  - FGUTZC
+  - FGUZ
+  - FKLST
+  - FZADG
+  - FZADV
+  - OZ
+
+Alarm:
+  - ASUTL
+  - ASUTN
+  - ASUTP
+  - ASUTV
+  - CDPB
+  - CDPR
+  - CDPY
+  - DIAGN1
+  - DIAGN2
+  - DIAGN3
+  - DIAGN4
+  - DIAGNL
+  - DIAGNN
+  - DIAGNP
+  - DIAGNV
+  - DPG
+  - DPY
+  - DPLOSH
+  - DPR
+  - DPRM
+  - DSRG
+  - FCOZK
+  - FDPG
+  - FDPR
+  - FDPY
+  - FGUKL
+  - FPLOS
+  - FPLOSH
+  - MCDPB
+  - MCDPR
+  - MCDPY
+  - MDIAG3
+  - MDIAGL
+  - MDIAGN
+  - MDIAGP
+  - MDIAGV
+  - MFCOZK
+  - SHPLOS
+
+ShieldC:  #Alarm
+  - SIGK
+  - SIGU
+
+AlarmI:
+  - DPG1
+  - DSRGIN
+  - DPR1
+  - FDPG1
+  - FDPR1
+  - FOZRG
+  - MCOZGR
+  - OZGR
+  - OZRG
+  - SHPLS1
+
+ShieldP: #Alarm
+  - KBL
+
+Клапан для АКРБ: #Alarmer boolM0 boolG1
+  - KL
+
+
+SwitchG0R1: #boolG0 boolR1
+  - FVKL
+  - FZADG
+  - FZADV
+
+SwitchOpen: #boolG0 boolR1
+  - KLST_O
+
+ValveG0R2: #pairRX1 pairGX0
+  - IPKFV
+  - IPKFN
+  - IPKSPN
+
+#KPUP
+#MKLKOL
+#MKLKOP
+#MKLKOV
+#MKLOTS</pre>
+</body>
+</html>

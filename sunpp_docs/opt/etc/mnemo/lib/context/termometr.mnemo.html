@@ -1,0 +1,303 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>termometr.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>termometr.mnemo</h1>
+    <pre>
+def _glassV()
+{
+    linearGradient(x2=0.8){
+      .stop(0.1, &quot;#f9f9f9&quot;, opacity=0.9);
+      .stop(0.4, &quot;#f9f9f9&quot;, opacity=0.6);
+      .stop(0.8, &quot;#f9f9f9&quot;, opacity=0.);
+    }
+}
+def _glassH()
+{
+    linearGradient(y1=0.8){
+      .stop(0.05, &quot;#f9f9f9&quot;, opacity=0.9);
+      .stop(0.2, &quot;#f9f9f9&quot;, opacity=0.6);
+      .stop(0.7, &quot;#f9f9f9&quot;, opacity=0.);
+    }
+}
+
+
+def _TermometrBody(length, thickness, style=&#x27;&#x27;){
+            radius ?= 1.5*thickness; stroke_width ?= 1.;
+            thickness := thickness + stroke_width;
+            half := thickness*0.5;
+
+        combinePath(style=style){
+           circle(Point(0, length+radius-stroke_width), radius);
+           rect(topcenter=Origin, height=length+thickness/2, width=thickness);
+           circle(Origin, half);
+        }
+}
+
+def _TermometrBodyH(length, thickness, style=&#x27;&#x27;){
+            radius ?= 1.5*thickness; stroke_width ?= 1.;
+            thickness := thickness + stroke_width;
+            half := thickness*0.5;
+
+        combinePath(style=style, transform=Rotate(90)){
+           circle(Origin, radius);
+           rect(bottomcenter=Origin, height=length+thickness, width=thickness);
+           circle(Point(0, -length-thickness), half);
+        }
+}
+
+def _TermometrGlass(length, thickness, style=&#x27;&#x27;){
+    combinePath(style=style){
+       _TermometrBody(length, thickness);
+       -circle(Point(0.2*thickness, length+2.7*thickness), 2*thickness);
+    }
+}
+def _TermometrGlassH(length, thickness, style=&#x27;&#x27;){
+    combinePath(style=style, transform=Rotate(90)){
+       _TermometrBodyH(length, thickness);
+       -circle(Point(1.1*thickness, 1.1*thickness), 2*thickness);
+    }
+}
+
+
+def ruler_css()
+{
+    scss(&quot;&quot;&quot;
+    .region.alarm { stroke: #faa; }
+    .region.warn { stroke: #E3DB02; }
+    .ruler_labels {
+      text{
+      font-size: inherit;
+      text-anchor: inherit;
+      alignment-baseline: inherit;
+      fill: CurrentColor;
+      }
+    }
+    &quot;&quot;&quot;);
+
+}
+
+def TermometrV(at, thickness, height, bind, ruler_at=&#x27;right&#x27;, attributes=None)
+{
+    ruler_css();
+    scss(&quot;&quot;&quot;
+    .ruler_labels.vert { alignment-baseline: central; }
+    .ruler_labels.left { text-anchor: end; }
+    &quot;&quot;&quot;);
+
+        lir := bind.defined(&#x27;LIR&#x27;, 0);
+        hir := bind.defined(&#x27;HIR&#x27;, 10);
+
+        label_color ?= &#x27;#aaa&#x27;;
+        rulestyle := (stroke=label_color);
+        labels_size ?= 16;
+        big_step ?= int(labels_size);
+        small_step ?= int(big_step/2);
+        label_shift ?= big_step + small_step;
+        bulb_radius ?= int(thickness*0.5);
+        bulb_shift ?= ruler_at==&#x27;right&#x27; ? -4*bulb_radius: 4*bulb_radius;
+        rulestep ?= 50;
+        substep ?= 10;
+
+    range_ := (lir, hir);
+    group(at, attributes=attributes, class= &#x27;ppt&#x27;, bind=bind.bind_idx)
+    {
+            stroke_width ?= 1;
+            ruler_shift ?= thickness + 2*stroke_width;
+            labelstyle := &#x27;font_size:{}&#x27;.format(labels_size);
+
+        let rule = ruler(bind=bind, range=range_, hide_rule=True){
+          if(ruler_at==&#x27;left&#x27;){
+              rule = line((-ruler_shift, height), (-ruler_shift, 0));
+              line(Origin, (-big_step, 0), _rulestep=rulestep);
+              line(Origin, (-small_step, 0), _rulestep=substep);
+              text(-label_shift, 0, &#x27;%d&#x27;, _rulestep=rulestep, class=&#x27;label alignR&#x27;);
+          }else{
+              rule = line((ruler_shift, height), (ruler_shift, 0));
+              line(Origin, (big_step, 0), _rulestep=rulestep);
+              line(Origin, (small_step, 0), _rulestep=substep);
+              text(label_shift, 0, &#x27;%d&#x27;, _rulestep=rulestep, class=&#x27;label&#x27;);
+              if(ruler_at==&#x27;both&#x27;)
+              {
+                  line((-2*ruler_shift, 0), (-2*ruler_shift-big_step, 0), _rulestep=rulestep);
+                  line((-2*ruler_shift, 0), (-2*ruler_shift-small_step, 0) , _rulestep=substep);
+                  text(-2*ruler_shift-label_shift, 0, &#x27;%d&#x27;, _rulestep=rulestep, class=&#x27;vert left&#x27;, );
+              }
+          }
+        }
+
+        top := 0;
+        has_HHL := bind.defined(&#x27;HHL&#x27;);
+        has_HL := bind.defined(&#x27;HL&#x27;);
+        dshift := ruler_at==&#x27;left&#x27; ? -ruler_shift : ruler_shift;
+
+        if(has_HHL){
+          oldtop := top;
+          top := rule.calculate(has_HHL).y;
+          line((dshift, oldtop), (dshift, top), stroke_width=big_step, class=&#x27;alarm region&#x27;);
+        }
+        if(has_HL){
+          oldtop := top;
+          top := rule.calculate(has_HL).y;
+          line((dshift, oldtop), (dshift, top), stroke_width=big_step, class=&#x27;warn region&#x27;);
+        }
+        bottom := height;
+        has_LLL := bind.defined(&#x27;LLL&#x27;);
+        has_LL := bind.defined(&#x27;LL&#x27;);
+
+        if(has_LLL){
+          oldbottom := bottom;
+          bottom := rule.calculate(has_LLL).y;
+          line((dshift, oldbottom), (dshift, bottom), stroke_width=big_step, class=&#x27;alarm region&#x27;);
+        }
+        if(has_LL){
+          oldbottom := bottom;
+          bottom := rule.calculate(has_LL).y;
+          line((dshift, oldbottom), (dshift, bottom), stroke_width=big_step, class=&#x27;warn region&#x27;);
+        }
+
+        if(ruler_at!=&#x27;none&#x27;){
+            group(class=&#x27;vruler&#x27;){
+                +rule;
+            }
+        }
+        radius := 1.5*thickness;
+        use(Origin, href=#_TermometrBody(height, thickness, radius=radius, style=&#x27;fill:black; stroke:gray&#x27;));
+        group(bindtype=&#x27;hist&#x27;, class=&#x27;atag&#x27;, bind=bind.bind_idx, range=(lir,&#x27;;&#x27;,hir), style=(opacity=0.7), transform=Translate(0, height)*Rotate(180)){
+          line(y2=rule.calculate(lir).y, stroke_width=thickness);
+          circle(Point(bulb_shift, height), bulb_radius, class=&#x27;bulbover&#x27;);
+          circle(Point(bulb_shift, 0), bulb_radius, class=&#x27;bulbunder&#x27;);
+          circle(Point(0, - radius + 1), radius, class=&#x27;termobulb&#x27;);
+        }
+
+
+        use(Origin, href=#_TermometrGlass(height, thickness, radius=radius, style=(fill=#_glassV(), stroke=&#x27;none&#x27;)));
+
+	}
+
+}
+def TermometrH(at, thickness, width, bind, ruler_at=&#x27;top&#x27;, attributes=None)
+{
+    ruler_css();
+    scss(&quot;&quot;&quot;
+    .ruler_labels.vert { alignment-baseline: central; }
+    .ruler_labels.left { text-anchor: end; }
+    &quot;&quot;&quot;);
+
+        lir := bind.defined(&#x27;LIR&#x27;, 0);
+        hir := bind.defined(&#x27;HIR&#x27;, 10);
+
+        label_color ?= &#x27;#aaa&#x27;;
+        rulestyle := (stroke=label_color);
+        labels_size ?= 16;
+        big_step ?= int(labels_size);
+        small_step ?= int(big_step/2);
+        label_shift ?= big_step*2;
+        bulb_radius ?= int(thickness*0.5);
+        bulb_shift ?= ruler_at==&#x27;right&#x27; ? -4*bulb_radius: 4*bulb_radius;
+        rulestep ?= 50;
+        substep ?= 10;
+
+    range_ := (lir, hir);
+    group(at, attributes=attributes, class= &#x27;ppt&#x27;, bind=bind.bind_idx)
+    {
+            stroke_width ?= 1;
+            ruler_shift ?= thickness + 2*stroke_width;
+            labelstyle := &#x27;font_size:{}&#x27;.format(labels_size);
+
+        let rule = ruler(bind=bind, range=range_, hide_rule=True){
+          if(ruler_at==&#x27;top&#x27;){
+              rule = line((thickness*1.5, -ruler_shift), (width+thickness*1.5, -ruler_shift));
+              line(Origin, (0, -big_step), _rulestep=rulestep);
+              line(Origin, (0, -small_step), _rulestep=substep);
+              text(0, -label_shift, &#x27;%d&#x27;, _rulestep=rulestep, class=&#x27;label alignR&#x27;);
+          }else{
+              rule = line((ruler_shift, width), (ruler_shift, 0));
+              line(Origin, (0, big_step), _rulestep=rulestep);
+              line(Origin, (0, small_step), _rulestep=substep);
+              text(label_shift, 0, &#x27;%d&#x27;, _rulestep=rulestep, class=&#x27;label&#x27;);
+              if(ruler_at==&#x27;both&#x27;)
+              {
+                  line((-2*ruler_shift, 0), (-2*ruler_shift-big_step, 0), _rulestep=rulestep);
+                  line((-2*ruler_shift, 0), (-2*ruler_shift-small_step, 0) , _rulestep=substep);
+                  text(-2*ruler_shift-label_shift, 0, &#x27;%d&#x27;, _rulestep=rulestep, class=&#x27;vert left&#x27;, );
+              }
+          }
+        }
+
+        top := width+thickness*1.5;
+        has_HHL := bind.defined(&#x27;HHL&#x27;);
+        has_HL := bind.defined(&#x27;HL&#x27;);
+        dshift := ruler_at==&#x27;top&#x27; ? -ruler_shift : ruler_shift;
+
+        if(has_HHL){
+          oldtop := top;
+          top := rule.calculate(has_HHL).x;
+          line((oldtop, dshift), (top, dshift), stroke_width=big_step, class=&#x27;alarm region&#x27;);
+        }
+        if(has_HL){
+          oldtop := top;
+          top := rule.calculate(has_HL).x;
+          line((oldtop, dshift), (top, dshift), stroke_width=big_step, class=&#x27;warn region&#x27;);
+        }
+        bottom := thickness*1.5;
+        has_LLL := bind.defined(&#x27;LLL&#x27;);
+        has_LL := bind.defined(&#x27;LL&#x27;);
+
+        if(has_LLL){
+          oldbottom := bottom;
+          bottom := rule.calculate(has_LLL).x;
+          line((oldbottom, dshift), (bottom, dshift), stroke_width=big_step, class=&#x27;alarm region&#x27;);
+        }
+        if(has_LL){
+          oldbottom := bottom;
+          bottom := rule.calculate(has_LL).x;
+          line((oldbottom, dshift), (bottom, dshift), stroke_width=big_step, class=&#x27;warn region&#x27;);
+        }
+
+        if(ruler_at!=&#x27;none&#x27;){
+            group(class=&#x27;hruler&#x27;){
+                +rule;
+            }
+        }
+
+        radius := 1.5*thickness;
+        use(Origin, href=#_TermometrBodyH(width, thickness, radius=radius, style=&#x27;fill:black; stroke:gray&#x27;));
+
+        group(bindtype=&#x27;hist&#x27;, class=&#x27;atag&#x27;, bind=bind.bind_idx, range=(lir,&#x27;;&#x27;,hir), style=(opacity=0.7), transform=Translate(Point(1.5*thickness, 0))*Rotate(90)){
+          line(Origin, Point(0, -width), stroke_width=thickness);
+          circle(Point(-bulb_shift,0), bulb_radius, class=&#x27;bulbover&#x27;);
+          circle(Point(-bulb_shift, -width), bulb_radius, class=&#x27;bulbunder&#x27;);
+          circle(Point(0, 1.5*thickness), radius, class=&#x27;termobulb&#x27;);
+        }
+
+        use(Origin, href=#_TermometrGlassH(width, thickness, radius=radius, style=(fill=#_glassH(), stroke=&#x27;none&#x27;), angle=90));
+
+	}
+
+}</pre>
+</body>
+</html>

@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>__prj.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>__prj.yaml</h1>
+    <pre>title: Регламент
+type: ekatra.brama.rtdb_project:RtdbProject
+role:
+  - reglament
+  - sunpp
+
+
+# menu:
+#   - name: update_spd_data
+#     title: Push PG and arrays.json
+#     comment: Upload local file &#x27;hub/su&#x27; to remote
+#     action:
+#       - st2action: ansible.playbook
+#         trace_tag: &#x27;update_spd_data_{{ prj.name }}&#x27;
+#         parameters:
+#           extra_vars:
+#             - brama_user: &#x27;{{ username }}&#x27;
+#               src: /var/ekatra/hub/su/
+#               dest: /var/ekatra/hub/su/
+#               mode: &quot;push&quot;
+#           playbook: &#x27;/ekatra/workflow/ansible/sync_spd.yaml&#x27;
+#           inventory_file: &#x27;{{ brama.instance_path }}/projects/ekatra/etc/hosts.yaml&#x27;
+#           verbose: vvv
+#           limit: st2.sunpp.cns
+#       - st2action: ansible.playbook
+#         trace_tag: &#x27;update_spd_data_{{ prj.name }}&#x27;
+#         parameters:
+#           extra_vars:
+#             - brama_user: &#x27;{{ username }}&#x27;
+#               src: /var/ekatra/spd/meta/su/arrays.json
+#               dest: /var/ekatra/rtdb/su/arrays.json
+#               mode: &quot;push&quot;
+#           playbook: &#x27;/ekatra/workflow/ansible/sync_spd.yaml&#x27;
+#           inventory_file: &#x27;{{ brama.instance_path }}/projects/ekatra/etc/hosts.yaml&#x27;
+#           verbose: vvv
+#           limit: st2.sunpp.cns
+
+#menu:
+#  - name: update_spd_data
+#    title: Update SPD data
+#    comment: Download remote SPD files into local tmp path
+#    action:
+#    - st2action: ansible.playbook
+#      trace_tag: &#x27;update_spd_data_{{ prj.name }}&#x27;
+#      parameters:
+#        extra_vars:
+#          - brama_user: &#x27;{{ username }}&#x27;
+#            src: /etc/spd/export/*
+#            dest: &#x27;{{ prj.root }}/rtdb/export/&#x27;
+#        playbook: &#x27;/ekatra/workflow/ansible/sync_spd.yaml&#x27;
+#        inventory_file: &#x27;{{ brama.instance_path }}/projects/ekatra/etc/hosts.yaml&#x27;
+#        verbose: vvv
+#        limit: sunpp.cns</pre>
+</body>
+</html>

@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>bridge_simulator.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>bridge_simulator.yaml</h1>
+    <pre>- name: Start RDTB Simulator
+  hosts: localhost
+  connection: local
+  roles:
+    - common_vars
+
+  tasks:
+  - block:
+
+    - set_fact:
+        rtdb_image: &quot;{{ images.rtdb }}&quot;
+
+    - name: Create RDTB Simulator service
+      docker_container:
+        name: rtdb-simulator
+        hostname: rtdb-simulator
+        restart: yes
+        recreate: yes
+        image: &quot;{{ rtdb_image }}&quot;
+        command: python -c &#x27;from rtdbsio.rtdb_simple_emulator import main; main()&#x27;
+        working_dir: /var/ekatra/rtdb/
+        networks:
+        - name: &quot;{{ ekatra_domain }}&quot;
+
+#        volumes:
+#        - &quot;{{ ekatra_domain }}-rtdb-data:/var/rtdb/&quot;
+        volumes_from:
+        - &quot;rtdb-hub&quot;
+        labels:
+          &quot;ekatra.service&quot;: rtdb
+          &quot;ekatra.title&quot;: &quot;RDTB Simulator !!!&quot;
+          &quot;com.docker.compose.project&quot;: &quot;{{ ekatra_domain }}&quot;
+
+</pre>
+</body>
+</html>

@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_frontend.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_frontend.yaml</h1>
+    <pre># Назначение файла и описание:
+# Этот файл содержит конфигурацию для фронтенд-сервера Nginx.
+# Он определяет директории для хранения данных и настройки виртуальных хостов.
+
+# Директории для хранения данных Nginx
+nginx_data_dirs:
+  - /var/ekatra/install
+  - /var/ekatra/spd
+
+# Конфигурация виртуальных хостов Nginx
+nginx_virtual_hosts:
+  spd:
+    locations:
+      # Локация для /spd
+      - path: &#x27;^~ /spd&#x27;
+        root: /var/ekatra
+        
+      # Локация для /install
+      - path: /install
+        root: /var/ekatra
+        
+      # Локация для корневого пути
+      - path: /
+        root: /var/www
+        try_files: $uri $uri/ =404
+        
+      # Локация для статических файлов
+      - path: &#x27;~* \.(?:css|js|jpg|jpeg|gif|png|ico|svg|svgz)
+        root: /var/www
+        try_files: $uri $uri/ =404</pre>
+</body>
+</html>

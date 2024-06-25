@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>collect_rtdb2oldrtdb.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>collect_rtdb2oldrtdb.yaml</h1>
+    <pre>- name: Start Collector RTDB2OLDRTDB
+  hosts: localhost
+  connection: local
+  roles:
+    - common_vars
+
+  tasks:
+  - when: collectconf is defined
+    block:
+
+    - set_fact:
+        service_path: /var/ekatra/tmp/service/collect/
+        service_name: rtdb-collector-{{ collectconf.type }}-{{ collectconf.prefix }}
+        ns_path: /var/ekatra/rtdb/{{ collectconf.prefix }}
+        rtdb_image: &quot;{{ images.rtdb }}&quot;
+
+    - file:
+        path: &#x27;{{ service_path }}&#x27;
+        state: directory
+        mode: 0755
+
+    - name: update service meta data
+      copy:
+        dest: &#x27;{{ service_path  }}/{{ service_name }}.yaml&#x27;
+        content: &#x27;{{ collectconf | to_nice_yaml }}&#x27;
+
+#    - set_fact:
+#        setup_cmd: &gt;
+#            mkdir -p \&quot;{{ ns_path }}\&quot;;
+#            cd \&quot;{{ ns_path }}\&quot;
+
+#    - name: Setup Namespace
+#      docker_container:
+#        detach: false
+#        name: conf-collector-{{ collectconf.type }}-{{ collectconf.prefix }}
+#        hostname: conf-collector-{{ collectconf.type }}-{{ collectconf.prefix }}
+#        recreate: yes
+#        cleanup: yes
+#        image: &quot;{{ rtdb_image }}&quot;
+#        command:
+#        - sh
+#        - &#x27;-c &quot;{{ setup_cmd }}&quot;&#x27;
+#        networks:
+#        - name: &quot;{{ ekatra_domain }}&quot;
+#        volumes_from:
+#        - &quot;rtdb-hub&quot;
+
+#    - name: Create Collector service
+#      docker_container:
+#        name: &#x27;{{ service_name }}&#x27;
+#        hostname: &#x27;{{ service_name }}&#x27;
+#        restart: yes
+#        recreate: yes
+#        image: &quot;{{ rtdb_image }}&quot;
+#        command: ekatra-collector -S {{ collectconf.type }} -i RTDB -H tsdb -d /var/ekatra/rtdb/ {{ ns_path }}/collect.pg
+#        working_dir: /var/ekatra/rtdb/
+#        networks:
+#        - name: &quot;{{ ekatra_domain }}&quot;
+#        volumes_from:
+#        - &quot;rtdb-hub&quot;
+#        labels:
+#         &quot;ekatra.service&quot;: collector
+#         &quot;ekatra.title&quot;: Collector {{ collectconf.prefix }}
+#         &quot;com.docker.compose.project&quot;: &quot;rtdb&quot;
+
+
+</pre>
+</body>
+</html>

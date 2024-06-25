@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>bridge_hika2rtdb_from_service_confs.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>bridge_hika2rtdb_from_service_confs.yaml</h1>
+    <pre>- name: Start Bridge HIKA2RTDB from service config
+  hosts: localhost
+  connection: local
+#  roles:
+#    - common_vars
+
+  tasks:
+  - set_fact:
+      service_path: /var/ekatra/tmp/service/bridge/
+
+  - name: publish the service config by mqtt
+    mqtt:
+      topic: &#x27;rtdb/bridge/configuration&#x27;
+      payload: &#x27;{{ lookup(&quot;file&quot;, item)|from_yaml|to_json }}&#x27;
+      server: mq
+    ignore_errors: yes
+    with_fileglob:
+      - &#x27;{{ service_path }}/rtdb-hikabridge-*.yaml&#x27;</pre>
+</body>
+</html>

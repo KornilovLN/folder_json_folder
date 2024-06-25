@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_testmnemolib.py</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_testmnemolib.py</h1>
+    <pre>&#x27;&#x27;&#x27;
+Комментарии:
+
+В начале файла импортируются необходимые модули для работы с мнемосхемами,
+    загрузки модулей, сохранения XML и обработки аргументов командной строки.
+
+Класс BinderValue       представляет значение привязки и содержит методы для доступа 
+                        к различным свойствам значения.
+Класс DnBinderValue     закомментирован и не используется в текущем коде.
+Класс CheckBinder       используется для проверки и итерации по различным типам привязок.
+Класс TestMnemoAttributes   наследуется от Attributes и определяет атрибуты 
+                            для тестовой мнемосхемы.
+Класс TestMnemo         наследуется от Mnemo и определяет геометрические атрибуты
+                            для тестовой мнемосхемы.
+Класс TestSvg           отвечает за генерацию и сохранение тестовой мнемосхемы в формате SVG.
+Метод generate          загружает модуль &#x27;hika7lib&#x27; из исходного файла, 
+                            создает главный узел и обрабатывает блоки мнемосхемы.
+Метод gen_xml           генерирует XML-представление мнемосхемы.
+Метод save              сохраняет сгенерированную мнемосхему в файл SVG.
+Метод process           обрабатывает отдельный блок мнемосхемы, создавая группы и элементы.
+Функция process         выполняет основной процесс генерации мнемосхемы 
+                            с использованием указанных настроек и путей к библиотекам.
+Функция Main            является точкой входа скрипта и обрабатывает аргументы командной строки,
+                            вызывая функцию process с соответствующими настройками.
+
+Заглушенный текст исходника, такой как закомментированный класс DnBinderValue и некоторые закомментированные части кода, оставлен без изменений.
+&#x27;&#x27;&#x27;
+
+#! /usr/bin/env python
+import os
+from pathlib import Path
+from mnemo.mnemocompile import MnemoLibs, Generator, save_xml
+from mnemo.mnemoload import MnemoLibLoader
+from mnemo.tree.node import Mnemo, Group, M_, MainNode, Point, Origin, bounds, Attributes
+from mnemo.tree.text import Text
+from lxml import etree
+
+
+class BinderValue(object):
+    def __init__(self, value):
+        &quot;&quot;&quot;
+        Инициализирует объект BinderValue.
+
+        :param value: Значение привязки.
+        &quot;&quot;&quot;
+        self.value = value
+        self.monotag = 1  # TODO: process monotag
+
+    def __getitem__(self, *args, **kwargs):
+        &quot;&quot;&quot;
+        Возвращает сам объект BinderValue при обращении по индексу.
+
+        :return: Сам объект BinderValue.
+        &quot;&quot;&quot;
+        return self
+
+    def __call__(self, kind, *args):
+        &quot;&quot;&quot;
+        Возвращает сам объект BinderValue при вызове как функции.
+
+        :param kind: Тип привязки.
+        :return: Сам объект BinderValue.
+        &quot;&quot;&quot;
+        return self
+
+    @property
+    def href(self):
+        &quot;&quot;&quot;
+        Возвращает значение привязки в формате ссылки.
+
+        :return: Значение привязки в формате ссылки.
+        &quot;&quot;&quot;
+        return &#x27;#%s&#x27; % self.value
+
+    @property
+    def hint(self):
+        &quot;&quot;&quot;
+        Возвращает значение привязки в качестве подсказки.
+
+        :return: Значение привязки.
+        &quot;&quot;&quot;
+        return self.value
+
+    @property
+    def bind_idx(self):
+        &quot;&quot;&quot;
+        Возвращает значение привязки в качестве индекса привязки.
+
+        :return: Значение привязки.
+        &quot;&quot;&quot;
+        return self.value
+
+
+# class DnBinderValue(object):
+#     def __init__(self, *args):
+#         self.tags = map(lambda x: BinderValue(x), args)
+#
+#     def __call__(self, kind, *args):
+#         return self
+#
+#     @property
+#     def href(self):
+#         return &#x27;#&#x27; %
+#
+#     @property
+#     def hint(self):
+#         return &#x27;\n&#x27;.join(map(lambda x: x.hint, self.tags))
+#
+#     @property
+#     def bind_idx(self):
+#         return &#x27;;&#x27;.join(map(lambda x: x.bind_idx, self.tags))
+
+
+class CheckBinder(object):
+    def __init__(self):
+        &quot;&quot;&quot;
+        Инициализирует объект CheckBinder.
+        &quot;&quot;&quot;
+        self.kind = None
+        self.monotag = 1  # TODO: process monotag
+
+    def __getitem__(self, *args, **kwargs):
+        &quot;&quot;&quot;
+        Возвращает сам объект CheckBinder при обращении по индексу.
+
+        :return: Сам объект CheckBinder.
+        &quot;&quot;&quot;
+        return self
+
+    def __call__(self, kind, *args):
+        &quot;&quot;&quot;
+        Устанавливает тип привязки и возвращает сам объект CheckBinder.
+
+        :param kind: Тип привязки.
+        :return: Сам объект CheckBinder.
+        &quot;&quot;&quot;
+        self.kind = kind
+#         if kind == &#x27;d3&#x27;:
+#             self.tags = (BinderValue(&#x27;offline&#x27;), BinderValue(&#x27;offline&#x27;), BinderValue(&#x27;offline&#x27;))
+        return self
+
+    def iterate(self):
+        &quot;&quot;&quot;
+        Генерирует значения привязки в зависимости от типа привязки.
+
+        :yield: Значения привязки.
+        &quot;&quot;&quot;
+        if self.kind == &#x27;b2&#x27;:
+            yield BinderValue(&#x27;00&#x27;)
+            yield BinderValue(&#x27;01&#x27;)
+            yield BinderValue(&#x27;10&#x27;)
+            yield BinderValue(&#x27;11&#x27;)
+            yield BinderValue(&#x27;fault&#x27;)
+        elif self.kind == &#x27;b&#x27;:
+            yield BinderValue(&#x27;0&#x27;)
+            yield BinderValue(&#x27;1&#x27;)
+            yield BinderValue(&#x27;fault&#x27;)
+#         elif self.kind == &#x27;d3&#x27;:
+#             yield DnBinderValue(&#x27;0&#x27;, &#x27;0&#x27;, &#x27;0&#x27;)
+#             yield DnBinderValue(&#x27;1&#x27;, &#x27;0&#x27;, &#x27;0&#x27;)
+#             yield DnBinderValue(&#x27;0&#x27;, &#x27;1&#x27;, &#x27;0&#x27;)
+#             yield DnBinderValue(&#x27;0&#x27;, &#x27;0&#x27;, &#x27;1&#x27;)
+#         elif self.kind == &#x27;d2&#x27;:
+#             yield DnBinderValue(&#x27;0&#x27;, &#x27;0&#x27;)
+#             yield DnBinderValue(&#x27;1&#x27;, &#x27;0&#x27;)
+#             yield DnBinderValue(&#x27;0&#x27;, &#x27;1&#x27;)
+#             yield DnBinderValue(&#x27;1&#x27;, &#x27;1&#x27;)
+        elif self.kind == &#x27;as&#x27;:
+            yield BinderValue(&#x27;ok&#x27;)
+            yield BinderValue(&#x27;warn L&#x27;)
+            yield BinderValue(&#x27;emrg L&#x27;)
+            yield BinderValue(&#x27;range L&#x27;)
+            yield BinderValue(&#x27;warn H&#x27;)
+            yield BinderValue(&#x27;emrg H&#x27;)
+            yield BinderValue(&#x27;range H&#x27;)
+            yield BinderValue(&#x27;fault&#x27;)
+        elif self.kind is None:
+            raise Exception(&#x27;&#x27;)
+        else:
+            print(&quot;kind??? %s&quot; % self.kind)
+
+    @property
+    def href(self):
+        &quot;&quot;&quot;
+        Возвращает пустую ссылку.
+
+        :return: Пустая ссылка.
+        &quot;&quot;&quot;
+        return &#x27;#&#x27;
+
+    @property
+    def hint(self):
+        &quot;&quot;&quot;
+        Возвращает подсказку &quot;offline&quot;.
+
+        :return: Подсказка &quot;offline&quot;.
+        &quot;&quot;&quot;
+        return &#x27;offline&#x27;
+
+    @property
+    def bind_idx(self):
+        &quot;&quot;&quot;
+        Возвращает пустой индекс привязки.
+
+        :return: Пустой индекс привязки.
+        &quot;&quot;&quot;
+        return &#x27;&#x27;
+
+
+class TestMnemoAttributes(Attributes):
+    _skips = {&#x27;stylesheets&#x27;, &#x27;preserveAspectRatio&#x27;, &#x27;svg_version&#x27;}
+
+    def __call__(self, obj, d=None):
+        &quot;&quot;&quot;
+        Возвращает атрибуты объекта с добавлением версии SVG.
+
+        :param obj: Объект.
+        :param d: Словарь атрибутов.
+        :return: Словарь атрибутов с добавлением версии SVG.
+        &quot;&quot;&quot;
+        d = super(TestMnemoAttributes, self).__call__(obj, d)
+        d[&#x27;version&#x27;] = self.__dict__.get(&#x27;svg_version&#x27;, &#x27;1.0&#x27;)
+        return d
+
+
+class TestMnemo(Mnemo):
+    __attributes__ = TestMnemoAttributes
+
+    def geom_attributes(self, d):
+        &quot;&quot;&quot;
+        Устанавливает геометрические атрибуты для тестовой мнемосхемы.
+
+        :param d: Словарь атрибутов.
+        &quot;&quot;&quot;
+        d[&#x27;viewBox&#x27;] = &#x27; &#x27;.join(map(str, (self.x, self.y, self.width, self.height)))
+        d[&#x27;width&#x27;] = &#x27;{}px&#x27;.format(self.width)
+        d[&#x27;height&#x27;] = &#x27;{}px&#x27;.format(self.height)
+        d[&#x27;style&#x27;] = &#x27;overflow-x: auto; overflow-y: auto;&#x27;
+        d[&#x27;class&#x27;] = &#x27;mnemo test-mnemo&#x27;
+
+
+class TestSvg(object):
+    def __init__(self, conf):
+        &quot;&quot;&quot;
+        Инициализирует объект TestSvg.
+
+        :param conf: Конфигурация.
+        &quot;&quot;&quot;
+        self.conf = conf
+        self.mnemo = TestMnemo()
+        self.bottom = 0
+
+    def generate(self, src, comp=None):
+        &quot;&quot;&quot;
+        Генерирует тестовую мнемосхему из исходного файла.
+
+        :param src: Путь к исходному файлу.
+        :param comp: Компонент.
+        &quot;&quot;&quot;
+        mod = MnemoLibLoader(&#x27;__mnemo__&#x27;, src).load_module(&#x27;hika7lib&#x27;)
+        if mod:
+            self.root = MainNode(comp, hika_version=&#x27;5&#x27;)  # TODO: hika_version from configure
+            with self.root:
+                blocks = []
+                for name, obj in mod.__dict__.items():
+                    if isinstance(obj, type) and issubclass(obj, M_):
+                        meta = getattr(obj, &#x27;__meta__&#x27;, None)
+                        if isinstance(meta, dict) and &#x27;size&#x27; in meta:
+                            blocks.append((name, obj, meta))
+                blocks.sort(key=lambda x: x[0])
+                map(lambda x: self.process(*x), blocks)
+            self.save(src)
+
+    def gen_xml(self):
+        &quot;&quot;&quot;
+        Генерирует XML-представление мнемосхемы.
+
+        :return: XML-представление мнемосхемы.
+        &quot;&quot;&quot;
+        if self.bottom:
+            r = self.mnemo
+            r.x, r.y, r.width, r.height = -50, 0, 1000, self.bottom + 10
+            root = r.svg()
+            if root is not None:
+                for x in root.xpath(&#x27;//*[@bind]&#x27;):
+                    v = x.attrib[&#x27;bind&#x27;]
+                    if v:
+                        x.set(&#x27;rts&#x27;, v)
+                    del x.attrib[&#x27;bind&#x27;]
+            el = etree.ElementTree(root)
+            pi = etree.ProcessingInstruction(&#x27;xml-stylesheet&#x27;, &#x27;href=&quot;%s&quot; type=&quot;text/css&quot;&#x27; % &#x27;dark.css&#x27;)
+            root.addprevious(pi)
+            return el
+
+    def save(self, src):
+        &quot;&quot;&quot;
+        Сохраняет сгенерированную мнемосхему в файл SVG.
+
+        :param src: Путь к исходному файлу.
+        &quot;&quot;&quot;
+        outpath = self.conf.get(&#x27;output&#x27;)
+        if outpath is None:
+            target = Path(src).with_suffix(&#x27;.svg&#x27;)
+        else:
+            outpath = Path(outpath)
+            if outpath.is_dir():
+                target = outpath / (Path(src).stem + &#x27;.svg&#x27;)
+            else:
+                target = outpath
+        xml = self.gen_xml()
+        if xml is not None:
+            save_xml(target, xml)
+
+    def process(self, name, macro, meta):
+        &quot;&quot;&quot;
+        Обрабатывает блок мнемосхемы.
+
+        :param name: Имя блока.
+        :param macro: Макрос блока.
+        :param meta: Метаданные блока.
+        &quot;&quot;&quot;
+        w, h = meta[&#x27;size&#x27;]
+        binder = CheckBinder()
+        try:
+            p = Point(0, 20)
+            v = macro(p=p, w=w, h=h, bind=binder)
+            vs = []
+            for t in binder.iterate():
+                p = p + (w+15, 0)
+                vs.append(macro(p, w, h, t))
+            start = self.bottom + 10
+            g = Group(Point(0, start))
+            g.fold(Text(Point(0, 10), u&#x27;{}: {}&#x27;.format(name, meta.get(&#x27;title&#x27;, &#x27;&#x27;)),
+                        font_size=&#x27;10px&#x27;, CLASS=&#x27;label&#x27;)
+            )
+            g.fold(v)
+            for i in vs:
+                g.fold(i)
+            self.mnemo.fold(g)
+            self.bottom += bounds(g).args[3] + 40
+        except Exception as e:
+            print(&quot;{} error: {}&quot;.format(name, e))
+
+
+def process(src, genconf={}):
+    &quot;&quot;&quot;
+    Обрабатывает исходный файл и генерирует мнемосхему.
+
+    :param src: Путь к исходному файлу.
+    :param genconf: Конфигурация генерации.
+    &quot;&quot;&quot;
+    libpaths = genconf.get(&#x27;libpath&#x27;, [])
+    if not isinstance(libpaths, (tuple, list)):
+        libpaths = libpaths.split(&#x27;:&#x27;)
+
+    with MnemoLibs(*libpaths):
+        with Generator(genconf) as g:
+            TestSvg(genconf).generate(src, g)
+
+
+def Main():
+    &quot;&quot;&quot;
+    Главная функция, обрабатывающая аргументы командной строки и запускающая процесс генерации мнемосхемы.
+    &quot;&quot;&quot;
+    import argparse
+    import logging
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(&#x27;--libs&#x27;, &#x27;-l&#x27;, type=str, help=&quot;lib search paths&quot;)
+    parser.add_argument(&#x27;--css&#x27;, type=str, help=&quot;use this css&quot;)
+    parser.add_argument(&#x27;--output&#x27;, &#x27;-o&#x27;, type=str, help=&quot;save to a given file&quot;)
+    parser.add_argument(&#x27;file&#x27;, type=str, help=&#x27;source file&#x27;)
+
+    args = parser.parse_args()
+    genconf = {}
+
+    if args.libs:
+        genconf[&#x27;libpath&#x27;] = args.libs
+
+    if args.css:
+        genconf[&#x27;css&#x27;] = os.path.abspath(args.css)
+    if args.output:
+        genconf[&#x27;output&#x27;] = args.output
+
+    logging.basicConfig()
+    process(args.file, genconf=genconf)
+
+
+if __name__ == &#x27;__main__&#x27;:
+    Main()</pre>
+</body>
+</html>

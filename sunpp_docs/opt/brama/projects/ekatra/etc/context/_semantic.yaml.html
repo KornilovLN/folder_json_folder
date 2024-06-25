@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>_semantic.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>_semantic.yaml</h1>
+    <pre># Этот YAML-файл содержит различные настройки для приложения.
+
+# 1 domain: sunpp определяет домен приложения.
+
+# 2 Раздел meta содержит настройки, связанные с метаданными:
+
+#   * mofstates: true включает обработку состояний MOF.
+#   * upload_url и upload_path определяют URL и путь для загрузки метаданных.
+#   * graphs содержит список источников для графов метаданных.
+
+# 3 Раздел nav содержит настройки для навигационного меню:
+
+#   * src определяет исходный файл с определением структуры меню.
+#   * dest задает путь для сохранения сгенерированной структуры меню.
+
+# 4 Раздел synchronize закомментирован, но, вероятно, предназначен 
+#   для синхронизации структуры меню.
+
+# 5 Раздел doit_config содержит настройки для утилиты doit,
+#   используемой для автоматизации задач.
+#   Здесь указан бэкенд (sqlite3) и уровень детализации (verbosity: 2).
+
+# 6 Раздел logging определяет уровень логирования (INFO).
+
+# Этот файл используется для конфигурации различных аспектов приложения,
+# таких как обработка метаданных, структура навигационного меню,
+# автоматизация задач и логирование.
+
+
+# Домен приложения
+domain: sunpp
+
+# Раздел с метаданными
+meta:
+  # Включить обработку состояний MOF
+  mofstates: true
+  
+  # URL для загрузки метаданных
+  upload_url: &#x27;http://www/spd/meta/&#x27;
+  
+  # Путь для сохранения загруженных метаданных
+  upload_path: /var/ekatra/spd/meta/
+  
+  # Список источников графов метаданных
+  graphs:
+    - sources: /usr/local/lib/python3.7/dist-packages/ekatra/semantic/cim/*/
+    - sources: /ekatra/etc/meta/cim/*/
+
+# Раздел с настройками навигационного меню
+nav:
+  # Исходный файл с определением структуры меню
+  src: /ekatra/brama/projects/ekatra/etc/nav.yaml
+  
+  # Путь для сохранения сгенерированной структуры меню
+  dest: /var/ekatra/spd/nav.json
+
+# Закомментированный раздел для синхронизации структуры меню
+#synchronize:
+#  src: /ekatra/brama/projects/ekatra/etc/nav.json
+#  dest: /var/ekatra/spd/nav.json
+
+# Настройки для doit (утилиты для автоматизации задач)
+doit_config:
+    backend: sqlite3
+    verbosity: 2
+
+# Настройки логирования
+logging:
+  level: INFO
+</pre>
+</body>
+</html>

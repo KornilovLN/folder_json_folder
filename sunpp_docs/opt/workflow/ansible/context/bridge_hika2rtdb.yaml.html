@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>bridge_hika2rtdb.yaml</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>bridge_hika2rtdb.yaml</h1>
+    <pre>- name: Start Bridge HIKA2RTDB
+  hosts: localhost
+  connection: local
+  roles:
+    - common_vars
+
+  tasks:
+  - when: bridgeconf is defined
+    block:
+
+    - set_fact:
+        service_path: /var/ekatra/tmp/service/bridge/
+        service_name: rtdb-hikabridge-{{ bridgeconf.prefix }}
+        ns_path: /var/ekatra/rtdb/{{ bridgeconf.prefix }}
+        rtdb_image: &quot;{{ images.rtdb }}&quot;
+
+    - file:
+        path: &#x27;{{ service_path }}&#x27;
+        state: directory
+        mode: 0755
+
+    - name: update service meta data
+      copy:
+        dest: &#x27;{{ service_path }}/{{ service_name }}.yaml&#x27;
+        content: &#x27;{{ bridgeconf | to_nice_yaml }}&#x27;
+
+    - set_fact:
+        setup_cmd: &gt;
+            mkdir -p \&quot;{{ ns_path }}\&quot;;
+            cd \&quot;{{ ns_path }}\&quot; &amp;&amp;
+            curl --fail -O \&quot;{{ bridgeconf.arrays_url }}\&quot; &amp;&amp;
+            rtdb-configurator arrays.json &amp;&amp;
+            echo \&quot;dynamic HikaBridge Service_Object * rtdbbridge:_make_BridgeService() &#x27;-mmemory -i{{ bridgeconf.address }}&#x27;\&quot;&gt;{{ ns_path }}/svc.conf
+
+    - name: Setup Namespace
+      docker_container:
+        detach: false
+        name: conf-hikabridge-{{ bridgeconf.prefix }}
+        hostname: conf-hikabridge-{{ bridgeconf.prefix }}
+        recreate: yes
+        cleanup: yes
+        image: &quot;{{ rtdb_image }}&quot;
+        command:
+        - sh
+        - &#x27;-c &quot;{{ setup_cmd }}&quot;&#x27;
+        networks:
+        - name: &#x27;{{ ekatra_domain }}&#x27;
+#        volumes:
+#        - &quot;{{ ekatra_domain }}-rtdb-data:/var/rtdb/&quot;
+        volumes_from:
+        - &quot;rtdb-hub&quot;
+
+
+    - name: Create Bridge service
+      docker_container:
+        name: &#x27;{{ service_name }}&#x27;
+        hostname: &#x27;{{ service_name }}&#x27;
+        restart: yes
+        recreate: yes
+        restart_policy: &#x27;always&#x27;
+        image: &quot;{{ rtdb_image }}&quot;
+        command: /usr/local/bin/rtdbrun
+        working_dir: &quot;{{ ns_path }}&quot;
+        network_mode: host
+#        volumes:
+#        - &quot;{{ ekatra_domain }}-rtdb-data:/var/rtdb/&quot;
+        volumes_from:
+        - &quot;rtdb-hub&quot;
+        log_driver: &quot;json-file&quot;
+        log_options: 
+          max-size: &quot;200k&quot;
+          max-file: &quot;5&quot;
+
+        labels:
+         &quot;ekatra.service&quot;: rtdb
+         &quot;ekatra.title&quot;: Bridge HIKA2RTDB {{ bridgeconf.prefix }}
+         &quot;com.docker.compose.project&quot;: &quot;rtdb&quot;
+
+
+</pre>
+</body>
+</html>

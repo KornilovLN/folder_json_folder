@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>fParBGSVX_3.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>fParBGSVX_3.mnemo</h1>
+    <pre>import ekatra.semantic.mnemobinder as m;
+from lib.panel import panel, panel2;
+from lib.naec import *;
+
+debug ?= True;
+mnemo_marging ?= 20;
+//mnemo_width ?= 850; //1020
+//mnemo_height ?= 430; //440
+
+
+
+pg := m.Binder(&#x27;fParBGSVX_3.yaml&#x27;);
+
+Mnemo(title=&#x27;Параметры групп B. G. S. V. X.&#x27;, class=&quot;mnemo&quot;,
+      stylesheets = &#x27;../dark.css&#x27;, marging = mnemo_marging, font_size=&#x27;16px&#x27;)
+
+{
+    labels_size := 10;
+    panel_width := 350;
+    panel_margins := (0, 10, 20, 10);
+    element_height := 40;
+    panel_step := panel_width/10;
+    label_shift := 25;
+    shift := 0;
+    txt_cls := &#x27;f22&#x27;;
+
+    // B panel
+    block_step := element_height*3;
+    panel2(Point(0, 0), title=(&#x27;В - Распредустройства&#x27;, &#x27;собственных нужд (РУСН)&#x27;), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step*0.5, &quot;Напряжение на шинах собственных нужд&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.B.NS);
+        }
+    }
+    shift := panel_step+block_step+60;
+    block_step := element_height;
+    panel2(Point(panel_width*1.1, 0), title=(&#x27;X - Защитная оболочка проходки&#x27;, &#x27;радиационный контроль&#x27;), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step, &quot;Аv т/н до СВО-1 (чуствит. канал)&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.AV_SVO_CH);
+        }
+        ch := block_step+label_shift;
+        in_block(Point(0, 60), panel_width, block_step, &quot;Аv т/н до СВО-1 (грубый канал)&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.AV_SVO_G);
+        }
+        ch := ch+block_step+label_shift;
+        in_block(Point(0, 120), panel_width, block_step*4, &quot;МЭД над БВ&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.MED_BV, exp=True);
+        }
+
+        in_block(Point(0, 180), panel_width, block_step, &quot;МЭД в ГА701&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.MED_GA, exp=True);
+        }
+        in_block(Point(0, 250), panel_width, block_step, &quot;МЭД пром. площадки&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.MED_PP, exp=True);
+        }
+        in_block(Point(0, 320), panel_width, block_step, &quot;А техводы&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.AV_T);
+        }
+        in_block(Point(panel_width*1.1, 0), panel_width, block_step, &quot;А золей ВТ-1&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.AV_Z);
+        }
+        in_block(Point(panel_width*1.1, 60), panel_width, block_step, &quot;А ИРГ в ВТ-1&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.AV_IGR, exp=True);
+        }
+        in_block(Point(panel_width*1.1, 120), panel_width, block_step, &quot;А йода ВТ-1&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.AV_YOD);
+        }
+        in_block(Point(panel_width*1.1, 180), panel_width, block_step, &quot;МЭД над паропроводом ПГ&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.X.MED_P, exp=True);
+        }
+    }
+
+    block_step := element_height;
+    panel2(Point(0, 180), title=(&#x27;G - Турбогенератор&#x27; , &#x27;и дизель генераторы&#x27;), label_class=txt_cls, margins=panel_margins){
+        in_block(Origin, panel_width, block_step, &quot;Ввод питания от ДГ&quot;, lclass=txt_cls){
+            b_line_toggle(Origin, panel_width, pg.G.VVOD);
+        }
+        in_block(Point(0, 75), panel_width, block_step, &quot;Мощность активная генератора&quot;, lclass=txt_cls){
+           hist_group(Origin, panel_width, pg.G.Na);
+        }
+        in_block(Point(0, 140), panel_width, block_step*2, &quot;Мощность дизель-генераторов&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.G.Nd);
+        }
+    }
+    shift := block_step*8+panel_step;
+    block_step := element_height;
+    panel2(Point(0, 500), title=(&#x27;S - Паровая турбина&#x27;, None), label_class=txt_cls, margins=(10, 20, 10, 20)){
+        panel2(Point(panel_width*0.05, 40), title=(&#x27;SB - Подшипники паровой турбины&#x27;, None), label_class=txt_cls, margins=panel_margins){
+            in_block(Point(0, 0), panel_width*0.9, block_step, &quot;Частота вращения ротора ТГ-3&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width*0.9, pg.S.SB.Per);
+            }
+        }
+        panel2(Point(395, 30), title=(&#x27;SE - Системы регулирования&#x27;, &#x27;и защиты турбины&#x27;), label_class=txt_cls, margins=panel_margins){
+            in_block(Origin, panel_width*0.9, block_step, &quot;Стопорный клапан турбины&quot;, lclass=txt_cls){
+                b_line_shutter(Origin, panel_width*0.9, pg.S.SE.CPK);
+            }
+        }
+        panel2(Point(785, 10), title=(&#x27;VF - Система технического&#x27;, &#x27;водоснабжения потребителей группы &quot;А&quot;&#x27;), label_class=txt_cls, margins=panel_margins){
+            in_block(Origin, panel_width*0.9, block_step, &quot;F VF после TOAP&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width*0.9, pg.S.VF.F);
+            }
+        }
+
+    }
+}</pre>
+</body>
+</html>

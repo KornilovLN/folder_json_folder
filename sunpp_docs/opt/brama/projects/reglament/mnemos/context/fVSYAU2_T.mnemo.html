@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>fVSYAU2_T.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>fVSYAU2_T.mnemo</h1>
+    <pre>import ekatra.semantic.mnemobinder as m;
+//from lib.spir import *;
+from lib.panel import panel2;
+from lib.naec import *;
+
+debug ?= True;
+mnemo_marging ?= 20;
+//mnemo_width ?= 850; //1020
+//mnemo_height ?= 430; //440
+
+
+
+pg := m.MultiBinder(
+                    fVSYAU2_T3=&#x27;fVSYAU2_T3.yaml&#x27;
+                    );
+
+
+Mnemo(title=&#x27;Вспомогательные системы и системы безопастосни РУ (параметры группы Т)&#x27;, class=&quot;mnemo&quot;,
+      stylesheets = &#x27;../dark.css&#x27;, marging = mnemo_marging, font_size=&#x27;24px&#x27;)
+
+{
+
+    labels_size := 10;
+    panel_width := 400;
+    panel_margins := (10, 10, 20, 10);
+    element_height := 50;
+    txt_cls := &#x27;f22&#x27;;
+    // Panel1
+    panel2(Origin, margins=panel_margins){
+        in_block(Origin, panel_width, 70, &quot;Контрольный ПК на ПГ&quot;, lclass=txt_cls){
+           b_line_lamp(Origin, panel_width, pg.RU.K_PK);
+        }
+        in_block(Point(0, 70), panel_width, 70, &quot;Рабочий ПК на ПГ&quot;, lclass=txt_cls){
+           b_line_lamp(Origin, panel_width, pg.RU.R_PK);
+        }
+        in_block(Point(0, 140), panel_width, 70, &quot;БЗОК&quot;, lclass=txt_cls){
+           b_line_lamp(Origin, panel_width, pg.RU.BZOK);
+        }
+        in_block(Point(0, 210), panel_width, 120, &quot;Положение БРУ-А&quot;, lclass=txt_cls){
+            b_line_percent_clock(Origin, panel_width, pg.RU.BRUA);
+        }
+        in_block(Point(0, 280), panel_width, 90, &quot;Уровень в баке аварийного запаса обессоленной воды&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.RU.LB);
+        }
+    }
+// Panel2
+    panel2(Point(panel_width*1.1, 0), margins=panel_margins){
+        block_step := 120;
+        in_block(Point(0, 0), panel_width, 40, &quot;Концентрация бора в трубопроводе от TK&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.TK.C);
+        }
+        in_block(Point(0, 80), panel_width, 70, &quot;Подпиточные насосы&quot;, lclass=txt_cls){
+            b_line_pump(Origin, panel_width, pg.TK.NAS);
+        }
+    }
+    panel2(Point(0, 430), margins=panel_margins){
+        block_step := 120;
+        in_block(Point(0, 0), panel_width, 40, &quot;Концентрация бора на входе в активную зону&quot;, lclass=txt_cls){
+            hist_group(Origin, panel_width, pg.TV.Cb);
+        }
+    }
+    if (pg.TG1){
+        panel2(Point(panel_width*1.1, 190), margins=panel_margins){
+            block_step := 120;
+            in_block(Point(0, 0), panel_width, 40, &quot;Уровень воды в кассетном отсеке бассейна&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.TG1.Lkass);
+            }
+            in_block(Point(0, 80), panel_width, 40, &quot;Уровень воды в контейнерном отсеке бассейна выдержки&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.TG1.Lcont);
+            }
+            in_block(Point(0, 160), panel_width, 40, &quot;Температура воды в кассетном отсеке бассейна выдержки&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.TG1.Tkass);
+            }
+            in_block(Point(0, 240), panel_width, 40, &quot;Температура воды в контейнерном отсеке  бассейна выдержки&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.TG1.Tcont);
+            }
+
+        }
+
+    }else{
+        panel2(Point(panel_width*1.1, 190), margins=panel_margins){
+            block_step := 120;
+            in_block(Point(0, 0), panel_width, 120, &quot;L в кассетном отсеке БВ&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.TG2.L);
+            }
+            in_block(Point(0, 120), panel_width, 120, &quot;T в кассетном отсеке БВ&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.TG2.T);
+            }
+        }
+    }
+
+    if (pg.TL){
+        panel2(Point(panel_width*1.1, 470), margins=panel_margins){
+            block_step := 120;
+            in_block(Point(0, 0), panel_width, 120, &quot;TL б/д арм в воздуховоду ГО&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.TL.TLS);
+            }
+            in_block(Point(0, 130), panel_width, 40, &quot;T наружного воздуха&quot;, lclass=txt_cls){
+                hist_group(Origin, panel_width, pg.TL.T);
+            }
+        }
+    }
+
+
+}</pre>
+</body>
+</html>

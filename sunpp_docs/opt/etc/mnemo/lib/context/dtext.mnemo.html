@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>dtext.mnemo</title>
+    <!--
+    <style>
+        body { font-family: Arial, sans-serif; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+    -->
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 14px;  /* Увеличенный размер шрифта */
+            line-height: 1.5; /* Улучшенная читаемость */
+        }
+    </style>
+</head>
+<body>
+    <h1>dtext.mnemo</h1>
+    <pre>def _range_alarm_marks(x, y, h)
+{
+  s := h*0.4; s2 := h*0.15;
+  polygon(points=(Point(x, y), Point(x-s2, y+s), , Point(x+s2, y+s)), class=&#x27;stat_region_up&#x27;);
+  polygon(points=(Point(x, y+h), Point(x-s2, y+h-s), , Point(x+s2, y+h-s)), class=&#x27;stat_region_down&#x27;);
+}
+
+def dtext(p, w, h, bind, label=None, txtclass=None, format=False, value_format=None)
+{
+    tx := p.x+w-0.3*h;
+    mx := p.x+w-0.2*h;
+
+    if(label){
+      text(p.x-3, p.y+h-3, label, class=(&#x27;label&#x27;, &#x27;alignR&#x27;, txtclass));
+    }
+    if (format) {
+           bt:=&#x27;fdtext&#x27;;
+    }else{
+           bt:=&#x27;dtext&#x27;;
+    }
+    if (value_format){
+       tmp:=bind.set_format(value_format);
+    }
+    group(bindtype=bt, class=&#x27;ppt atag&#x27;, bind=bind.bind_idx, value_format=value_format)
+    {
+        rect(p, w, h, r=2, class=&#x27;pptbgv&#x27;);
+        _range_alarm_marks(mx, p.y, h);
+        text(tx-3, p.y+h-3, &#x27;XXX&#x27;, class=(&#x27;apptxt&#x27;, &#x27;alignR&#x27;, txtclass));
+    }
+}</pre>
+</body>
+</html>
